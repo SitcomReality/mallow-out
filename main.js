@@ -6,9 +6,14 @@ import { initControls, updateControls } from './src/game/controls.js';
 import { castRay, getEnemyDistanceAt } from './src/game/shooting.js';
 import { HITS_TO_KILL } from './src/game/constants.js';
 import { settings } from './src/state.js';
+import { createHUD } from './src/ui/hud.js';
+import { createPauseMenu } from './src/ui/pause-menu.js';
 
 let isPlaying = false;
+let isPaused = false;
 let controlsSetup = null;
+let hud = null;
+let pauseMenu = null;
 
 document.getElementById('newGame').addEventListener('click', () => {
   document.getElementById('menu').style.display = 'none';
@@ -17,22 +22,52 @@ document.getElementById('newGame').addEventListener('click', () => {
   startGame();
 });
 
+function quitToMenu() {
+  isPlaying = false;
+  isPaused = false;
+  document.getElementById('menu').style.display = 'flex';
+  document.getElementById('gameContainer').style.display = 'none';
+  document.getElementById('crosshair').style.display = 'none';
+  if (hud) hud.hide();
+  if (pauseMenu) pauseMenu.hide();
+  // Reset game state
+  gameState.enemy = null;
+  gameState.objects = [];
+}
+
 function startGame() {
   if (isPlaying) return;
   isPlaying = true;
+  isPaused = false;
   
   const container = document.getElementById('gameContainer');
   const { render, uniforms, renderer } = createRenderer(container);
   
+  // Initialize UI
+  hud = createHUD();
+  hud.show();
+  
+  pauseMenu = createPauseMenu(
+    () => togglePause(), // Resume
+    () => quitToMenu()   // Quit
+  );
+  
   // Initialize controls
   controlsSetup = initControls(container);
+  
+  // ESC key for pause
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isPlaying) {
+      togglePause();
+    }
+  });
   
   // Spawn first enemy
   spawnEnemy();
   
   // Shooting
   container.addEventListener('click', () => {
-    if (document.pointerLockElement === container) {
+    if (document.pointerLockElement === container && !isPaused) {
       shoot();
     }
   });
@@ -43,33 +78,49 @@ function startGame() {
   let totalDelta = 0;
 
   function gameLoop(time) {
+    if (!isPlaying) return; // Stop loop if quit
+    
     const delta = (time - lastTime) * 0.001;
     lastTime = time;
     
-    // Performance monitoring for dynamic resolution
-    if (settings.dynamicRes) {
-      frameCount++;
-      totalDelta += delta;
-      if (frameCount >= 30) {
-        const avgDelta = totalDelta / frameCount;
-        const targetDelta = 1.0 / settings.targetFPS;
-        
-        if (avgDelta > targetDelta * 1.1) { // Running slow
-          settings.renderScale = Math.max(settings.minScale, settings.renderScale - 0.05);
-        } else if (avgDelta < targetDelta * 0.8) { // Running well
-          settings.renderScale = Math.min(settings.maxScale, settings.renderScale + 0.02);
+    // Only update game logic if not paused
+    if (!isPaused) {
+      // Performance monitoring for dynamic resolution
+      if (settings.dynamicRes) {
+        frameCount++;
+        totalDelta += delta;
+        if (frameCount >= 30) {
+          const avgDelta = totalDelta / frameCount;
+          const targetDelta = 1.0 / settings.targetFPS;
+          
+          if (avgDelta > targetDelta * 1.1) { // Running slow
+            settings.renderScale = Math.max(settings.minScale, settings.renderScale - 0.05);
+          } else if (avgDelta < targetDelta * 0.8) { // Running well
+            settings.renderScale = Math.min(settings.maxScale, settings.renderScale + 0.02);
+          }
+          frameCount = 0;
+          totalDelta = 0;
         }
-        frameCount = 0;
-        totalDelta = 0;
       }
-    }
 
-    updateControls(delta);
+      updateControls(delta);
+    }
+    
     render(time);
     requestAnimationFrame(gameLoop);
   }
   
   requestAnimationFrame(gameLoop);
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  if (isPaused) {
+    pauseMenu.show();
+    document.exitPointerLock();
+  } else {
+    pauseMenu.hide();
+  }
 }
 
 function spawnEnemy() {
