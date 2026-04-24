@@ -1,4 +1,4 @@
-// Game constants for easy tuning
+ // Game constants for easy tuning
 export const CONSTANTS = {
   // Player
   PLAYER_HEIGHT: 1.6,
@@ -19,13 +19,14 @@ export const CONSTANTS = {
   FLAME_DAMAGE_RATE: 0.05, // seconds between damage ticks
   FLAME_DAMAGE_RADIUS: 0.1,
   
-  // Enemies
+  // Enemies (flattened disc-like)
   ENEMY_SPAWN_DISTANCE: 30,
   ENEMY_MAX_COUNT: 1,
   ENEMY_SPAWN_INTERVAL: 2.0,
   ENEMY_MOVE_SPEED: 1.5,
-  ENEMY_SIZE: 1.0,
-  ENEMY_HEALTH: 5, // number of hits to kill
+  ENEMY_RADIUS: 1.2,    // horizontal radius of the disc
+  ENEMY_HEIGHT: 0.6,    // overall height (thickness) of the disc
+  ENEMY_HEALTH: 5,      // number of hits to kill
   
   // Effects
   MELT_EFFECT_SPEED: 2.0,

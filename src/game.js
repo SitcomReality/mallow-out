@@ -126,17 +126,18 @@ export class Game {
     enemies.forEach((enemy, i) => {
       if (i >= 32) return;
       
-      // Main enemy sphere
-      u.uObjData0.value[objCount].set(0, 0, 0, 0); // type=sphere, union
+      // Main enemy: short upright cylinder (disc-like)
+      u.uObjData0.value[objCount].set(2, 0, 0, 0); // type=2 (cylinder), union
       u.uObjData1.value[objCount].copy(enemy.position).setW(0);
-      u.uObjData2.value[objCount].set(enemy.size, enemy.size, enemy.size, 0);
+      // sdCylinder expects (r, halfHeight) in uObjData2.x and .y
+      u.uObjData2.value[objCount].set(enemy.radius, enemy.halfHeight, enemy.radius, 0);
       u.uObjData3.value[objCount].set(enemy.color.r, enemy.color.g, enemy.color.b, 0);
       u.uObjData4.value[objCount].set(0, 0, 0, 0);
-      u.uObjData5.value[objCount].set(enemy.meltAmount * 0.3, 1.5, 0, 0); // noise amount
+      u.uObjData5.value[objCount].set(enemy.meltAmount * 0.3, 1.5, 0, 0); // noise amount & scale
       u.uObjData6.value[objCount].set(0, -enemy.meltAmount * 2, 0, 0); // noise offset
       objCount++;
       
-      // Damage holes
+      // Damage holes (same approach as before)
       enemy.damages.forEach(dmg => {
         if (objCount >= 31) return;
         
