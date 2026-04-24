@@ -8,7 +8,8 @@ import { fragmentShader } from '../shaders/fragment.js';
 export function createMainMaterial() {
   return new THREE.ShaderMaterial({
     uniforms: {
-      uFontTex: { value: uFontTex },
+      // Initialize font texture uniform to null by default; it can be assigned later.
+      uFontTex: { value: null },
       uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
       uCamPos: { value: new THREE.Vector3() },
       uCamFwd: { value: new THREE.Vector3() },
