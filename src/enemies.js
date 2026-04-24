@@ -21,23 +21,23 @@ export class Enemy {
   takeDamage(damageData) {
     this.health--;
 
-    // Convert damage world origin to local space relative to enemy
-    const localOrigin = damageData.origin.clone().sub(this.position);
-    // Inverse rotate the origin and direction to lock it to the enemy's orientation
-    const invRot = new THREE.Euler(-this.rotation.x, -this.rotation.y, -this.rotation.z, 'YXZ');
-    localOrigin.applyEuler(invRot);
-    const localDir = damageData.direction.clone().applyEuler(invRot);
+    // Store damage in local space (enemy-relative coordinates)
+    const localOrigin = this.worldToLocal(damageData.origin);
+    const localDir = this.worldToLocalDir(damageData.direction);
 
     this.damages.push({
-      ...damageData,
+      type: damageData.type || 'bullet',
       localOrigin,
-      localDirection: localDir
+      localDirection: localDir,
+      radius: damageData.radius,
+      length: damageData.length
     });
     
-    // Add blood splatter at hit location
+    // Store blood splatter in local space too
     if (damageData.hitPoint) {
+      const localHitPoint = this.worldToLocal(damageData.hitPoint);
       this.bloodSplatters.push({
-        position: damageData.hitPoint.clone(),
+        localPosition: localHitPoint,
         time: 0,
         size: CONSTANTS.BLOOD_SPLATTER_SIZE
       });
@@ -49,40 +49,79 @@ export class Enemy {
     }
   }
   
+  // Transform world position to local space
+  worldToLocal(worldPos) {
+    const local = worldPos.clone().sub(this.position);
+    const invRot = new THREE.Euler(-this.rotation.x, -this.rotation.y, -this.rotation.z, 'YXZ');
+    local.applyEuler(invRot);
+    return local;
+  }
+  
+  // Transform world direction to local space
+  worldToLocalDir(worldDir) {
+    const invRot = new THREE.Euler(-this.rotation.x, -this.rotation.y, -this.rotation.z, 'YXZ');
+    return worldDir.clone().applyEuler(invRot);
+  }
+  
+  // Transform local position to world space
+  localToWorld(localPos) {
+    const world = localPos.clone();
+    world.applyEuler(this.rotation);
+    world.add(this.position);
+    return world;
+  }
+  
+  // Transform local direction to world space
+  localToWorldDir(localDir) {
+    return localDir.clone().applyEuler(this.rotation);
+  }
+  
   update(dt, playerPos) {
     if (this.dead) return;
 
-    // Calculate direction to player
-    const dir = new THREE.Vector3().subVectors(playerPos, this.position);
-    dir.y = 0;
+    // Calculate direction to player (in XZ plane)
+    const toPlayer = new THREE.Vector3(
+      playerPos.x - this.position.x,
+      0,
+      playerPos.z - this.position.z
+    );
+    const distToPlayer = toPlayer.length();
     
-    // Calculate target rotation (where enemy should face)
-    this.targetRotationY = Math.atan2(dir.x, dir.z);
-    
-    // Smoothly rotate toward target
-    let rotDiff = this.targetRotationY - this.rotation.y;
-    // Normalize angle difference to [-PI, PI]
-    while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
-    while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
-    
-    const rotSpeed = 3.0; // radians per second
-    if (Math.abs(rotDiff) > 0.1) {
-      this.rotation.y += Math.sign(rotDiff) * Math.min(Math.abs(rotDiff), rotSpeed * dt);
-    } else {
-      this.rotation.y = this.targetRotationY;
+    if (distToPlayer > 0.1) {
+      toPlayer.normalize();
+      
+      // Calculate target facing direction (yaw only)
+      // Enemy should face the player with its "front" (which is the +Z face in local space)
+      this.targetRotationY = Math.atan2(toPlayer.x, toPlayer.z);
+      
+      // Smoothly rotate toward target
+      let rotDiff = this.targetRotationY - this.rotation.y;
+      // Normalize angle difference to [-PI, PI]
+      while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
+      while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
+      
+      const rotSpeed = 3.0; // radians per second
+      const rotAmount = Math.sign(rotDiff) * Math.min(Math.abs(rotDiff), rotSpeed * dt);
+      this.rotation.y += rotAmount;
     }
     
-    // Tilt to "stand up" on edge
+    // Stand the disc upright (rotate 90° around X axis)
     this.rotation.x = Math.PI / 2;
+    this.rotation.z = 0;
     
-    // Only move forward if mostly facing the player
-    if (Math.abs(rotDiff) < 0.5 && dir.length() > 1.5) {
-      const forward = new THREE.Vector3(Math.sin(this.rotation.y), 0, Math.cos(this.rotation.y));
-      forward.multiplyScalar(CONSTANTS.ENEMY_MOVE_SPEED * dt);
-      this.position.add(forward);
+    // Move forward when facing the player and not too close
+    const facingError = Math.abs(this.targetRotationY - this.rotation.y);
+    if (facingError < 0.3 && distToPlayer > 1.5) {
+      // Move in the direction the enemy is facing
+      const forward = new THREE.Vector3(
+        Math.sin(this.rotation.y),
+        0,
+        Math.cos(this.rotation.y)
+      );
+      this.position.add(forward.multiplyScalar(CONSTANTS.ENEMY_MOVE_SPEED * dt));
     }
     
-    // Update blood splatters
+    // Update blood splatter timers (they stay in local space, just age)
     this.bloodSplatters = this.bloodSplatters.filter(splatter => {
       splatter.time += dt;
       return splatter.time < CONSTANTS.BLOOD_DECAY_TIME;

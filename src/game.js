@@ -121,17 +121,17 @@ export class Game {
     u.uTime.value = this.time;
     u.uDayTime.value = 0.35; // Golden hour
     
-    // Enemies
+    // Enemies - each enemy and all its FX form a group
     const enemies = this.enemyManager.enemies;
     let objCount = 0;
     
-    enemies.forEach((enemy, i) => {
+    enemies.forEach((enemy, enemyIdx) => {
       if (objCount >= 32) return;
       
-      const enemyGroupId = i + 1; // Unique group per enemy
-      u.uGroupData.value[enemyGroupId - 1].set(0, 0.1, 0, 0); // Union for the group into the world
+      const enemyGroupId = enemyIdx + 1; // Unique group per enemy
+      u.uGroupData.value[enemyGroupId - 1].set(0, 0.1, 0, 0); // Union the group into the world
 
-      // Main enemy: Standing cylinder (disc)
+      // Main enemy body: Standing cylinder (disc)
       u.uObjData0.value[objCount].set(2, 0, 0, enemyGroupId); // type=2 (cylinder), union within group
       u.uObjData1.value[objCount].copy(enemy.position).setW(0);
       u.uObjData2.value[objCount].set(enemy.radius, enemy.halfHeight, enemy.radius, 0);
@@ -141,14 +141,13 @@ export class Game {
       u.uObjData6.value[objCount].set(0, -enemy.meltAmount * 2, 0, 0);
       objCount++;
       
-      // Add simple "eye" sphere on front of enemy
+      // Add "eye" sphere on front face (local +Z becomes the front after rotation)
       if (objCount < 32) {
-        const eyeOffset = new THREE.Vector3(0, 0, enemy.halfHeight + 0.05);
-        eyeOffset.applyEuler(enemy.rotation);
-        const eyePos = enemy.position.clone().add(eyeOffset);
+        const eyeLocalPos = new THREE.Vector3(0, 0, enemy.halfHeight + 0.05);
+        const eyeWorldPos = enemy.localToWorld(eyeLocalPos);
         
         u.uObjData0.value[objCount].set(0, 0, 0, enemyGroupId); // sphere, union
-        u.uObjData1.value[objCount].copy(eyePos).setW(0);
+        u.uObjData1.value[objCount].copy(eyeWorldPos).setW(0);
         u.uObjData2.value[objCount].set(0.15, 0.15, 0.15, 0);
         u.uObjData3.value[objCount].set(0.1, 0.1, 0.1, 0); // Dark eye
         u.uObjData4.value[objCount].set(0, 0, 0, 0);
@@ -157,37 +156,17 @@ export class Game {
         objCount++;
       }
       
-      // Blood splatters
-      enemy.bloodSplatters.forEach(splatter => {
-        if (objCount >= 32) return;
-        const fade = 1.0 - (splatter.time / CONSTANTS.BLOOD_DECAY_TIME);
-        const size = splatter.size * (0.5 + fade * 0.5);
-        
-        u.uObjData0.value[objCount].set(0, 0, 0.2, 0); // sphere, union with world (not grouped)
-        u.uObjData1.value[objCount].copy(splatter.position).setW(0);
-        u.uObjData2.value[objCount].set(size, size, size, 0);
-        u.uObjData3.value[objCount].set(0.6 * fade, 0.05 * fade, 0.05 * fade, 0);
-        u.uObjData4.value[objCount].set(0, 0, 0, 0);
-        u.uObjData5.value[objCount].set(0.2, 2.0, 0, 0);
-        u.uObjData6.value[objCount].set(0, 0, 0, 0);
-        objCount++;
-      });
-      
-      // Damage holes parented to enemy
+      // Damage holes - transform from local to world space and subtract from enemy group
       enemy.damages.forEach(dmg => {
         if (objCount >= 32) return;
         
-        // Re-calculate the world position of the hole based on enemy current pos and rotation
-        const worldPos = dmg.localOrigin.clone();
-        worldPos.applyEuler(enemy.rotation);
-        worldPos.add(enemy.position);
-
-        const worldDir = dmg.localDirection.clone();
-        worldDir.applyEuler(enemy.rotation);
+        const worldOrigin = enemy.localToWorld(dmg.localOrigin);
+        const worldDir = enemy.localToWorldDir(dmg.localDirection);
 
         if (dmg.type === 'flame') {
-          u.uObjData0.value[objCount].set(0, 1, 0.05, enemyGroupId); // subtract
-          u.uObjData1.value[objCount].copy(worldPos).setW(0);
+          // Flame damage: small sphere subtraction
+          u.uObjData0.value[objCount].set(0, 1, 0.05, enemyGroupId); // sphere, subtract from group
+          u.uObjData1.value[objCount].copy(worldOrigin).setW(0);
           u.uObjData2.value[objCount].set(dmg.radius, dmg.radius, dmg.radius, 0);
           u.uObjData3.value[objCount].set(0, 0, 0, 0);
           u.uObjData4.value[objCount].set(0, 0, 0, 0);
@@ -195,29 +174,42 @@ export class Game {
           u.uObjData6.value[objCount].set(0, 0, 0, 0);
           objCount++;
         } else {
-          // Cylinder subtraction for bullet holes - extend through entire enemy
-          const holeLength = enemy.radius * 2.5; // Long enough to go through
-          const midpoint = worldPos.clone().add(worldDir.clone().multiplyScalar(holeLength * 0.5));
+          // Bullet hole: cylinder punched through enemy
+          const holeLength = enemy.radius * 3.0; // Long enough to fully penetrate
+          const holeMidpoint = worldOrigin.clone().add(worldDir.clone().multiplyScalar(holeLength * 0.5));
           
-          u.uObjData0.value[objCount].set(2, 1, 0, enemyGroupId); // subtract, no blend for clean hole
-          u.uObjData1.value[objCount].copy(midpoint).setW(0);
+          u.uObjData0.value[objCount].set(2, 1, 0, enemyGroupId); // cylinder, subtract from group
+          u.uObjData1.value[objCount].copy(holeMidpoint).setW(0);
           u.uObjData2.value[objCount].set(dmg.radius, holeLength * 0.5, dmg.radius, 0);
           u.uObjData3.value[objCount].set(0, 0, 0, 0);
           
-          // Properly orient cylinder along shot direction
-          const up = new THREE.Vector3(0, 1, 0);
-          const axis = new THREE.Vector3().crossVectors(up, worldDir).normalize();
-          const angle = Math.acos(up.dot(worldDir));
+          // Orient cylinder along the shot direction
+          const pitch = Math.atan2(worldDir.y, Math.sqrt(worldDir.x * worldDir.x + worldDir.z * worldDir.z)) - Math.PI / 2;
+          const yaw = Math.atan2(worldDir.x, worldDir.z);
           
-          // Convert axis-angle to euler (simplified for cylinder alignment)
-          const rotX = Math.atan2(worldDir.y, Math.sqrt(worldDir.x * worldDir.x + worldDir.z * worldDir.z)) - Math.PI / 2;
-          const rotY = Math.atan2(worldDir.x, worldDir.z);
-          
-          u.uObjData4.value[objCount].set(rotX, rotY, 0, 0);
+          u.uObjData4.value[objCount].set(pitch, yaw, 0, 0);
           u.uObjData5.value[objCount].set(0, 0, 0, 0);
           u.uObjData6.value[objCount].set(0, 0, 0, 0);
           objCount++;
         }
+      });
+      
+      // Blood splatters - transform from local to world space and add to group
+      enemy.bloodSplatters.forEach(splatter => {
+        if (objCount >= 32) return;
+        
+        const worldPos = enemy.localToWorld(splatter.localPosition);
+        const fade = 1.0 - (splatter.time / CONSTANTS.BLOOD_DECAY_TIME);
+        const size = splatter.size * (0.5 + fade * 0.5);
+        
+        u.uObjData0.value[objCount].set(0, 0, 0.2, enemyGroupId); // sphere, union within group
+        u.uObjData1.value[objCount].copy(worldPos).setW(0);
+        u.uObjData2.value[objCount].set(size, size, size, 0);
+        u.uObjData3.value[objCount].set(0.6 * fade, 0.05 * fade, 0.05 * fade, 0);
+        u.uObjData4.value[objCount].set(0, 0, 0, 0);
+        u.uObjData5.value[objCount].set(0.2, 2.0, 0, 0);
+        u.uObjData6.value[objCount].set(0, 0, 0, 0);
+        objCount++;
       });
     });
     
