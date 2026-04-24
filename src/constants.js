@@ -1,4 +1,4 @@
-// Game constants for easy tuning
+# Game constants for easy tuning
 export const CONSTANTS = {
   // Player
   PLAYER_HEIGHT: 1.6,
@@ -21,7 +21,7 @@ export const CONSTANTS = {
   
   // Enemies
   ENEMY_SPAWN_DISTANCE: 30,
-  ENEMY_MAX_COUNT: 10,
+  ENEMY_MAX_COUNT: 1,
   ENEMY_SPAWN_INTERVAL: 2.0,
   ENEMY_MOVE_SPEED: 1.5,
   ENEMY_SIZE: 1.0,
