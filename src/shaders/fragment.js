@@ -34,6 +34,18 @@ void main() {
     if (t > uDrawDist) break;
   }
   
+  float skyGrad = rd.y * 0.5 + 0.5;
+  vec3 skyBase = mix(uSkyColor2, uSkyColor, skyGrad);
+
+  // Early depth cutoff: skip expensive lighting and effects for distant pixels
+  if (t > 38.0) {
+    vec3 cutoffCol = skyBase;
+    cutoffCol = cutoffCol / (cutoffCol + 0.5);
+    cutoffCol = pow(cutoffCol, vec3(0.85));
+    gl_FragColor = vec4(cutoffCol, 1.0);
+    return;
+  }
+
   vec3 col;
   if (hit) {
     vec3 n = calcNormal(hitP, map(hitP).x);
@@ -43,8 +55,8 @@ void main() {
     if (uFlatLighting > 0.5) {
       float ndotl = max(dot(n, env.sunDir), 0.0);
       litColor = baseColor * (env.ambientColor + env.sunColor * ndotl * 0.7);
-    } else if (t < 80.0) {
-      // Full lighting only for nearby geometry
+    } else {
+      // Full quality lighting only for nearby geometry
       float ndotl = dot(n, env.sunDir);
       float lightingFactor = (uCelShading > 0.5) ? celShade(ndotl) : max(ndotl, 0.0);
       
@@ -65,10 +77,6 @@ void main() {
       vec3 rimColor = vec3(0.3, 0.5, 0.65) * rim * 0.5;
       litColor = baseColor * (env.ambientColor * ao + env.sunColor * lightingFactor * shadow);
       litColor += rimColor;
-    } else {
-      // Cheap lighting for distant geometry (no AO/shadows/rim)
-      float ndotl = max(dot(n, env.sunDir), 0.0);
-      litColor = baseColor * (env.ambientColor + env.sunColor * ndotl * 0.6);
     }
 
     col = litColor;
@@ -78,8 +86,6 @@ void main() {
     float silhouette = 0.12;
     if (dot(n, -rd) < silhouette) col *= 0.7;
   } else {
-    float skyGrad = rd.y * 0.5 + 0.5;
-    vec3 skyBase = mix(uSkyColor2, uSkyColor, skyGrad);
     if (uSkyTextured > 0.5) {
       vec2 skyUV = rd.xz / (rd.y + 0.3) * 5.0;
       float clouds = fbm(skyUV + uTime * 0.02);

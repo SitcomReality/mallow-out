@@ -12,7 +12,7 @@ export const settings = {
   minScale: 0.25,
   maxScale: 1.0,
   maxSteps: 60,
-  drawDistance: 70,
+  drawDistance: 40,
   flatLighting: false,
   celShading: true,
   shadowsEnabled: true,
