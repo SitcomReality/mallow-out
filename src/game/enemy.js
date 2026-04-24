@@ -31,10 +31,14 @@ export function createEnemy() {
 
 export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
   // Create a cylinder along the ray direction that punches through the enemy
-  const holeLength = ENEMY_CYLINDER_RADIUS * 3; // Long enough to go through
+  // Using a larger multiplier to ensure it fully clears the geometry even at extreme angles
+  const holeLength = ENEMY_CYLINDER_RADIUS * 4; 
   
-  // Calculate hole position (center of the penetrating cylinder)
-  const holePos = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2));
+  // Shift the center of the hole cylinder backward (towards the player) by a small amount.
+  // This ensures the subtraction starts slightly outside the mesh, preventing 'closed' entry wounds
+  // caused by floating-point precision issues or near-coplanar surfaces at the point of impact.
+  const entryOverlap = 0.5;
+  const holePos = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2 - entryOverlap));
   
   // Calculate rotation to align cylinder with ray direction
   const up = new THREE.Vector3(0, 1, 0);
