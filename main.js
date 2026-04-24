@@ -171,7 +171,7 @@ function shoot() {
   if (result.hit) {
     if (gameState.currentWeapon === 0) {
       addChunkToEnemy(gameState.enemy, result.point);
-      createChunkSplashFX(result.point, direction);
+      createChunkSplashFX(result.point, direction, gameState.enemy.rotation);
     } else {
       const hole = addHoleToEnemy(gameState.enemy, result.point, direction);
       // Calculate exit point for hole spray
