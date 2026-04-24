@@ -4,6 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Import map to resolve bare module specifiers via esm.sh CDN -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://esm.sh/three@0.150.1?target=es2022"
+    }
+  }
+  </script>
 </head>
 <body>
   <main class="container" role="main">
