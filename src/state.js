@@ -6,9 +6,13 @@ export const worldState = {
 };
 
 export const settings = {
-  renderScale: 0.75,
-  maxSteps: 120,
-  drawDistance: 100,
+  renderScale: 0.5,
+  targetFPS: 60,
+  dynamicRes: true,
+  minScale: 0.25,
+  maxScale: 1.0,
+  maxSteps: 60,
+  drawDistance: 70,
   flatLighting: false,
   celShading: true,
   shadowsEnabled: true,

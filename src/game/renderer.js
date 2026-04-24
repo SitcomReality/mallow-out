@@ -11,10 +11,18 @@ export function createRenderer(container) {
 
   const uniforms = material.uniforms;
   
-  // Set initial render buffer size
-  uniforms.uResolution.value.set(renderer.domElement.width, renderer.domElement.height);
+  let lastScale = -1;
 
   function render(time) {
+    // Dynamic resolution application
+    if (settings.renderScale !== lastScale) {
+      const w = Math.floor(window.innerWidth * settings.renderScale);
+      const h = Math.floor(window.innerHeight * settings.renderScale);
+      renderer.setSize(w, h, false); // false = don't update CSS style
+      uniforms.uResolution.value.set(w, h);
+      lastScale = settings.renderScale;
+    }
+
     updateUniforms(uniforms, time);
     renderer.render(scene, camera);
   }

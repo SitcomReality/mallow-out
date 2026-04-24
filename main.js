@@ -5,6 +5,7 @@ import { createRenderer } from './src/game/renderer.js';
 import { initControls, updateControls } from './src/game/controls.js';
 import { castRay, getEnemyDistanceAt } from './src/game/shooting.js';
 import { HITS_TO_KILL } from './src/game/constants.js';
+import { settings } from './src/state.js';
 
 let isPlaying = false;
 let controlsSetup = null;
@@ -38,10 +39,31 @@ function startGame() {
   
   // Game loop
   let lastTime = performance.now();
+  let frameCount = 0;
+  let totalDelta = 0;
+
   function gameLoop(time) {
     const delta = (time - lastTime) * 0.001;
     lastTime = time;
     
+    // Performance monitoring for dynamic resolution
+    if (settings.dynamicRes) {
+      frameCount++;
+      totalDelta += delta;
+      if (frameCount >= 30) {
+        const avgDelta = totalDelta / frameCount;
+        const targetDelta = 1.0 / settings.targetFPS;
+        
+        if (avgDelta > targetDelta * 1.1) { // Running slow
+          settings.renderScale = Math.max(settings.minScale, settings.renderScale - 0.05);
+        } else if (avgDelta < targetDelta * 0.8) { // Running well
+          settings.renderScale = Math.min(settings.maxScale, settings.renderScale + 0.02);
+        }
+        frameCount = 0;
+        totalDelta = 0;
+      }
+    }
+
     updateControls(delta);
     render(time);
     requestAnimationFrame(gameLoop);
