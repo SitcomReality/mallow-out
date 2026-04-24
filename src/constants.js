@@ -1,4 +1,4 @@
-# Game constants for easy tuning
+// Game constants for easy tuning
 export const CONSTANTS = {
   // Player
   PLAYER_HEIGHT: 1.6,
