@@ -60,10 +60,10 @@ float getObjectDist(vec3 p, int idx) {
   
   vec3 localP = p - pos;
   
-  // Apply rotation to the local coordinate space (inverse YXZ)
-  localP.xy *= rot2(-rot.z);
+  // Apply rotation to the local coordinate space
   localP.yz *= rot2(-rot.x);
   localP.xz *= rot2(rot.y);
+  localP.xy *= rot2(-rot.z);
   
   float d = 0.0;
   if (objType < 0.5) {

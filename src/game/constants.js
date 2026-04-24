@@ -1,0 +1,8 @@
+export const ENEMY_CYLINDER_RADIUS = 1.5;
+export const ENEMY_CYLINDER_HEIGHT = 0.3;
+export const ENEMY_SPAWN_RADIUS = 8;
+export const ENEMY_HEIGHT = 0;
+export const HOLE_RADIUS = 0.2;
+export const HITS_TO_KILL = 4;
+export const PLAYER_HEIGHT = 0;
+export const MOUSE_SENSITIVITY = 0.002;
