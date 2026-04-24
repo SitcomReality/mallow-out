@@ -124,27 +124,36 @@ export class Game {
     let objCount = 0;
     
     enemies.forEach((enemy, i) => {
-      if (i >= 32) return;
+      if (objCount >= 32) return;
       
-      // Main enemy: short upright cylinder (disc-like)
-      u.uObjData0.value[objCount].set(2, 0, 0, 0); // type=2 (cylinder), union
+      const enemyGroupId = i + 1; // Unique group per enemy
+      u.uGroupData.value[enemyGroupId - 1].set(0, 0.1, 0, 0); // Union for the group into the world
+
+      // Main enemy: Standing cylinder (disc)
+      u.uObjData0.value[objCount].set(2, 0, 0, enemyGroupId); // type=2 (cylinder), union within group
       u.uObjData1.value[objCount].copy(enemy.position).setW(0);
-      // sdCylinder expects (r, halfHeight) in uObjData2.x and .y
       u.uObjData2.value[objCount].set(enemy.radius, enemy.halfHeight, enemy.radius, 0);
       u.uObjData3.value[objCount].set(enemy.color.r, enemy.color.g, enemy.color.b, 0);
-      u.uObjData4.value[objCount].set(0, 0, 0, 0);
-      u.uObjData5.value[objCount].set(enemy.meltAmount * 0.3, 1.5, 0, 0); // noise amount & scale
-      u.uObjData6.value[objCount].set(0, -enemy.meltAmount * 2, 0, 0); // noise offset
+      u.uObjData4.value[objCount].set(enemy.rotation.x, enemy.rotation.y, enemy.rotation.z, 0);
+      u.uObjData5.value[objCount].set(enemy.meltAmount * 0.3, 1.5, 0, 0);
+      u.uObjData6.value[objCount].set(0, -enemy.meltAmount * 2, 0, 0);
       objCount++;
       
-      // Damage holes (same approach as before)
+      // Damage holes parented to enemy
       enemy.damages.forEach(dmg => {
-        if (objCount >= 31) return;
+        if (objCount >= 32) return;
         
+        // Re-calculate the world position of the hole based on enemy current pos and rotation
+        const worldPos = dmg.localOrigin.clone();
+        worldPos.applyEuler(enemy.rotation);
+        worldPos.add(enemy.position);
+
+        const worldDir = dmg.localDirection.clone();
+        worldDir.applyEuler(enemy.rotation);
+
         if (dmg.type === 'flame') {
-          // Small subtraction sphere for flame damage
-          u.uObjData0.value[objCount].set(0, 1, 0.05, 0); // sphere, subtract
-          u.uObjData1.value[objCount].copy(enemy.position).setW(0);
+          u.uObjData0.value[objCount].set(0, 1, 0.05, enemyGroupId); // subtract
+          u.uObjData1.value[objCount].copy(worldPos).setW(0);
           u.uObjData2.value[objCount].set(dmg.radius, dmg.radius, dmg.radius, 0);
           u.uObjData3.value[objCount].set(0, 0, 0, 0);
           u.uObjData4.value[objCount].set(0, 0, 0, 0);
@@ -153,16 +162,15 @@ export class Game {
           objCount++;
         } else {
           // Cylinder subtraction for bullet holes
-          const midpoint = dmg.origin.clone().add(dmg.direction.clone().multiplyScalar(dmg.length * 0.5));
+          const midpoint = worldPos.clone().add(worldDir.clone().multiplyScalar(dmg.length * 0.5));
           
-          u.uObjData0.value[objCount].set(2, 1, 0.05, 0); // cylinder, subtract
+          u.uObjData0.value[objCount].set(2, 1, 0.05, enemyGroupId); // subtract
           u.uObjData1.value[objCount].copy(midpoint).setW(0);
           u.uObjData2.value[objCount].set(dmg.radius, dmg.length * 0.5, dmg.radius, 0);
           u.uObjData3.value[objCount].set(0, 0, 0, 0);
           
-          // Rotation to align cylinder with bullet direction
-          const angle = Math.atan2(dmg.direction.x, dmg.direction.z);
-          const tilt = Math.asin(dmg.direction.y);
+          const angle = Math.atan2(worldDir.x, worldDir.z);
+          const tilt = Math.asin(worldDir.y);
           u.uObjData4.value[objCount].set(tilt, angle, 0, 0);
           u.uObjData5.value[objCount].set(0, 0, 0, 0);
           u.uObjData6.value[objCount].set(0, 0, 0, 0);
