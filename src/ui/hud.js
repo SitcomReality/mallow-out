@@ -3,16 +3,16 @@ export function createHUD() {
   
   hud.innerHTML = `
     <div class="weapon-bar">
-      <div class="weapon-slot active" data-weapon="0">
-        <span>🔫</span>
+      <div class="weapon-slot active" data-weapon="0" title="Remove Chunks">
+        <span>🟣</span>
         <div class="key-hint">1</div>
       </div>
-      <div class="weapon-slot" data-weapon="1">
-        <span>?</span>
+      <div class="weapon-slot" data-weapon="1" title="Puncture Holes">
+        <span>🟢</span>
         <div class="key-hint">2</div>
       </div>
-      <div class="weapon-slot" data-weapon="2">
-        <span>?</span>
+      <div class="weapon-slot" data-weapon="2" title="Lava Hose">
+        <span>🔥</span>
         <div class="key-hint">3</div>
       </div>
     </div>

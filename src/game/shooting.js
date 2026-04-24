@@ -49,6 +49,10 @@ export function getEnemyDistanceAt(enemy, point) {
 function getHoleDistanceAt(hole, point) {
   const localP = point.clone().sub(new THREE.Vector3(hole.position.x, hole.position.y, hole.position.z));
   
+  if (hole.type === 'sphere') {
+    return localP.length() - hole.scale.x;
+  }
+  
   const euler = new THREE.Euler(hole.rotation.x, hole.rotation.y, hole.rotation.z);
   const q = new THREE.Quaternion().setFromEuler(euler);
   localP.applyQuaternion(q.invert());

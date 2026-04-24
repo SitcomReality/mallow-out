@@ -30,24 +30,16 @@ export function createEnemy() {
 }
 
 export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
-  // Create a cylinder along the ray direction that punches through the enemy
-  // Using a larger multiplier to ensure it fully clears the geometry even at extreme angles
   const holeLength = ENEMY_CYLINDER_RADIUS * 4; 
-  
-  // Shift the center of the hole cylinder backward (towards the player) by a small amount.
-  // This ensures the subtraction starts slightly outside the mesh, preventing 'closed' entry wounds
-  // caused by floating-point precision issues or near-coplanar surfaces at the point of impact.
   const entryOverlap = 0.5;
   const holePos = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2 - entryOverlap));
   
-  // Calculate rotation to align cylinder with ray direction
   const up = new THREE.Vector3(0, 1, 0);
   const axis = new THREE.Vector3().crossVectors(up, rayDirection).normalize();
   const angle = Math.acos(up.dot(rayDirection));
   
   let rotationX = 0, rotationY = 0, rotationZ = 0;
   if (axis.length() > 0.001) {
-    // Convert axis-angle to euler (simplified for this case)
     const q = new THREE.Quaternion().setFromAxisAngle(axis, angle);
     const euler = new THREE.Euler().setFromQuaternion(q);
     rotationX = euler.x;
@@ -61,7 +53,6 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     position: { x: holePos.x, y: holePos.y, z: holePos.z },
     rotation: { x: rotationX, y: rotationY, z: rotationZ },
     scale: { x: HOLE_RADIUS, y: holeLength / 2, z: 0 },
-    color: '#ffffff',
     operation: 'subtract',
     blendRadius: 0.05,
     parentId: enemy.id,
@@ -69,6 +60,22 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
   
   enemy.holes.push(hole);
   enemy.hitCount++;
-  
   return hole;
+}
+
+export function addChunkToEnemy(enemy, hitPoint) {
+  const chunk = {
+    id: nextId++,
+    type: 'sphere',
+    position: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
+    operation: 'subtract',
+    blendRadius: 0.1,
+    parentId: enemy.id,
+  };
+  
+  enemy.holes.push(chunk);
+  enemy.hitCount += 2; // Chunks do more damage
+  return chunk;
 }

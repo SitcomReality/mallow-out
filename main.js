@@ -55,10 +55,19 @@ function startGame() {
   // Initialize controls
   controlsSetup = initControls(container);
   
-  // ESC key for pause
+  // Keyboard listeners
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isPlaying) {
+    if (!isPlaying) return;
+
+    if (e.key === 'Escape') {
       togglePause();
+    }
+    
+    // Weapon switching
+    if (!isPaused) {
+      if (e.key === '1') switchWeapon(0);
+      if (e.key === '2') switchWeapon(1);
+      if (e.key === '3') switchWeapon(2);
     }
   });
   
@@ -123,14 +132,26 @@ function togglePause() {
   }
 }
 
+function switchWeapon(index) {
+  gameState.currentWeapon = index;
+  if (hud) hud.setActiveWeapon(index);
+}
+
 function spawnEnemy() {
   const enemy = createEnemy();
   gameState.enemy = enemy;
   rebuildObjectList();
 }
 
+import { addChunkToEnemy } from './src/game/enemy.js';
+
 function shoot() {
   if (!gameState.enemy) return;
+  if (gameState.currentWeapon === 2) {
+    // Lava hose placeholder: maybe just a continuous stream of small subtractions?
+    // For now, let's just return.
+    return;
+  }
   
   const player = gameState.player;
   const origin = player.position.clone();
@@ -144,14 +165,22 @@ function shoot() {
   const result = castRay(origin, direction, distFunc);
   
   if (result.hit) {
-    addHoleToEnemy(gameState.enemy, result.point, direction);
+    if (gameState.currentWeapon === 0) {
+      addChunkToEnemy(gameState.enemy, result.point);
+    } else {
+      addHoleToEnemy(gameState.enemy, result.point, direction);
+    }
+    
     rebuildObjectList();
     
     if (gameState.enemy.hitCount >= HITS_TO_KILL) {
       // Enemy destroyed, spawn new one
+      const deadEnemy = gameState.enemy;
+      gameState.enemy = null;
+      rebuildObjectList();
       setTimeout(() => {
         spawnEnemy();
-      }, 100);
+      }, 500);
     }
   }
 }

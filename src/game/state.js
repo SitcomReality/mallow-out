@@ -9,4 +9,5 @@ export const gameState = {
   },
   enemy: null,
   objects: [],
+  currentWeapon: 0, // 0: Chunk, 1: Puncture, 2: Lava
 };
