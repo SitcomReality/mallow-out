@@ -1,5 +1,3 @@
-__DELETE_ME__
-
 import { settings } from '../state.js';
 
 export function createPauseMenu(onResume, onQuit) {

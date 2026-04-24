@@ -1,5 +1,3 @@
-__DELETE_ME__
-
 export function createHUD() {
   const hud = document.getElementById('hud');
   
