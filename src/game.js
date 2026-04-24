@@ -6,6 +6,7 @@ import { InputManager } from './input.js';
 import { Gun, Flamethrower } from './weapons.js';
 import { EnemyManager } from './enemies.js';
 import { settings } from './state.js';
+import { CONSTANTS } from './constants.js';
 import { UIManager } from './ui/ui-manager.js';
 
 export class Game {
