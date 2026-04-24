@@ -8,6 +8,7 @@ import { HITS_TO_KILL } from './src/game/constants.js';
 import { settings } from './src/state.js';
 import { createHUD } from './src/ui/hud.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
+import { activeFX, updateFX, clearAllFX, createChunkSplashFX, createHoleSprayFX } from './src/game/fx.js';
 
 let isPlaying = false;
 let isPaused = false;
@@ -33,6 +34,7 @@ function quitToMenu() {
   // Reset game state
   gameState.enemy = null;
   gameState.objects = [];
+  clearAllFX();
 }
 
 function startGame() {
@@ -113,6 +115,8 @@ function startGame() {
       }
 
       updateControls(delta);
+      updateFX(time * 0.001);
+      rebuildObjectList();
     }
     
     render(time);
@@ -167,8 +171,13 @@ function shoot() {
   if (result.hit) {
     if (gameState.currentWeapon === 0) {
       addChunkToEnemy(gameState.enemy, result.point);
+      createChunkSplashFX(result.point, direction);
     } else {
-      addHoleToEnemy(gameState.enemy, result.point, direction);
+      const hole = addHoleToEnemy(gameState.enemy, result.point, direction);
+      // Calculate exit point for hole spray
+      const holeLength = hole.scale.y * 2;
+      const exitPoint = result.point.clone().add(direction.clone().multiplyScalar(holeLength));
+      createHoleSprayFX(result.point, exitPoint, direction);
     }
     
     rebuildObjectList();
@@ -191,4 +200,5 @@ function rebuildObjectList() {
     gameState.objects.push(gameState.enemy);
     gameState.objects.push(...gameState.enemy.holes);
   }
+  gameState.objects.push(...activeFX);
 }
