@@ -7,22 +7,12 @@ export const worldState = {
   chunkCache: new Map(),
 };
 
-export const settings = { // make render settings customizable in-game
-  renderScale: 0.75,
-  maxSteps: 100,
-  drawDistance: 150,
-  lodDetail: 1.0,
+export const settings = {
+  renderScale: 0.5, // Lower for better performance
+  maxSteps: 80,
+  drawDistance: 100,
   flatLighting: false,
-  celShading: true,
-  shadowsEnabled: true,
-  aoEnabled: true,
-  isStarted: false,
-  uiVisible: true,
-  showOutline: true,
-  outlineColor: '#ffd200',
-  snapDistance: 0.5,
-  snapAngle: 15,
-  invertSnapModifier: false,
-  previewNoisePaused: false,
-  tutorialCompleted: localStorage.getItem('smelt_tutorial_completed') === 'true'
+  celShading: false,
+  shadowsEnabled: false,
+  aoEnabled: false,
 };
