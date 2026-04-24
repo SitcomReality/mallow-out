@@ -21,7 +21,7 @@ export const CONSTANTS = {
   
   // Enemies (flattened disc-like)
   ENEMY_SPAWN_DISTANCE: 30,
-  ENEMY_MAX_COUNT: 5,
+  ENEMY_MAX_COUNT: 1,
   ENEMY_SPAWN_INTERVAL: 3.0,
   ENEMY_MOVE_SPEED: 2.0,
   ENEMY_RADIUS: 1.2,    // Radius of the "face" circle
