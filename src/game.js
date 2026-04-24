@@ -141,9 +141,9 @@ export class Game {
       u.uObjData6.value[objCount].set(0, -enemy.meltAmount * 2, 0, 0);
       objCount++;
       
-      // Add "eye" sphere on front face (local +Z becomes the front after rotation)
+      // Add "eye" sphere on front face. The local unrotated front face is at +Y.
       if (objCount < 32) {
-        const eyeLocalPos = new THREE.Vector3(0, 0, enemy.halfHeight + 0.05);
+        const eyeLocalPos = new THREE.Vector3(0, enemy.halfHeight + 0.05, 0);
         const eyeWorldPos = enemy.localToWorld(eyeLocalPos);
         
         u.uObjData0.value[objCount].set(0, 0, 0, enemyGroupId); // sphere, union

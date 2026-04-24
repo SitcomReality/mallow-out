@@ -13,7 +13,7 @@ export class Enemy {
     this.meltAmount = 0;
     this.dead = false;
     this.color = new THREE.Color(0xff4444);
-    this.rotation = new THREE.Euler(0, 0, 0);
+    this.rotation = new THREE.Euler(0, 0, 0, 'YXZ');
     this.targetRotationY = 0;
     this.id = Math.random();
   }
@@ -51,29 +51,28 @@ export class Enemy {
   
   // Transform world position to local space
   worldToLocal(worldPos) {
-    const local = worldPos.clone().sub(this.position);
-    const invRot = new THREE.Euler(-this.rotation.x, -this.rotation.y, -this.rotation.z, 'YXZ');
-    local.applyEuler(invRot);
-    return local;
+    const q = new THREE.Quaternion().setFromEuler(this.rotation);
+    const invQ = q.invert();
+    return worldPos.clone().sub(this.position).applyQuaternion(invQ);
   }
   
   // Transform world direction to local space
   worldToLocalDir(worldDir) {
-    const invRot = new THREE.Euler(-this.rotation.x, -this.rotation.y, -this.rotation.z, 'YXZ');
-    return worldDir.clone().applyEuler(invRot);
+    const q = new THREE.Quaternion().setFromEuler(this.rotation);
+    const invQ = q.invert();
+    return worldDir.clone().applyQuaternion(invQ);
   }
   
   // Transform local position to world space
   localToWorld(localPos) {
-    const world = localPos.clone();
-    world.applyEuler(this.rotation);
-    world.add(this.position);
-    return world;
+    const q = new THREE.Quaternion().setFromEuler(this.rotation);
+    return localPos.clone().applyQuaternion(q).add(this.position);
   }
   
   // Transform local direction to world space
   localToWorldDir(localDir) {
-    return localDir.clone().applyEuler(this.rotation);
+    const q = new THREE.Quaternion().setFromEuler(this.rotation);
+    return localDir.clone().applyQuaternion(q);
   }
   
   update(dt, playerPos) {
@@ -175,12 +174,10 @@ export class EnemyManager {
       if (alongFlame < 0 || alongFlame > length) return;
       
       const closest = origin.clone().add(direction.clone().multiplyScalar(alongFlame));
-      // Horizontal (xz) distance and vertical separation
-      const dxz = Math.hypot(closest.x - enemy.position.x, closest.z - enemy.position.z);
-      const dy = Math.abs(closest.y - enemy.position.y);
+      const dist = closest.distanceTo(enemy.position);
       
-      // If within horizontal radius and within vertical half-height plus some tolerance, it's a hit
-      if (dxz < (radius + enemy.radius) && dy < (enemy.halfHeight + 0.5)) {
+      // Simple sphere bounding hit detection for flame
+      if (dist < radius + enemy.radius) {
         hits.push(enemy);
       }
     });
@@ -195,19 +192,28 @@ export class EnemyManager {
     this.enemies.forEach(enemy => {
       if (enemy.dead) return;
 
-      // Project enemy position onto the gun ray
-      const toEnemy = new THREE.Vector3().subVectors(enemy.position, origin);
-      const alongRay = toEnemy.dot(direction);
-      if (alongRay <= 0) return;
+      // Enemy front face normal (local +Y is the cylinder's face)
+      const normal = enemy.localToWorldDir(new THREE.Vector3(0, 1, 0));
+      // Point on the front face
+      const planePoint = enemy.localToWorld(new THREE.Vector3(0, enemy.halfHeight, 0));
 
-      const closestPointOnRay = origin.clone().add(direction.clone().multiplyScalar(alongRay));
-      const distToCenter = closestPointOnRay.distanceTo(enemy.position);
-
-      // Hit detection for a standing disc
-      if (distToCenter < enemy.radius && alongRay < closestDist) {
-        closestDist = alongRay;
-        closestEnemy = enemy;
-        hitPoint = closestPointOnRay.clone();
+      // Ray-Plane intersection
+      const denom = direction.dot(normal);
+      // We allow hitting from front or back
+      if (Math.abs(denom) > 1e-6) {
+        const t = planePoint.clone().sub(origin).dot(normal) / denom;
+        if (t > 0 && t < closestDist) {
+          const pt = origin.clone().add(direction.clone().multiplyScalar(t));
+          // Check if point is within the radius of the disc
+          const localPt = enemy.worldToLocal(pt);
+          // In local space, the disc is a cylinder along Y. So we check X and Z distance.
+          const distXZ = Math.hypot(localPt.x, localPt.z);
+          if (distXZ <= enemy.radius) {
+            closestDist = t;
+            closestEnemy = enemy;
+            hitPoint = pt;
+          }
+        }
       }
     });
 
