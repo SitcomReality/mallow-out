@@ -70,13 +70,14 @@ export class Game {
     if (this.input.mouse.left && this.currentWeapon === this.gun) {
       const damage = this.gun.fire(origin, direction);
       if (damage) {
-        const enemy = this.enemyManager.checkGunHit(origin, direction);
-        if (enemy) {
-          enemy.takeDamage({
+        const hitResult = this.enemyManager.checkGunHit(origin, direction);
+        if (hitResult) {
+          hitResult.enemy.takeDamage({
             origin: origin.clone(),
             direction: direction.clone(),
             radius: damage.radius,
             length: damage.length,
+            hitPoint: hitResult.hitPoint,
           });
         }
       }
@@ -139,6 +140,38 @@ export class Game {
       u.uObjData6.value[objCount].set(0, -enemy.meltAmount * 2, 0, 0);
       objCount++;
       
+      // Add simple "eye" sphere on front of enemy
+      if (objCount < 32) {
+        const eyeOffset = new THREE.Vector3(0, 0, enemy.halfHeight + 0.05);
+        eyeOffset.applyEuler(enemy.rotation);
+        const eyePos = enemy.position.clone().add(eyeOffset);
+        
+        u.uObjData0.value[objCount].set(0, 0, 0, enemyGroupId); // sphere, union
+        u.uObjData1.value[objCount].copy(eyePos).setW(0);
+        u.uObjData2.value[objCount].set(0.15, 0.15, 0.15, 0);
+        u.uObjData3.value[objCount].set(0.1, 0.1, 0.1, 0); // Dark eye
+        u.uObjData4.value[objCount].set(0, 0, 0, 0);
+        u.uObjData5.value[objCount].set(0, 0, 0, 0);
+        u.uObjData6.value[objCount].set(0, 0, 0, 0);
+        objCount++;
+      }
+      
+      // Blood splatters
+      enemy.bloodSplatters.forEach(splatter => {
+        if (objCount >= 32) return;
+        const fade = 1.0 - (splatter.time / CONSTANTS.BLOOD_DECAY_TIME);
+        const size = splatter.size * (0.5 + fade * 0.5);
+        
+        u.uObjData0.value[objCount].set(0, 0, 0.2, 0); // sphere, union with world (not grouped)
+        u.uObjData1.value[objCount].copy(splatter.position).setW(0);
+        u.uObjData2.value[objCount].set(size, size, size, 0);
+        u.uObjData3.value[objCount].set(0.6 * fade, 0.05 * fade, 0.05 * fade, 0);
+        u.uObjData4.value[objCount].set(0, 0, 0, 0);
+        u.uObjData5.value[objCount].set(0.2, 2.0, 0, 0);
+        u.uObjData6.value[objCount].set(0, 0, 0, 0);
+        objCount++;
+      });
+      
       // Damage holes parented to enemy
       enemy.damages.forEach(dmg => {
         if (objCount >= 32) return;
@@ -161,17 +194,25 @@ export class Game {
           u.uObjData6.value[objCount].set(0, 0, 0, 0);
           objCount++;
         } else {
-          // Cylinder subtraction for bullet holes
-          const midpoint = worldPos.clone().add(worldDir.clone().multiplyScalar(dmg.length * 0.5));
+          // Cylinder subtraction for bullet holes - extend through entire enemy
+          const holeLength = enemy.radius * 2.5; // Long enough to go through
+          const midpoint = worldPos.clone().add(worldDir.clone().multiplyScalar(holeLength * 0.5));
           
-          u.uObjData0.value[objCount].set(2, 1, 0.05, enemyGroupId); // subtract
+          u.uObjData0.value[objCount].set(2, 1, 0, enemyGroupId); // subtract, no blend for clean hole
           u.uObjData1.value[objCount].copy(midpoint).setW(0);
-          u.uObjData2.value[objCount].set(dmg.radius, dmg.length * 0.5, dmg.radius, 0);
+          u.uObjData2.value[objCount].set(dmg.radius, holeLength * 0.5, dmg.radius, 0);
           u.uObjData3.value[objCount].set(0, 0, 0, 0);
           
-          const angle = Math.atan2(worldDir.x, worldDir.z);
-          const tilt = Math.asin(worldDir.y);
-          u.uObjData4.value[objCount].set(tilt, angle, 0, 0);
+          // Properly orient cylinder along shot direction
+          const up = new THREE.Vector3(0, 1, 0);
+          const axis = new THREE.Vector3().crossVectors(up, worldDir).normalize();
+          const angle = Math.acos(up.dot(worldDir));
+          
+          // Convert axis-angle to euler (simplified for cylinder alignment)
+          const rotX = Math.atan2(worldDir.y, Math.sqrt(worldDir.x * worldDir.x + worldDir.z * worldDir.z)) - Math.PI / 2;
+          const rotY = Math.atan2(worldDir.x, worldDir.z);
+          
+          u.uObjData4.value[objCount].set(rotX, rotY, 0, 0);
           u.uObjData5.value[objCount].set(0, 0, 0, 0);
           u.uObjData6.value[objCount].set(0, 0, 0, 0);
           objCount++;

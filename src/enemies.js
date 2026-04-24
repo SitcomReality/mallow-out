@@ -9,10 +9,12 @@ export class Enemy {
     this.height = CONSTANTS.ENEMY_HEIGHT; // total height
     this.halfHeight = this.height * 0.5;
     this.damages = []; // Holes carved into this enemy
+    this.bloodSplatters = []; // Visual feedback on hit
     this.meltAmount = 0;
     this.dead = false;
     this.color = new THREE.Color(0xff4444);
     this.rotation = new THREE.Euler(0, 0, 0);
+    this.targetRotationY = 0;
     this.id = Math.random();
   }
 
@@ -31,6 +33,15 @@ export class Enemy {
       localOrigin,
       localDirection: localDir
     });
+    
+    // Add blood splatter at hit location
+    if (damageData.hitPoint) {
+      this.bloodSplatters.push({
+        position: damageData.hitPoint.clone(),
+        time: 0,
+        size: CONSTANTS.BLOOD_SPLATTER_SIZE
+      });
+    }
 
     if (this.health <= 0) {
       this.dead = true;
@@ -41,19 +52,41 @@ export class Enemy {
   update(dt, playerPos) {
     if (this.dead) return;
 
-    // Move toward player on the XZ plane
+    // Calculate direction to player
     const dir = new THREE.Vector3().subVectors(playerPos, this.position);
     dir.y = 0;
-
-    // Look at player (Y-axis rotation)
-    this.rotation.y = Math.atan2(dir.x, dir.z);
+    
+    // Calculate target rotation (where enemy should face)
+    this.targetRotationY = Math.atan2(dir.x, dir.z);
+    
+    // Smoothly rotate toward target
+    let rotDiff = this.targetRotationY - this.rotation.y;
+    // Normalize angle difference to [-PI, PI]
+    while (rotDiff > Math.PI) rotDiff -= Math.PI * 2;
+    while (rotDiff < -Math.PI) rotDiff += Math.PI * 2;
+    
+    const rotSpeed = 3.0; // radians per second
+    if (Math.abs(rotDiff) > 0.1) {
+      this.rotation.y += Math.sign(rotDiff) * Math.min(Math.abs(rotDiff), rotSpeed * dt);
+    } else {
+      this.rotation.y = this.targetRotationY;
+    }
+    
     // Tilt to "stand up" on edge
     this.rotation.x = Math.PI / 2;
-
-    if (dir.length() > 1.5) {
-      dir.normalize().multiplyScalar(CONSTANTS.ENEMY_MOVE_SPEED * dt);
-      this.position.add(dir);
+    
+    // Only move forward if mostly facing the player
+    if (Math.abs(rotDiff) < 0.5 && dir.length() > 1.5) {
+      const forward = new THREE.Vector3(Math.sin(this.rotation.y), 0, Math.cos(this.rotation.y));
+      forward.multiplyScalar(CONSTANTS.ENEMY_MOVE_SPEED * dt);
+      this.position.add(forward);
     }
+    
+    // Update blood splatters
+    this.bloodSplatters = this.bloodSplatters.filter(splatter => {
+      splatter.time += dt;
+      return splatter.time < CONSTANTS.BLOOD_DECAY_TIME;
+    });
   }
 }
 
@@ -118,6 +151,7 @@ export class EnemyManager {
   checkGunHit(origin, direction) {
     let closestEnemy = null;
     let closestDist = Infinity;
+    let hitPoint = null;
 
     this.enemies.forEach(enemy => {
       if (enemy.dead) return;
@@ -130,15 +164,14 @@ export class EnemyManager {
       const closestPointOnRay = origin.clone().add(direction.clone().multiplyScalar(alongRay));
       const distToCenter = closestPointOnRay.distanceTo(enemy.position);
 
-      // Hit detection for a standing disc:
-      // We check if the ray passes within the radius of the disc center.
-      // Since it's a thin disc facing the player, distanceTo center is a good heuristic.
+      // Hit detection for a standing disc
       if (distToCenter < enemy.radius && alongRay < closestDist) {
         closestDist = alongRay;
         closestEnemy = enemy;
+        hitPoint = closestPointOnRay.clone();
       }
     });
 
-    return closestEnemy;
+    return closestEnemy ? { enemy: closestEnemy, hitPoint } : null;
   }
 }
