@@ -1,0 +1,85 @@
+:root{
+  --bg:#0f1112;
+  --card:#0f1112;
+  --accent:#ff7a50;
+  --muted:#9aa3ac;
+  --btn-bg:#1f8cff;
+  --btn-fg:white;
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background: linear-gradient(180deg, #0b0c0d 0%, #121416 100%);
+  color:#e6eef6;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+.container{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:24px;
+  padding:28px;
+  box-sizing:border-box;
+  position:relative;
+  overflow:hidden;
+}
+
+.content{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+}
+
+.big-btn{
+  appearance:none;
+  -webkit-appearance:none;
+  border:0;
+  padding:18px 28px;
+  font-size:20px;
+  border-radius:14px;
+  background:linear-gradient(180deg,var(--btn-bg),#0f6fe0);
+  color:var(--btn-fg);
+  box-shadow:0 8px 24px rgba(15,30,60,0.45), inset 0 -2px 0 rgba(0,0,0,0.15);
+  min-width:220px;
+  max-width:90%;
+  cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease;
+  touch-action:manipulation;
+}
+
+.big-btn:active{ transform:translateY(2px) scale(.997); }
+.big-btn:focus{ outline:3px solid rgba(79,164,255,0.14); outline-offset:4px; }
+
+.credit{
+  position:absolute;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  pointer-events:none;
+}
+
+.credit-text{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:6px;
+  pointer-events:auto;
+}
+
+.credit img{
+  width:250px;
+  height:70px;
+  object-fit:contain;
+  pointer-events:auto;
+}
