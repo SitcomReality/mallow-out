@@ -6,6 +6,7 @@ import { InputManager } from './input.js';
 import { Gun, Flamethrower } from './weapons.js';
 import { EnemyManager } from './enemies.js';
 import { settings } from './state.js';
+import { UIManager } from './ui/ui-manager.js';
 
 export class Game {
   constructor(container) {
@@ -25,6 +26,7 @@ export class Game {
     
     this.time = 0;
     this.lastTime = performance.now();
+    this.paused = false;
     
     // Create material
     const material = createMainMaterial();
@@ -41,6 +43,10 @@ export class Game {
     });
     
     this.setupUniforms();
+    
+    // Create UI
+    this.ui = new UIManager(container, this);
+    
     this.animate();
   }
   
@@ -189,18 +195,36 @@ export class Game {
     u.uNumObjects.value = objCount;
   }
   
+  setPaused(paused) {
+    this.paused = paused;
+  }
+  
+  setRenderScale(scale) {
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5) * scale);
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    this.renderer.setSize(w, h);
+    this.uniforms.uResolution.value.set(this.renderer.domElement.width, this.renderer.domElement.height);
+  }
+  
   animate() {
     requestAnimationFrame(() => this.animate());
     
     const now = performance.now();
     const dt = Math.min((now - this.lastTime) / 1000, 0.1);
     this.lastTime = now;
-    this.time += dt;
     
-    // Update game state
-    this.player.update(dt, this.input.getMoveInput());
-    this.enemyManager.update(dt, this.player.position);
-    this.handleWeapons(dt);
+    if (!this.paused) {
+      this.time += dt;
+      
+      // Update game state
+      this.player.update(dt, this.input.getMoveInput());
+      this.enemyManager.update(dt, this.player.position);
+      this.handleWeapons(dt);
+    }
+    
+    // Update UI
+    this.ui.update();
     
     // Update uniforms and render
     this.updateUniforms();
