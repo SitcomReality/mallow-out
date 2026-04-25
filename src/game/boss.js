@@ -17,10 +17,23 @@ export function createBoss(wave) {
   const sizeMultiplier = BOSS_SIZE_BASE + (wave - 1) * BOSS_SIZE_PER_WAVE;
   
   const bossId = nextId++;
+  const shellGroupId = nextId++;
   const bloodGroupId = nextId++;
   const bloodCoreId = nextId++;
+  const innerMarshmallowId = nextId++;
   
-  // Create marshmallow shell (outer)
+  // Shell group (White part - will have holes subtracted)
+  const shellGroup = {
+    id: shellGroupId,
+    type: 'group',
+    position: { x, y: ENEMY_HEIGHT, z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 1, y: 1, z: 1 },
+    operation: 'union',
+    blendRadius: 0,
+    parentId: null,
+  };
+
   const marshmallow = {
     id: bossId,
     type: 'cylinder',
@@ -34,41 +47,59 @@ export function createBoss(wave) {
     color: '#' + color.getHexString(),
     operation: 'union',
     blendRadius: 0.1,
-    parentId: null,
+    parentId: shellGroupId,
   };
   
-  // Create blood group (will be intersected with marshmallow)
+  // Blood group (Interior red part)
   const bloodGroup = {
     id: bloodGroupId,
     type: 'group',
     position: { x, y: ENEMY_HEIGHT, z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 1, y: 1, z: 1 },
-    operation: 'intersect',
-    blendRadius: 0,
+    operation: 'union',
+    blendRadius: 0.1,
     parentId: null,
   };
+
+  // The inner marshmallow shape to intersect with the blood core
+  const innerMarshmallow = {
+    id: innerMarshmallowId,
+    type: 'cylinder',
+    position: { x, y: ENEMY_HEIGHT, z },
+    rotation: { x: 0, y: 0, z: Math.PI / 2 },
+    scale: { 
+      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 0.99, // Slightly smaller to prevent flickering
+      y: ENEMY_CYLINDER_HEIGHT * sizeMultiplier * 0.99, 
+      z: 0 
+    },
+    color: '#8B0000',
+    operation: 'union',
+    blendRadius: 0,
+    parentId: bloodGroupId,
+  };
   
-  // Create blood core object (sphere that encompasses the marshmallow)
   const bloodCore = {
     id: bloodCoreId,
     type: 'sphere',
     position: { x, y: ENEMY_HEIGHT, z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { 
-      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2, 
-      y: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2, 
-      z: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2 
+      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.1, 
+      y: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.1, 
+      z: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.1 
     },
-    color: '#8B0000', // Dark blood red
-    operation: 'union',
-    blendRadius: 0,
+    color: '#8B0000',
+    operation: 'intersect',
+    blendRadius: 0.05,
     parentId: bloodGroupId,
   };
   
   const boss = {
+    shellGroup,
     marshmallow,
     bloodGroup,
+    innerMarshmallow,
     bloodCore,
     holes: [],
     hitCount: 0,
@@ -77,6 +108,7 @@ export function createBoss(wave) {
     wave: wave,
     isBoss: true,
     id: bossId,
+    shellGroupId,
     bloodGroupId,
   };
   

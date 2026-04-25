@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
 import { settings, worldState } from '../state.js';
+import { flattenHierarchyForRender } from '../core/scene-processor.js';
 
 export function updateUniforms(uniforms, time) {
   const player = gameState.player;
@@ -31,31 +32,8 @@ export function updateUniforms(uniforms, time) {
   uniforms.uShadowsEnabled.value = settings.shadowsEnabled ? 1 : 0;
   uniforms.uAOEnabled.value = settings.aoEnabled ? 1 : 0;
   
-  // Scene objects (limit to 32 max to prevent array out of bounds)
-  const objects = gameState.objects.slice(0, 32);
-  uniforms.uNumObjects.value = objects.length;
-  
-  const opMap = { union: 0, subtract: 1, intersect: 2 };
-  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3 };
-  
-  objects.forEach((obj, i) => {
-    uniforms.uObjData0.value[i].set(
-      typeMap[obj.type] || 0,
-      opMap[obj.operation] || 0,
-      obj.blendRadius || 0,
-      0 // No groups for now
-    );
-    uniforms.uObjData1.value[i].set(obj.position.x, obj.position.y, obj.position.z, 0);
-    uniforms.uObjData2.value[i].set(obj.scale.x, obj.scale.y, obj.scale.z, 0);
-    uniforms.uObjData4.value[i].set(obj.rotation.x, obj.rotation.y, obj.rotation.z, 0);
-    const color = new THREE.Color(obj.color);
-    uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
-    
-    // Pass noise parameters
-    uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, 0, 0);
-    const nOffset = obj.noiseOffset || { x: 0, y: 0, z: 0 };
-    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
-  });
+  // Scene objects (flattened from gameState.objects)
+  flattenHierarchyForRender(gameState.objects, uniforms);
   
   // Marsh sky and floor
   uniforms.uSkyColor.value.setHex(0x7A9B8E); // Misty green-gray

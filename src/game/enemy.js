@@ -94,7 +94,7 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     color: '#000000',
     operation: 'subtract',
     blendRadius: 0.05,
-    parentId: enemy.bloodGroupId,
+    parentId: enemy.shellGroupId, // Subtraction belongs to the outer shell group
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
@@ -115,7 +115,7 @@ export function addChunkToEnemy(enemy, hitPoint) {
     color: '#000000',
     operation: 'subtract',
     blendRadius: 0.1,
-    parentId: enemy.bloodGroupId,
+    parentId: enemy.shellGroupId, // Subtraction belongs to the outer shell group
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
