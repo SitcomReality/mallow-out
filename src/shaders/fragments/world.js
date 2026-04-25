@@ -1,5 +1,9 @@
 export const world = `
 uniform float uFloorEnabled;
+uniform float uSphereRadius;
+uniform float uSphereWallThickness;
+uniform float uSphereNoiseAmount;
+uniform float uSphereNoiseScale;
 
 struct Object {
   float type;      // 0=sphere, 1=box, 2=cylinder, 3=torus
@@ -13,6 +17,20 @@ struct Object {
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
   return p.y + 4.0;
+}
+
+float sdHollowSphere(vec3 p) {
+  float dist = length(p) - uSphereRadius;
+  
+  // Add noise displacement to surface
+  if (uSphereNoiseAmount > 0.001) {
+    vec3 noisePos = p * uSphereNoiseScale;
+    float noise = fbm3D(noisePos) - 0.5;
+    dist += noise * uSphereNoiseAmount;
+  }
+  
+  // Make it hollow (only show inside surface)
+  return abs(dist + uSphereWallThickness * 0.5) - uSphereWallThickness * 0.5;
 }
 
 uniform sampler2D uFontTex;
@@ -105,7 +123,11 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
 }
 
 vec4 map(vec3 p) {
-  vec4 worldRes = vec4(1e10, 1.0, 1.0, 1.0);
+  // Start with sphere (if enabled, use sphere instead of floor)
+  float sphereDist = sdHollowSphere(p);
+  vec4 worldRes = uFloorEnabled > 0.5 
+    ? vec4(sphereDist, -1.0, -1.0, -1.0)
+    : vec4(1e10, 1.0, 1.0, 1.0);
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
   bool worldFirst = true;
@@ -176,8 +198,7 @@ vec4 map(vec3 p) {
     }
   }
   
-  float floorD = sdFloor(p);
-  if (floorD < worldRes.x) return vec4(floorD, -1.0, -1.0, -1.0);
+  // Floor is now handled at the start of map() as sphere
   return worldRes;
 }
 

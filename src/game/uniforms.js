@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
 import { settings, worldState } from '../state.js';
+import { SPHERE_RADIUS, SPHERE_WALL_THICKNESS, SPHERE_NOISE_AMOUNT, SPHERE_NOISE_SCALE } from '../world/constants.js';
 
 export function updateUniforms(uniforms, time) {
   const player = gameState.player;
@@ -57,13 +58,19 @@ export function updateUniforms(uniforms, time) {
     uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
   });
   
-  // Sky and floor
-  uniforms.uSkyColor.value.setHex(0x87CEEB);
-  uniforms.uSkyColor2.value.setHex(0x4682B4);
+  // Sky and sphere environment
+  uniforms.uSkyColor.value.setHex(0x1a0a20); // Dark purple sky
+  uniforms.uSkyColor2.value.setHex(0x0a0510); // Darker purple
   uniforms.uSkyTextured.value = 1;
-  uniforms.uFloorEnabled.value = 1;
-  uniforms.uFloorColor.value.setHex(0x8B7355);
+  uniforms.uFloorEnabled.value = 1; // Using sphere instead
+  uniforms.uFloorColor.value.setHex(0x4a2860); // Purple-ish sphere surface
   uniforms.uFloorTextured.value = 1;
+  
+  // Sphere parameters
+  uniforms.uSphereRadius.value = SPHERE_RADIUS;
+  uniforms.uSphereWallThickness.value = SPHERE_WALL_THICKNESS;
+  uniforms.uSphereNoiseAmount.value = SPHERE_NOISE_AMOUNT;
+  uniforms.uSphereNoiseScale.value = SPHERE_NOISE_SCALE;
   
   // Selection/outline (disabled for now)
   uniforms.uSelectionInfo.value.set(0, 0);

@@ -1,5 +1,6 @@
 import { MOUSE_SENSITIVITY } from './constants.js';
 import { gameState } from './state.js';
+import { SPHERE_RADIUS } from '../world/constants.js';
 
 const keys = {};
 
@@ -42,15 +43,13 @@ export function initControls(container) {
 }
 
 export function updateControls(delta) {
-  // Basic WASD movement (fixed directions)
+  // Basic WASD movement with outward gravity
   const speed = 5 * delta;
   const yaw = gameState.player.yaw;
 
-  // Forward vector matches the ray direction used elsewhere: (sin(yaw), 0, -cos(yaw))
+  // Calculate forward and right vectors
   const forwardX = Math.sin(yaw);
   const forwardZ = -Math.cos(yaw);
-
-  // Right vector is perpendicular to forward on the XZ plane
   const rightX = Math.cos(yaw);
   const rightZ = Math.sin(yaw);
 
@@ -69,5 +68,21 @@ export function updateControls(delta) {
   if (keys['d']) {
     gameState.player.position.x += rightX * speed;
     gameState.player.position.z += rightZ * speed;
+  }
+  
+  // Apply outward "gravity" - keep player on inner surface of sphere
+  const pos = gameState.player.position;
+  const distFromCenter = Math.sqrt(pos.x * pos.x + pos.y * pos.y + pos.z * pos.z);
+  
+  if (distFromCenter > 0.01) {
+    // Target radius is slightly inside the sphere wall
+    const targetRadius = SPHERE_RADIUS - 1.5;
+    const normalizeScale = targetRadius / distFromCenter;
+    
+    // Smoothly pull player to sphere surface
+    const pullStrength = 0.1;
+    pos.x += (pos.x * normalizeScale - pos.x) * pullStrength;
+    pos.y += (pos.y * normalizeScale - pos.y) * pullStrength;
+    pos.z += (pos.z * normalizeScale - pos.z) * pullStrength;
   }
 }

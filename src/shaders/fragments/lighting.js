@@ -83,7 +83,7 @@ LightEnv getLightEnv(float dayTime) {
   env.ambientColor = mix(dayAmbient, nightAmbient, nightFactor);
   env.skyColor = mix(daySky, nightSky, nightFactor);
   env.fogColor = mix(dayFog, nightFog, nightFactor);
-  env.fogDensity = mix(0.035, 0.05, nightFactor);
+  env.fogDensity = 0.08; // Higher fog for performance (critical optimization)
   return env;
 }
 `;
