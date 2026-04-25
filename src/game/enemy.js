@@ -14,11 +14,15 @@ export function createEnemy() {
   const lightness = 0.4 + Math.random() * 0.3;
   const color = new THREE.Color().setHSL(hue, saturation, lightness);
   
-  return {
-    id: nextId++,
+  const enemyId = nextId++;
+  const bloodId = nextId++;
+  
+  // Main marshmallow surface
+  const enemy = {
+    id: enemyId,
     type: 'cylinder',
     position: { x, y: ENEMY_HEIGHT, z },
-    rotation: { x: 0, y: 0, z: Math.PI / 2 }, // Standing upright on edge
+    rotation: { x: 0, y: 0, z: Math.PI / 2 },
     scale: { x: ENEMY_CYLINDER_RADIUS, y: ENEMY_CYLINDER_HEIGHT, z: 0 },
     color: '#' + color.getHexString(),
     operation: 'union',
@@ -26,7 +30,29 @@ export function createEnemy() {
     parentId: null,
     holes: [],
     hitCount: 0,
+    bloodId: bloodId,
   };
+  
+  // Blood interior - slightly larger sphere to encompass the cylinder
+  const bloodObject = {
+    id: bloodId,
+    type: 'sphere',
+    position: { x, y: ENEMY_HEIGHT, z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { 
+      x: ENEMY_CYLINDER_RADIUS * 1.2, 
+      y: ENEMY_CYLINDER_RADIUS * 1.2, 
+      z: ENEMY_CYLINDER_RADIUS * 1.2 
+    },
+    color: '#8B0000', // Dark blood red
+    operation: 'intersect',
+    blendRadius: 0,
+    parentId: enemyId,
+  };
+  
+  enemy.bloodObject = bloodObject;
+  
+  return enemy;
 }
 
 export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
@@ -55,7 +81,9 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     scale: { x: HOLE_RADIUS, y: holeLength / 2, z: 0 },
     operation: 'subtract',
     blendRadius: 0.05,
-    parentId: enemy.id,
+    parentId: enemy.bloodId,
+    noiseAmount: 0.4,
+    noiseScale: 1.0,
   };
   
   enemy.holes.push(hole);
@@ -72,7 +100,9 @@ export function addChunkToEnemy(enemy, hitPoint) {
     scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
     operation: 'subtract',
     blendRadius: 0.1,
-    parentId: enemy.id,
+    parentId: enemy.bloodId,
+    noiseAmount: 0.4,
+    noiseScale: 1.0,
   };
   
   enemy.holes.push(chunk);

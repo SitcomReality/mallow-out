@@ -246,10 +246,16 @@ function rebuildObjectList() {
   gameState.objects = [];
   if (gameState.boss) {
     gameState.objects.push(gameState.boss);
+    if (gameState.boss.bloodObject) {
+      gameState.objects.push(gameState.boss.bloodObject);
+    }
     gameState.objects.push(...gameState.boss.holes);
   }
   for (const melting of gameState.meltingEnemies) {
     gameState.objects.push(melting);
+    if (melting.bloodObject) {
+      gameState.objects.push(melting.bloodObject);
+    }
     gameState.objects.push(...melting.holes);
   }
   gameState.objects.push(...activeFX);
