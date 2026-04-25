@@ -43,7 +43,9 @@ export function initControls(container) {
 
 export function updateControls(delta) {
   // Basic WASD movement (fixed directions)
-  const speed = 5 * delta;
+  const baseSpeed = 5;
+  const speedBonus = gameState.upgrades.moveSpeed * 0.2;
+  const speed = baseSpeed * (1 + speedBonus) * delta;
   const yaw = gameState.player.yaw;
 
   // Forward vector matches the ray direction used elsewhere: (sin(yaw), 0, -cos(yaw))

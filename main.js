@@ -1,20 +1,26 @@
 import * as THREE from 'three';
 import { gameState } from './src/game/state.js';
-import { createEnemy, addHoleToEnemy } from './src/game/enemy.js';
+import { addHoleToEnemy } from './src/game/enemy.js';
+import { createBoss, damageBoss } from './src/game/boss.js';
 import { createRenderer } from './src/game/renderer.js';
 import { initControls, updateControls } from './src/game/controls.js';
 import { castRay, getEnemyDistanceAt } from './src/game/shooting.js';
-import { HITS_TO_KILL } from './src/game/constants.js';
+import { BASE_DAMAGE_CHUNK, BASE_DAMAGE_HOLE } from './src/game/constants.js';
 import { settings } from './src/state.js';
 import { createHUD } from './src/ui/hud.js';
+import { createBossHUD } from './src/ui/boss-hud.js';
+import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { activeFX, updateFX, clearAllFX, createChunkSplashFX, createHoleSprayFX } from './src/game/fx.js';
 import { updateMeltingEnemies } from './src/game/melting.js';
+import { STARTING_WAVE } from './src/game/wave-constants.js';
 
 let isPlaying = false;
 let isPaused = false;
 let controlsSetup = null;
 let hud = null;
+let bossHUD = null;
+let upgradeScreen = null;
 let pauseMenu = null;
 
 document.getElementById('newGame').addEventListener('click', () => {
@@ -31,11 +37,21 @@ function quitToMenu() {
   document.getElementById('gameContainer').style.display = 'none';
   document.getElementById('crosshair').style.display = 'none';
   if (hud) hud.hide();
+  if (bossHUD) bossHUD.hide();
+  if (upgradeScreen) upgradeScreen.hide();
   if (pauseMenu) pauseMenu.hide();
   // Reset game state
-  gameState.enemy = null;
+  gameState.boss = null;
   gameState.meltingEnemies = [];
   gameState.objects = [];
+  gameState.currentWave = STARTING_WAVE;
+  gameState.upgrades = {
+    damage: 0,
+    fireRate: 0,
+    moveSpeed: 0,
+    health: 0,
+    splash: 0,
+  };
   clearAllFX();
 }
 
@@ -51,9 +67,24 @@ function startGame() {
   hud = createHUD();
   hud.show();
   
+  bossHUD = createBossHUD();
+  
+  upgradeScreen = createUpgradeScreen((upgradeId) => {
+    // Apply upgrade
+    if (upgradeId === 'damage') gameState.upgrades.damage++;
+    else if (upgradeId === 'fire_rate') gameState.upgrades.fireRate++;
+    else if (upgradeId === 'move_speed') gameState.upgrades.moveSpeed++;
+    else if (upgradeId === 'health') gameState.upgrades.health++;
+    else if (upgradeId === 'splash') gameState.upgrades.splash++;
+    
+    // Start next wave
+    gameState.currentWave++;
+    spawnBoss();
+  });
+  
   pauseMenu = createPauseMenu(
-    () => togglePause(), // Resume
-    () => quitToMenu()   // Quit
+    () => togglePause(),
+    () => quitToMenu()
   );
   
   // Initialize controls
@@ -75,8 +106,8 @@ function startGame() {
     }
   });
   
-  // Spawn first enemy
-  spawnEnemy();
+  // Spawn first boss
+  spawnBoss();
   
   // Shooting
   container.addEventListener('click', () => {
@@ -144,19 +175,18 @@ function switchWeapon(index) {
   if (hud) hud.setActiveWeapon(index);
 }
 
-function spawnEnemy() {
-  const enemy = createEnemy();
-  gameState.enemy = enemy;
+function spawnBoss() {
+  const boss = createBoss(gameState.currentWave);
+  gameState.boss = boss;
+  if (bossHUD) bossHUD.update(boss);
   rebuildObjectList();
 }
 
 import { addChunkToEnemy } from './src/game/enemy.js';
 
 function shoot() {
-  if (!gameState.enemy) return;
+  if (!gameState.boss) return;
   if (gameState.currentWeapon === 2) {
-    // Lava hose placeholder: maybe just a continuous stream of small subtractions?
-    // For now, let's just return.
     return;
   }
   
@@ -168,47 +198,55 @@ function shoot() {
     -Math.cos(player.yaw) * Math.cos(player.pitch)
   ).normalize();
   
-  const distFunc = (p) => getEnemyDistanceAt(gameState.enemy, p);
+  const distFunc = (p) => getEnemyDistanceAt(gameState.boss, p);
   const result = castRay(origin, direction, distFunc);
   
   if (result.hit) {
+    let damage = 0;
+    
     if (gameState.currentWeapon === 0) {
-      addChunkToEnemy(gameState.enemy, result.point);
-      createChunkSplashFX(result.point, direction, gameState.enemy.rotation);
+      addChunkToEnemy(gameState.boss, result.point);
+      createChunkSplashFX(result.point, direction, gameState.boss.rotation);
+      damage = BASE_DAMAGE_CHUNK + gameState.upgrades.damage;
     } else {
-      const hole = addHoleToEnemy(gameState.enemy, result.point, direction);
-      // Calculate exit point for hole spray
+      const hole = addHoleToEnemy(gameState.boss, result.point, direction);
       const holeLength = hole.scale.y * 2;
       const exitPoint = result.point.clone().add(direction.clone().multiplyScalar(holeLength));
       createHoleSprayFX(result.point, exitPoint, direction);
+      damage = BASE_DAMAGE_HOLE + gameState.upgrades.damage;
     }
+    
+    const defeated = damageBoss(gameState.boss, damage);
+    if (bossHUD) bossHUD.update(gameState.boss);
     
     rebuildObjectList();
     
-    if (gameState.enemy.hitCount >= HITS_TO_KILL) {
-      // Limit number of melting enemies to prevent exceeding 32 object limit
+    if (defeated) {
       if (gameState.meltingEnemies.length >= 2) {
         gameState.meltingEnemies.shift();
       }
       
-      // Enemy destroyed, start melting animation
-      const deadEnemy = gameState.enemy;
-      deadEnemy.meltStartTime = performance.now() * 0.001;
-      gameState.meltingEnemies.push(deadEnemy);
-      gameState.enemy = null;
+      const deadBoss = gameState.boss;
+      deadBoss.meltStartTime = performance.now() * 0.001;
+      gameState.meltingEnemies.push(deadBoss);
+      gameState.boss = null;
+      if (bossHUD) bossHUD.hide();
+      
       rebuildObjectList();
+      
+      // Show upgrade screen after a delay
       setTimeout(() => {
-        spawnEnemy();
-      }, 500);
+        if (upgradeScreen) upgradeScreen.show(gameState.currentWave);
+      }, 1500);
     }
   }
 }
 
 function rebuildObjectList() {
   gameState.objects = [];
-  if (gameState.enemy) {
-    gameState.objects.push(gameState.enemy);
-    gameState.objects.push(...gameState.enemy.holes);
+  if (gameState.boss) {
+    gameState.objects.push(gameState.boss);
+    gameState.objects.push(...gameState.boss.holes);
   }
   for (const melting of gameState.meltingEnemies) {
     gameState.objects.push(melting);

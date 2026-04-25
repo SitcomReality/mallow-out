@@ -57,12 +57,12 @@ export function updateUniforms(uniforms, time) {
     uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
   });
   
-  // Sky and floor
-  uniforms.uSkyColor.value.setHex(0x87CEEB);
-  uniforms.uSkyColor2.value.setHex(0x4682B4);
+  // Marsh sky and floor
+  uniforms.uSkyColor.value.setHex(0x7A9B8E); // Misty green-gray
+  uniforms.uSkyColor2.value.setHex(0x4A6A5C); // Darker marsh tone
   uniforms.uSkyTextured.value = 1;
   uniforms.uFloorEnabled.value = 1;
-  uniforms.uFloorColor.value.setHex(0x8B7355);
+  uniforms.uFloorColor.value.setHex(0x5A7A6A); // Murky marsh ground
   uniforms.uFloorTextured.value = 1;
   
   // Selection/outline (disabled for now)
