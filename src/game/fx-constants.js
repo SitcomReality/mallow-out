@@ -7,7 +7,7 @@ export const CHUNK_SPLASH_SPEED = 4.0;
 export const CHUNK_SPLASH_INITIAL_NOISE_AMOUNT = 0.1;
 export const CHUNK_SPLASH_FINAL_NOISE_AMOUNT = 1.5;
 export const CHUNK_SPLASH_INITIAL_NOISE_SCALE = 3.0;
-export const CHUNK_SPLASH_FINAL_NOISE_SCALE = 0.5;
+export const CHUNK_SPLASH_FINAL_NOISE_SCALE = 10;
 export const CHUNK_SPLASH_INITIAL_BLEND = 0.3;
 export const CHUNK_SPLASH_FINAL_BLEND = 0.02;
 
@@ -25,4 +25,4 @@ export const HOLE_SPRAY_FINAL_BLEND = 0.01;
 
 // Dissipation phase (last 20% of duration)
 export const DISSIPATE_NOISE_AMOUNT = 3.0;
-export const DISSIPATE_NOISE_SCALE = 0.05;
+export const DISSIPATE_NOISE_SCALE = 50;
