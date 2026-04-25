@@ -34,17 +34,8 @@ void main() {
     if (t > uDrawDist) break;
   }
   
-  float skyGrad = rd.y * 0.5 + 0.5;
+  float skyGrad = clamp(rd.y * 2.0 + 0.5, 0.0, 1.0);
   vec3 skyBase = mix(uSkyColor2, uSkyColor, skyGrad);
-
-  // Early depth cutoff: skip expensive lighting and effects for distant pixels
-  if (t > 38.0) {
-    vec3 cutoffCol = skyBase;
-    cutoffCol = cutoffCol / (cutoffCol + 0.5);
-    cutoffCol = pow(cutoffCol, vec3(0.85));
-    gl_FragColor = vec4(cutoffCol, 1.0);
-    return;
-  }
 
   vec3 col;
   if (hit) {
@@ -80,12 +71,13 @@ void main() {
     }
 
     col = litColor;
-    float fogAmount = 1.0 - exp(-t * env.fogDensity);
-    col = mix(col, env.fogColor, fogAmount);
+    
     // Subtle silhouette
     float silhouette = 0.12;
     if (dot(n, -rd) < silhouette) col *= 0.7;
   } else {
+    // If we didn't hit anything, we're at uDrawDist
+    t = uDrawDist;
     if (uSkyTextured > 0.5) {
       vec2 skyUV = rd.xz / (rd.y + 0.3) * 5.0;
       float clouds = fbm(skyUV + uTime * 0.02);
@@ -94,6 +86,14 @@ void main() {
       col = skyBase;
     }
   }
+  // Apply fog based on distance t relative to uDrawDist
+  // We use a combination of exponential and distance-clamped fog for a thick horizon
+  float fogExp = 1.0 - exp(-t * env.fogDensity);
+  float fogDist = clamp((t - uDrawDist * 0.5) / (uDrawDist * 0.5), 0.0, 1.0);
+  float fogAmount = max(fogExp, pow(fogDist, 2.0));
+  
+  col = mix(col, env.fogColor, fogAmount);
+
   if (uSelectionInfo.x > 0.5 && uShowOutline > 0.5) {
     float tSel = 0.0;
     float minD = 1e10;

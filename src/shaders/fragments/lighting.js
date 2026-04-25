@@ -84,6 +84,10 @@ LightEnv getLightEnv(float dayTime) {
   env.skyColor = mix(daySky, nightSky, nightFactor);
   env.fogColor = mix(dayFog, nightFog, nightFactor);
   env.fogDensity = mix(0.035, 0.05, nightFactor);
+  
+  // Ensure fog color matches the horizon color for a seamless transition
+  env.fogColor = mix(env.fogColor, env.skyColor, 0.5);
+  
   return env;
 }
 `;
