@@ -17,8 +17,11 @@ export function createBoss(wave) {
   const sizeMultiplier = BOSS_SIZE_BASE + (wave - 1) * BOSS_SIZE_PER_WAVE;
   
   const bossId = nextId++;
+  const bloodGroupId = nextId++;
+  const bloodCoreId = nextId++;
   
-  const boss = {
+  // Create marshmallow shell (outer)
+  const marshmallow = {
     id: bossId,
     type: 'cylinder',
     position: { x, y: ENEMY_HEIGHT, z },
@@ -30,14 +33,51 @@ export function createBoss(wave) {
     },
     color: '#' + color.getHexString(),
     operation: 'union',
-    blendRadius: 0.15,
+    blendRadius: 0.1,
     parentId: null,
+  };
+  
+  // Create blood group (will be intersected with marshmallow)
+  const bloodGroup = {
+    id: bloodGroupId,
+    type: 'group',
+    position: { x, y: ENEMY_HEIGHT, z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 1, y: 1, z: 1 },
+    operation: 'intersect',
+    blendRadius: 0,
+    parentId: null,
+  };
+  
+  // Create blood core object (sphere that encompasses the marshmallow)
+  const bloodCore = {
+    id: bloodCoreId,
+    type: 'sphere',
+    position: { x, y: ENEMY_HEIGHT, z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { 
+      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2, 
+      y: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2, 
+      z: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2 
+    },
+    color: '#8B0000', // Dark blood red
+    operation: 'union',
+    blendRadius: 0,
+    parentId: bloodGroupId,
+  };
+  
+  const boss = {
+    marshmallow,
+    bloodGroup,
+    bloodCore,
     holes: [],
     hitCount: 0,
     maxHealth: BOSS_BASE_HEALTH + (wave - 1) * BOSS_HEALTH_PER_WAVE,
     currentHealth: BOSS_BASE_HEALTH + (wave - 1) * BOSS_HEALTH_PER_WAVE,
     wave: wave,
     isBoss: true,
+    id: bossId,
+    bloodGroupId,
   };
   
   return boss;

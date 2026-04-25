@@ -88,26 +88,22 @@ float getObjectDist(vec3 p, int idx) {
 }
 
 vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
-  if (op < 0.5) { // Union
+  if (op < 0.5) {
     if (blend > 0.01) {
       float h = clamp(0.5 + 0.5 * (res.x - d) / blend, 0.0, 1.0);
       vec3 finalCol = mix(res.yzw, col, h);
-      // Floor sentinel check
       if (res.yzw.x < -0.5 && h < 0.5) finalCol = res.yzw;
       if (col.x < -0.5 && h >= 0.5) finalCol = col;
       return vec4(mix(res.x, d, h) - blend * h * (1.0 - h), finalCol);
     } else {
       return (d < res.x) ? vec4(d, col) : res;
     }
-  } else if (op < 1.5) { // Subtract
-    float newD = smax(res.x, -d, blend);
-    // If the subtracted object's surface is closer, take its color 
-    // (useful for showing internal "meaty" surface)
-    return vec4(newD, (newD > res.x) ? col : res.yzw);
-  } else { // Intersect
+  } else if (op < 1.5) {
+    return vec4(smax(res.x, -d, blend), res.yzw);
+  } else {
     float oldD = res.x;
-    float newD = smax(res.x, d, blend);
-    return vec4(newD, (newD > oldD) ? col : res.yzw);
+    float newD = max(res.x, d);
+    return vec4(newD, (d > oldD) ? col : res.yzw);
   }
 }
 
@@ -116,7 +112,7 @@ vec4 map(vec3 p) {
   vec4 worldRes = vec4(fD, -1.0, -1.0, -1.0);
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
-  bool groupFirst = true;
+  bool worldFirst = false;
 
   for (int i = 0; i < 32; i++) {
     if (float(i) >= uNumObjects) break;
@@ -131,30 +127,43 @@ vec4 map(vec3 p) {
     float blend = uObjData0[i].z;
 
     if (gid != lastGid) {
+      // Close existing group if it was active
       if (lastGid > 0.5) {
         int gIdx = int(lastGid - 1.0);
         float gOp = uGroupData[gIdx].x;
         float gBlend = uGroupData[gIdx].y;
-        worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
+        if (worldFirst) {
+          worldRes = groupRes;
+          worldFirst = false;
+        } else {
+          worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
+        }
       }
       
       lastGid = gid;
       if (gid > 0.5) {
+        // Start new group
         groupRes = vec4(d, col);
-        groupFirst = false;
       } else {
-        worldRes = blendOp(worldRes, d, col, op, blend);
+        // Single object
+        if (worldFirst) {
+          worldRes = vec4(d, col);
+          worldFirst = false;
+        } else {
+          worldRes = blendOp(worldRes, d, col, op, blend);
+        }
       }
     } else {
+      // Continue same state (group or no group)
       if (gid > 0.5) {
-        if (groupFirst) {
-          groupRes = vec4(d, col);
-          groupFirst = false;
-        } else {
-          groupRes = blendOp(groupRes, d, col, op, blend);
-        }
+        groupRes = blendOp(groupRes, d, col, op, blend);
       } else {
-        worldRes = blendOp(worldRes, d, col, op, blend);
+        if (worldFirst) {
+          worldRes = vec4(d, col);
+          worldFirst = false;
+        } else {
+          worldRes = blendOp(worldRes, d, col, op, blend);
+        }
       }
     }
   }

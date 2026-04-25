@@ -21,17 +21,17 @@ export function castRay(origin, direction, distanceFunction, maxDistance = 100) 
 }
 
 export function getEnemyDistanceAt(enemy, point) {
-  // Transform point to local space
-  const localP = point.clone().sub(new THREE.Vector3(enemy.position.x, enemy.position.y, enemy.position.z));
+  // Transform point to local space of marshmallow
+  const localP = point.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z));
   
   // Apply inverse rotation
-  const euler = new THREE.Euler(enemy.rotation.x, enemy.rotation.y, enemy.rotation.z);
+  const euler = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
   const q = new THREE.Quaternion().setFromEuler(euler);
   localP.applyQuaternion(q.invert());
   
   // Calculate cylinder distance (simplified - height is along Y in local space)
-  const r = enemy.scale.x;
-  const h = enemy.scale.y;
+  const r = enemy.marshmallow.scale.x;
+  const h = enemy.marshmallow.scale.y;
   const dx = Math.sqrt(localP.x * localP.x + localP.z * localP.z) - r;
   const dy = Math.abs(localP.y) - h;
   

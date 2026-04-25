@@ -28,12 +28,6 @@ vec3 getMaterialColor(vec3 colorData, vec3 p) {
     return col;
   }
   
-  // Marshmallow special case: if color is red (0.545, 0, 0), add some interior texture
-  if (colorData.r > 0.5 && colorData.g < 0.1 && colorData.b < 0.1) {
-    float meat = fbm(p.xy * 4.0 + p.z * 2.0) * 0.5 + 0.5;
-    return mix(colorData * 0.6, colorData * 1.2, meat);
-  }
-
   return colorData;
 }
 
