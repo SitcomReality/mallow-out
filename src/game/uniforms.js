@@ -9,32 +9,28 @@ export function updateUniforms(uniforms, time) {
   // Camera setup
   uniforms.uCamPos.value.copy(player.position);
   
-  // Forward vector from yaw/pitch (camera facing)
-  const forward = new THREE.Vector3(
-    Math.sin(player.yaw) * Math.cos(player.pitch),
-    Math.sin(player.pitch),
-    -Math.cos(player.yaw) * Math.cos(player.pitch)
-  ).normalize();
+  // Match the camera up-vector with the spherical environment
+  const localUp = player.position.clone().multiplyScalar(-1).normalize();
   
-  // For spherical world we need the local "up" to be the radial direction from center to player.
-  // Fall back to world up if player is very close to origin to avoid zero-length normalize.
-  const posLen = player.position.length();
-  const localUp = posLen > 1e-4 ? player.position.clone().normalize() : new THREE.Vector3(0, 1, 0);
-  
-  // Build orthonormal basis robustly: right = forward x localUp (guard against small lengths)
-  let right = new THREE.Vector3().crossVectors(forward, localUp);
-  if (right.lengthSq() < 1e-6) {
-    // forward is nearly parallel to localUp; pick a stable tangent direction
-    const tangent = Math.abs(localUp.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
-    right = new THREE.Vector3().crossVectors(forward, tangent).normalize();
-  } else {
-    right.normalize();
+  let forwardRef = new THREE.Vector3(0, 0, -1);
+  if (Math.abs(localUp.dot(forwardRef)) > 0.99) {
+    forwardRef = new THREE.Vector3(1, 0, 0);
   }
-  const up = new THREE.Vector3().crossVectors(right, forward).normalize();
   
-  uniforms.uCamFwd.value.copy(forward);
-  uniforms.uCamRight.value.copy(right);
-  uniforms.uCamUp.value.copy(up);
+  const localRight = new THREE.Vector3().crossVectors(forwardRef, localUp).normalize();
+  const localForward = new THREE.Vector3().crossVectors(localUp, localRight).normalize();
+  
+  const yawedForward = localForward.clone().multiplyScalar(Math.cos(player.yaw)).add(localRight.clone().multiplyScalar(-Math.sin(player.yaw)));
+  const yawedRight = new THREE.Vector3().crossVectors(yawedForward, localUp).normalize();
+  
+  // Pitch the camera up and down relative to the spherical tangent
+  const pitchQ = new THREE.Quaternion().setFromAxisAngle(yawedRight, player.pitch);
+  const finalForward = yawedForward.clone().applyQuaternion(pitchQ);
+  const finalUp = localUp.clone().applyQuaternion(pitchQ);
+  
+  uniforms.uCamFwd.value.copy(finalForward);
+  uniforms.uCamRight.value.copy(yawedRight);
+  uniforms.uCamUp.value.copy(finalUp);
   
   // Time and settings
   uniforms.uTime.value = time * 0.001;

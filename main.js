@@ -159,11 +159,21 @@ function shoot() {
   
   const player = gameState.player;
   const origin = player.position.clone();
-  const direction = new THREE.Vector3(
-    Math.sin(player.yaw) * Math.cos(player.pitch),
-    Math.sin(player.pitch),
-    -Math.cos(player.yaw) * Math.cos(player.pitch)
-  ).normalize();
+  
+  // Reconstruct spherical camera forward vector for shooting
+  const localUp = origin.clone().multiplyScalar(-1).normalize();
+  let forwardRef = new THREE.Vector3(0, 0, -1);
+  if (Math.abs(localUp.dot(forwardRef)) > 0.99) {
+    forwardRef = new THREE.Vector3(1, 0, 0);
+  }
+  const localRight = new THREE.Vector3().crossVectors(forwardRef, localUp).normalize();
+  const localForward = new THREE.Vector3().crossVectors(localUp, localRight).normalize();
+  
+  const yawedForward = localForward.clone().multiplyScalar(Math.cos(player.yaw)).add(localRight.clone().multiplyScalar(-Math.sin(player.yaw)));
+  const yawedRight = new THREE.Vector3().crossVectors(yawedForward, localUp).normalize();
+  
+  const pitchQ = new THREE.Quaternion().setFromAxisAngle(yawedRight, player.pitch);
+  const direction = yawedForward.clone().applyQuaternion(pitchQ).normalize();
   
   const distFunc = (p) => getEnemyDistanceAt(gameState.enemy, p);
   const result = castRay(origin, direction, distFunc);

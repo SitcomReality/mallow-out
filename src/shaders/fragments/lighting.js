@@ -19,11 +19,9 @@ vec3 getMaterialColor(vec3 colorData, vec3 p) {
   if (colorData.x < -0.5) {
     vec3 col = uFloorColor;
     if (uFloorTextured > 0.5) {
-      float pattern = noise(p.xz * 0.8) * 0.6 + fbm(p.xz * 2.0) * 0.4;
-      col = mix(col * 0.6, col * 1.4, pattern);
-      float grid = smoothstep(0.0, 0.02, abs(fract(p.x * 0.5 + 0.5) - 0.5)) * 
-                   smoothstep(0.0, 0.02, abs(fract(p.z * 0.5 + 0.5) - 0.5));
-      col = mix(col * 1.2, col, grid);
+      // Replaced 2D texture (and grid) with 3D noise so it wraps along the spherical walls organically
+      float pattern = noise3D(p * 0.2) * 0.6 + fbm3D(p * 0.8) * 0.4;
+      col = mix(col * 0.7, col * 1.3, pattern);
     }
     return col;
   }

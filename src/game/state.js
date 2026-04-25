@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 export const gameState = {
   player: {
-    position: new THREE.Vector3(0, 0, 0),
+    position: new THREE.Vector3(0, -48.5, 0), // Spawn at the bottom of the hollow sphere
     rotation: new THREE.Euler(0, 0, 0),
     yaw: 0,
     pitch: 0,

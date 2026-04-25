@@ -1,8 +1,8 @@
 // Hollow sphere environment constants
 export const SPHERE_RADIUS = 50;
 export const SPHERE_WALL_THICKNESS = 2;
-export const SPHERE_NOISE_SCALE = 2.0;
-export const SPHERE_NOISE_AMOUNT = 1.5;
+export const SPHERE_NOISE_SCALE = 0.2;
+export const SPHERE_NOISE_AMOUNT = 3.0;
 
 // Fog settings (critical for performance)
 export const FOG_DENSITY = 0.08;
