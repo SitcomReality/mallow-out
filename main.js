@@ -245,19 +245,11 @@ function shoot() {
 function rebuildObjectList() {
   gameState.objects = [];
   if (gameState.boss) {
-    gameState.objects.push(gameState.boss.shellGroup);
     gameState.objects.push(gameState.boss.marshmallow);
-    gameState.objects.push(gameState.boss.bloodGroup);
-    gameState.objects.push(gameState.boss.innerMarshmallow);
-    gameState.objects.push(gameState.boss.bloodCore);
     gameState.objects.push(...gameState.boss.holes);
   }
   for (const melting of gameState.meltingEnemies) {
-    gameState.objects.push(melting.shellGroup);
     gameState.objects.push(melting.marshmallow);
-    gameState.objects.push(melting.bloodGroup);
-    gameState.objects.push(melting.innerMarshmallow);
-    gameState.objects.push(melting.bloodCore);
     gameState.objects.push(...melting.holes);
   }
   gameState.objects.push(...activeFX);

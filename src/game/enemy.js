@@ -31,39 +31,11 @@ export function createEnemy() {
     parentId: null,
   };
   
-  // Create blood group (will be intersected with marshmallow)
-  const bloodGroup = {
-    id: bloodGroupId,
-    type: 'group',
-    position: { x, y: ENEMY_HEIGHT, z },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: 1, y: 1, z: 1 },
-    operation: 'intersect',
-    blendRadius: 0,
-    parentId: null,
-  };
-  
-  // Create blood core object (slightly larger sphere to ensure coverage)
-  const bloodCore = {
-    id: bloodCoreId,
-    type: 'sphere',
-    position: { x, y: ENEMY_HEIGHT, z },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: ENEMY_CYLINDER_RADIUS * 1.2, y: ENEMY_CYLINDER_RADIUS * 1.2, z: ENEMY_CYLINDER_RADIUS * 1.2 },
-    color: '#8B0000', // Dark blood red
-    operation: 'union',
-    blendRadius: 0,
-    parentId: bloodGroupId,
-  };
-  
   return {
     marshmallow,
-    bloodGroup,
-    bloodCore,
     holes: [],
     hitCount: 0,
     id: enemyId,
-    bloodGroupId,
   };
 }
 
@@ -91,10 +63,10 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     position: { x: holePos.x, y: holePos.y, z: holePos.z },
     rotation: { x: rotationX, y: rotationY, z: rotationZ },
     scale: { x: HOLE_RADIUS, y: holeLength / 2, z: 0 },
-    color: '#000000',
+    color: '#8B0000',
     operation: 'subtract',
     blendRadius: 0.05,
-    parentId: enemy.shellGroupId, // Subtraction belongs to the outer shell group
+    parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
@@ -112,10 +84,10 @@ export function addChunkToEnemy(enemy, hitPoint) {
     position: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
-    color: '#000000',
+    color: '#8B0000',
     operation: 'subtract',
     blendRadius: 0.1,
-    parentId: enemy.shellGroupId, // Subtraction belongs to the outer shell group
+    parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },

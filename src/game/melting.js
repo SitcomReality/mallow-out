@@ -29,10 +29,6 @@ export function updateMeltingEnemies(currentTime) {
     
     if (enemy.meltStartY === undefined) {
       enemy.meltStartY = enemy.marshmallow.position.y;
-      enemy.shellGroupMeltStartY = enemy.shellGroup.position.y;
-      enemy.bloodGroupMeltStartY = enemy.bloodGroup.position.y;
-      enemy.bloodCoreMeltStartY = enemy.bloodCore.position.y;
-      enemy.innerMarshmallowMeltStartY = enemy.innerMarshmallow.position.y;
       
       enemy.holes.forEach(hole => {
         hole.meltStartY = hole.position.y;
@@ -48,10 +44,6 @@ export function updateMeltingEnemies(currentTime) {
     const dy = currentY - enemy.marshmallow.position.y;
     
     enemy.marshmallow.position.y = currentY;
-    enemy.shellGroup.position.y += dy;
-    enemy.bloodGroup.position.y += dy;
-    enemy.bloodCore.position.y += dy;
-    enemy.innerMarshmallow.position.y += dy;
     
     enemy.holes.forEach(hole => {
       if (hole.meltStartY !== undefined) {

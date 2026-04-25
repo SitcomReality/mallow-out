@@ -99,7 +99,15 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
       return (d < res.x) ? vec4(d, col) : res;
     }
   } else if (op < 1.5) {
-    return vec4(smax(res.x, -d, blend), res.yzw);
+    float newD = smax(res.x, -d, blend);
+    float h = 0.0;
+    if (blend > 0.001) {
+      h = clamp(0.5 + 0.5 * (-d - res.x) / blend, 0.0, 1.0);
+    } else {
+      h = (-d > res.x) ? 1.0 : 0.0;
+    }
+    vec3 newCol = mix(res.yzw, col, h);
+    return vec4(newD, newCol);
   } else {
     float oldD = res.x;
     float newD = max(res.x, d);
