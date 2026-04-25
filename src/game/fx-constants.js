@@ -1,10 +1,9 @@
- // Chunk Splash (Torus) FX
-export const CHUNK_SPLASH_DURATION = 0.45; // seconds (shorter so it doesn't travel far)
+// Chunk Splash (Torus) FX
+export const CHUNK_SPLASH_DURATION = 0.8; // seconds
 export const CHUNK_SPLASH_INITIAL_RADIUS = 0.2;
-export const CHUNK_SPLASH_FINAL_RADIUS = 1.0;
+export const CHUNK_SPLASH_FINAL_RADIUS = 1.2;
 export const CHUNK_SPLASH_TUBE_RADIUS = 0.15;
-// Much lower speed so the torus expands in place instead of flying away
-export const CHUNK_SPLASH_SPEED = 0.9;
+export const CHUNK_SPLASH_SPEED = 4.0;
 export const CHUNK_SPLASH_INITIAL_NOISE_AMOUNT = 0.1;
 export const CHUNK_SPLASH_FINAL_NOISE_AMOUNT = 1.5;
 export const CHUNK_SPLASH_INITIAL_NOISE_SCALE = 3.0;
