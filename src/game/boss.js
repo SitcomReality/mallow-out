@@ -17,7 +17,6 @@ export function createBoss(wave) {
   const sizeMultiplier = BOSS_SIZE_BASE + (wave - 1) * BOSS_SIZE_PER_WAVE;
   
   const bossId = nextId++;
-  const bloodId = nextId++;
   
   const boss = {
     id: bossId,
@@ -31,7 +30,7 @@ export function createBoss(wave) {
     },
     color: '#' + color.getHexString(),
     operation: 'union',
-    blendRadius: 0.1,
+    blendRadius: 0.15,
     parentId: null,
     holes: [],
     hitCount: 0,
@@ -39,27 +38,7 @@ export function createBoss(wave) {
     currentHealth: BOSS_BASE_HEALTH + (wave - 1) * BOSS_HEALTH_PER_WAVE,
     wave: wave,
     isBoss: true,
-    bloodId: bloodId,
   };
-  
-  // Blood interior
-  const bloodObject = {
-    id: bloodId,
-    type: 'sphere',
-    position: { x, y: ENEMY_HEIGHT, z },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { 
-      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2, 
-      y: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2, 
-      z: ENEMY_CYLINDER_RADIUS * sizeMultiplier * 1.2 
-    },
-    color: '#8B0000',
-    operation: 'intersect',
-    blendRadius: 0,
-    parentId: bossId,
-  };
-  
-  boss.bloodObject = bloodObject;
   
   return boss;
 }

@@ -244,19 +244,35 @@ function shoot() {
 
 function rebuildObjectList() {
   gameState.objects = [];
+
+  const addMallowWithFilling = (mallow) => {
+    // 1. The main shell
+    gameState.objects.push(mallow);
+    
+    // 2. The filling group (using the mallow ID as the parent for grouping)
+    // We create a duplicate of the mallow that is slightly smaller and red
+    const filling = {
+      ...mallow,
+      id: mallow.id + 1000,
+      color: '#8B0000',
+      scale: { x: mallow.scale.x * 0.98, y: mallow.scale.y * 0.98, z: mallow.scale.z * 0.98 },
+      parentId: mallow.id, // Group them together
+      operation: 'union'
+    };
+    gameState.objects.push(filling);
+
+    // 3. The holes (applied to both via parentId logic in the future, 
+    // or just subtracted from world in current logic)
+    gameState.objects.push(...mallow.holes);
+  };
+
   if (gameState.boss) {
-    gameState.objects.push(gameState.boss);
-    if (gameState.boss.bloodObject) {
-      gameState.objects.push(gameState.boss.bloodObject);
-    }
-    gameState.objects.push(...gameState.boss.holes);
+    addMallowWithFilling(gameState.boss);
   }
+  
   for (const melting of gameState.meltingEnemies) {
-    gameState.objects.push(melting);
-    if (melting.bloodObject) {
-      gameState.objects.push(melting.bloodObject);
-    }
-    gameState.objects.push(...melting.holes);
+    addMallowWithFilling(melting);
   }
+
   gameState.objects.push(...activeFX);
 }

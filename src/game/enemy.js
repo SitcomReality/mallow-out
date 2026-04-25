@@ -15,9 +15,7 @@ export function createEnemy() {
   const color = new THREE.Color().setHSL(hue, saturation, lightness);
   
   const enemyId = nextId++;
-  const bloodId = nextId++;
   
-  // Main marshmallow surface
   const enemy = {
     id: enemyId,
     type: 'cylinder',
@@ -26,31 +24,11 @@ export function createEnemy() {
     scale: { x: ENEMY_CYLINDER_RADIUS, y: ENEMY_CYLINDER_HEIGHT, z: 0 },
     color: '#' + color.getHexString(),
     operation: 'union',
-    blendRadius: 0,
+    blendRadius: 0.1,
     parentId: null,
     holes: [],
     hitCount: 0,
-    bloodId: bloodId,
   };
-  
-  // Blood interior - slightly larger sphere to encompass the cylinder
-  const bloodObject = {
-    id: bloodId,
-    type: 'sphere',
-    position: { x, y: ENEMY_HEIGHT, z },
-    rotation: { x: 0, y: 0, z: 0 },
-    scale: { 
-      x: ENEMY_CYLINDER_RADIUS * 1.2, 
-      y: ENEMY_CYLINDER_RADIUS * 1.2, 
-      z: ENEMY_CYLINDER_RADIUS * 1.2 
-    },
-    color: '#8B0000', // Dark blood red
-    operation: 'intersect',
-    blendRadius: 0,
-    parentId: enemyId,
-  };
-  
-  enemy.bloodObject = bloodObject;
   
   return enemy;
 }
@@ -79,9 +57,10 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     position: { x: holePos.x, y: holePos.y, z: holePos.z },
     rotation: { x: rotationX, y: rotationY, z: rotationZ },
     scale: { x: HOLE_RADIUS, y: holeLength / 2, z: 0 },
+    color: '#8B0000', // Crimson red for the "meat"
     operation: 'subtract',
-    blendRadius: 0.05,
-    parentId: enemy.bloodId,
+    blendRadius: 0.1,
+    parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,
   };
@@ -98,9 +77,10 @@ export function addChunkToEnemy(enemy, hitPoint) {
     position: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
+    color: '#8B0000', // Crimson red for the "meat"
     operation: 'subtract',
-    blendRadius: 0.1,
-    parentId: enemy.bloodId,
+    blendRadius: 0.15,
+    parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,
   };
