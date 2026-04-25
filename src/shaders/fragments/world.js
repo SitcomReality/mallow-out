@@ -1,9 +1,5 @@
 export const world = `
 uniform float uFloorEnabled;
-uniform float uSphereRadius;
-uniform float uSphereWallThickness;
-uniform float uSphereNoiseAmount;
-uniform float uSphereNoiseScale;
 
 struct Object {
   float type;      // 0=sphere, 1=box, 2=cylinder, 3=torus
@@ -17,20 +13,6 @@ struct Object {
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
   return p.y + 4.0;
-}
-
-float sdHollowSphere(vec3 p) {
-  float dist = length(p) - uSphereRadius;
-  
-  // Add noise displacement to surface
-  if (uSphereNoiseAmount > 0.001) {
-    vec3 noisePos = p * uSphereNoiseScale;
-    float noise = fbm3D(noisePos) - 0.5;
-    dist += noise * uSphereNoiseAmount;
-  }
-  
-  // Make it hollow (only show inside surface)
-  return abs(dist + uSphereWallThickness * 0.5) - uSphereWallThickness * 0.5;
 }
 
 uniform sampler2D uFontTex;
@@ -109,7 +91,10 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
   if (op < 0.5) {
     if (blend > 0.01) {
       float h = clamp(0.5 + 0.5 * (res.x - d) / blend, 0.0, 1.0);
-      return vec4(mix(res.x, d, h) - blend * h * (1.0 - h), mix(res.yzw, col, h));
+      vec3 finalCol = mix(res.yzw, col, h);
+      if (res.yzw.x < -0.5 && h < 0.5) finalCol = res.yzw;
+      if (col.x < -0.5 && h >= 0.5) finalCol = col;
+      return vec4(mix(res.x, d, h) - blend * h * (1.0 - h), finalCol);
     } else {
       return (d < res.x) ? vec4(d, col) : res;
     }
@@ -123,14 +108,11 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
 }
 
 vec4 map(vec3 p) {
-  // Start with sphere (if enabled, use sphere instead of floor)
-  float sphereDist = sdHollowSphere(p);
-  vec4 worldRes = uFloorEnabled > 0.5 
-    ? vec4(sphereDist, -1.0, -1.0, -1.0)
-    : vec4(1e10, 1.0, 1.0, 1.0);
+  float fD = sdFloor(p);
+  vec4 worldRes = vec4(fD, -1.0, -1.0, -1.0);
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
-  bool worldFirst = true;
+  bool worldFirst = false;
 
   for (int i = 0; i < 32; i++) {
     if (float(i) >= uNumObjects) break;
@@ -198,7 +180,6 @@ vec4 map(vec3 p) {
     }
   }
   
-  // Floor is now handled at the start of map() as sphere
   return worldRes;
 }
 

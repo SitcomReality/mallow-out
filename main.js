@@ -9,6 +9,7 @@ import { settings } from './src/state.js';
 import { createHUD } from './src/ui/hud.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { activeFX, updateFX, clearAllFX, createChunkSplashFX, createHoleSprayFX } from './src/game/fx.js';
+import { updateMeltingEnemies } from './src/game/melting.js';
 
 let isPlaying = false;
 let isPaused = false;
@@ -33,6 +34,7 @@ function quitToMenu() {
   if (pauseMenu) pauseMenu.hide();
   // Reset game state
   gameState.enemy = null;
+  gameState.meltingEnemies = [];
   gameState.objects = [];
   clearAllFX();
 }
@@ -116,6 +118,7 @@ function startGame() {
 
       updateControls(delta);
       updateFX(time * 0.001);
+      updateMeltingEnemies(time * 0.001);
       rebuildObjectList();
     }
     
@@ -159,21 +162,11 @@ function shoot() {
   
   const player = gameState.player;
   const origin = player.position.clone();
-  
-  // Reconstruct spherical camera forward vector for shooting
-  const localUp = origin.clone().multiplyScalar(-1).normalize();
-  let forwardRef = new THREE.Vector3(0, 0, -1);
-  if (Math.abs(localUp.dot(forwardRef)) > 0.99) {
-    forwardRef = new THREE.Vector3(1, 0, 0);
-  }
-  const localRight = new THREE.Vector3().crossVectors(forwardRef, localUp).normalize();
-  const localForward = new THREE.Vector3().crossVectors(localUp, localRight).normalize();
-  
-  const yawedForward = localForward.clone().multiplyScalar(Math.cos(player.yaw)).add(localRight.clone().multiplyScalar(-Math.sin(player.yaw)));
-  const yawedRight = new THREE.Vector3().crossVectors(yawedForward, localUp).normalize();
-  
-  const pitchQ = new THREE.Quaternion().setFromAxisAngle(yawedRight, player.pitch);
-  const direction = yawedForward.clone().applyQuaternion(pitchQ).normalize();
+  const direction = new THREE.Vector3(
+    Math.sin(player.yaw) * Math.cos(player.pitch),
+    Math.sin(player.pitch),
+    -Math.cos(player.yaw) * Math.cos(player.pitch)
+  ).normalize();
   
   const distFunc = (p) => getEnemyDistanceAt(gameState.enemy, p);
   const result = castRay(origin, direction, distFunc);
@@ -193,8 +186,15 @@ function shoot() {
     rebuildObjectList();
     
     if (gameState.enemy.hitCount >= HITS_TO_KILL) {
-      // Enemy destroyed, spawn new one
+      // Limit number of melting enemies to prevent exceeding 32 object limit
+      if (gameState.meltingEnemies.length >= 2) {
+        gameState.meltingEnemies.shift();
+      }
+      
+      // Enemy destroyed, start melting animation
       const deadEnemy = gameState.enemy;
+      deadEnemy.meltStartTime = performance.now() * 0.001;
+      gameState.meltingEnemies.push(deadEnemy);
       gameState.enemy = null;
       rebuildObjectList();
       setTimeout(() => {
@@ -209,6 +209,10 @@ function rebuildObjectList() {
   if (gameState.enemy) {
     gameState.objects.push(gameState.enemy);
     gameState.objects.push(...gameState.enemy.holes);
+  }
+  for (const melting of gameState.meltingEnemies) {
+    gameState.objects.push(melting);
+    gameState.objects.push(...melting.holes);
   }
   gameState.objects.push(...activeFX);
 }

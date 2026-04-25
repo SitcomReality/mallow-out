@@ -9,9 +9,6 @@ export function createEnemy() {
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   
-  // Approximate surface height near the player's spawn point
-  const y = -48.5;
-  
   const hue = Math.random();
   const saturation = 0.6 + Math.random() * 0.4;
   const lightness = 0.4 + Math.random() * 0.3;
@@ -20,7 +17,7 @@ export function createEnemy() {
   return {
     id: nextId++,
     type: 'cylinder',
-    position: { x, y, z },
+    position: { x, y: ENEMY_HEIGHT, z },
     rotation: { x: 0, y: 0, z: Math.PI / 2 }, // Standing upright on edge
     scale: { x: ENEMY_CYLINDER_RADIUS, y: ENEMY_CYLINDER_HEIGHT, z: 0 },
     color: '#' + color.getHexString(),

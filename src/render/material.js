@@ -42,10 +42,6 @@ export function createMainMaterial() {
       uFloorEnabled: { value: 1.0 },
       uFloorTextured: { value: 1.0 },
       uFloorColor: { value: new THREE.Color() },
-      uSphereRadius: { value: 50.0 },
-      uSphereWallThickness: { value: 2.0 },
-      uSphereNoiseAmount: { value: 1.5 },
-      uSphereNoiseScale: { value: 2.0 },
     },
     vertexShader,
     fragmentShader

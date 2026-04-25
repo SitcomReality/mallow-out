@@ -20,7 +20,6 @@ void main() {
   vec3 hitCol = vec3(0.0);
   vec3 hitP;
   bool hit = false;
-  float accumulatedFog = 0.0;
   
   for (int i = 0; i < 160; i++) {
     if (float(i) >= uMaxSteps) break;
@@ -32,11 +31,6 @@ void main() {
       break;
     }
     t += res.x * 0.8;
-    
-    // Fog-based early termination (critical performance optimization)
-    accumulatedFog += env.fogDensity * res.x * 0.8;
-    if (accumulatedFog > 0.95) break; // 95% fog = stop raymarching
-    
     if (t > uDrawDist) break;
   }
   
