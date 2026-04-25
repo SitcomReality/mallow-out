@@ -9,13 +9,27 @@ export function updateUniforms(uniforms, time) {
   // Camera setup
   uniforms.uCamPos.value.copy(player.position);
   
+  // Forward vector from yaw/pitch (camera facing)
   const forward = new THREE.Vector3(
     Math.sin(player.yaw) * Math.cos(player.pitch),
     Math.sin(player.pitch),
     -Math.cos(player.yaw) * Math.cos(player.pitch)
   ).normalize();
   
-  const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+  // For spherical world we need the local "up" to be the radial direction from center to player.
+  // Fall back to world up if player is very close to origin to avoid zero-length normalize.
+  const posLen = player.position.length();
+  const localUp = posLen > 1e-4 ? player.position.clone().normalize() : new THREE.Vector3(0, 1, 0);
+  
+  // Build orthonormal basis robustly: right = forward x localUp (guard against small lengths)
+  let right = new THREE.Vector3().crossVectors(forward, localUp);
+  if (right.lengthSq() < 1e-6) {
+    // forward is nearly parallel to localUp; pick a stable tangent direction
+    const tangent = Math.abs(localUp.y) < 0.9 ? new THREE.Vector3(0, 1, 0) : new THREE.Vector3(1, 0, 0);
+    right = new THREE.Vector3().crossVectors(forward, tangent).normalize();
+  } else {
+    right.normalize();
+  }
   const up = new THREE.Vector3().crossVectors(right, forward).normalize();
   
   uniforms.uCamFwd.value.copy(forward);
