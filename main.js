@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from './src/game/state.js';
-import { addHoleToEnemy } from './src/game/enemy.js';
+import { addHoleToEnemy, addChunkToEnemy } from './src/game/enemy.js';
 import { createBoss, damageBoss } from './src/game/boss.js';
 import { createRenderer } from './src/game/renderer.js';
 import { initControls, updateControls } from './src/game/controls.js';
@@ -109,6 +109,7 @@ function startGame() {
   
   // Spawn first boss
   spawnBoss();
+  console.log(`[Game Start] Wave ${gameState.currentWave} active.`);
   
   // Shooting
   container.addEventListener('click', () => {
@@ -132,6 +133,7 @@ function startGame() {
     if (!isPaused) {
       // Check for wave completion: Boss is dead and all melting animations finished
       if (gameState.waveInProgress && !gameState.boss && gameState.meltingEnemies.length === 0) {
+        console.log(`[Wave Complete] Wave ${gameState.currentWave} finished. Transitioning to upgrade screen.`);
         gameState.waveInProgress = false;
         if (upgradeScreen) {
           upgradeScreen.show(gameState.currentWave);
@@ -189,11 +191,10 @@ function spawnBoss() {
   const boss = createBoss(gameState.currentWave);
   gameState.boss = boss;
   gameState.waveInProgress = true;
+  console.log(`[Wave Spawn] New boss spawned for wave ${gameState.currentWave}.`);
   if (bossHUD) bossHUD.update(boss);
   rebuildObjectList();
 }
-
-import { addChunkToEnemy } from './src/game/enemy.js';
 
 function shoot() {
   if (!gameState.boss) return;
@@ -217,7 +218,7 @@ function shoot() {
     
     if (gameState.currentWeapon === 0) {
       addChunkToEnemy(gameState.boss, result.point);
-      createChunkSplashFX(result.point, direction, gameState.boss.rotation);
+      createChunkSplashFX(result.point, direction, gameState.boss.marshmallow.rotation);
       damage = BASE_DAMAGE_CHUNK + gameState.upgrades.damage;
     } else {
       const hole = addHoleToEnemy(gameState.boss, result.point, direction);
@@ -233,6 +234,7 @@ function shoot() {
     rebuildObjectList();
     
     if (defeated) {
+      console.log(`[Boss Defeated] Transitioning to melting phase. HP: ${gameState.boss.currentHealth}`);
       if (gameState.meltingEnemies.length >= 2) {
         gameState.meltingEnemies.shift();
       }

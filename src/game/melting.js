@@ -62,6 +62,7 @@ export function updateMeltingEnemies(currentTime) {
     const index = gameState.meltingEnemies.indexOf(enemy);
     if (index > -1) {
       gameState.meltingEnemies.splice(index, 1);
+      console.log("[Melting Complete] Mallow removed from melting state. Remaining melting enemies:", gameState.meltingEnemies.length);
     }
   }
 }
