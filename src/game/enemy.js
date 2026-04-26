@@ -86,8 +86,9 @@ export function addChunkToEnemy(enemy, hitPoint) {
   // Calculate cylinder surface normal at intersection point
   const localP = hitPoint.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z));
   const euler = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
-  const q = new THREE.Quaternion().setFromEuler(euler);
-  localP.applyQuaternion(q.invert());
+  const localToWorld = new THREE.Quaternion().setFromEuler(euler);
+  const worldToLocal = localToWorld.clone().invert();
+  localP.applyQuaternion(worldToLocal);
   
   let localNormal = new THREE.Vector3();
   if (Math.abs(localP.y) >= enemy.marshmallow.scale.y - 0.01) {
@@ -95,7 +96,7 @@ export function addChunkToEnemy(enemy, hitPoint) {
   } else {
     localNormal.set(localP.x, 0, localP.z).normalize(); // Radial cylinder surface normal
   }
-  const worldNormal = localNormal.applyQuaternion(q).normalize();
+  const worldNormal = localNormal.applyQuaternion(localToWorld).normalize();
 
   const chunk = {
     id: nextId++,
