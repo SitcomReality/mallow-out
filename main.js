@@ -137,6 +137,7 @@ function startGame() {
         gameState.waveInProgress = false;
         if (upgradeScreen) {
           upgradeScreen.show(gameState.currentWave);
+          document.exitPointerLock();
         }
       }
 
