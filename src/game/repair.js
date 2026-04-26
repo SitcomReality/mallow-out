@@ -23,6 +23,12 @@ export function updateRepairs(currentTime, delta) {
       if (hole.repairData.type === 'hole') {
         // Decrease radius until it disappears
         hole.scale.x = hole.repairData.initialRadius * (1.0 - t);
+
+        // Shrink lengthwards in the final 25% of the animation
+        if (t > 0.75) {
+          const lengthT = (t - 0.75) / 0.25;
+          hole.scale.y = hole.repairData.initialHeight * (1.0 - lengthT);
+        }
       } else if (hole.repairData.type === 'chunk') {
         // Move away from mallow body along surface normal
         const speed = CHUNK_REPAIR_SPEED * delta;

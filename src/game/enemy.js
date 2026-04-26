@@ -73,7 +73,8 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     repairData: {
       type: 'hole',
       startTime: performance.now() * 0.001,
-      initialRadius: HOLE_RADIUS
+      initialRadius: HOLE_RADIUS,
+      initialHeight: holeLength / 2
     }
   };
   
