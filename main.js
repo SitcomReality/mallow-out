@@ -130,6 +130,14 @@ function startGame() {
     
     // Only update game logic if not paused
     if (!isPaused) {
+      // Check for wave completion: Boss is dead and all melting animations finished
+      if (gameState.waveInProgress && !gameState.boss && gameState.meltingEnemies.length === 0) {
+        gameState.waveInProgress = false;
+        if (upgradeScreen) {
+          upgradeScreen.show(gameState.currentWave);
+        }
+      }
+
       // Performance monitoring for dynamic resolution
       if (settings.dynamicRes) {
         frameCount++;
@@ -180,6 +188,7 @@ function switchWeapon(index) {
 function spawnBoss() {
   const boss = createBoss(gameState.currentWave);
   gameState.boss = boss;
+  gameState.waveInProgress = true;
   if (bossHUD) bossHUD.update(boss);
   rebuildObjectList();
 }
@@ -235,11 +244,6 @@ function shoot() {
       if (bossHUD) bossHUD.hide();
       
       rebuildObjectList();
-      
-      // Show upgrade screen after a delay
-      setTimeout(() => {
-        if (upgradeScreen) upgradeScreen.show(gameState.currentWave);
-      }, 1500);
     }
   }
 }

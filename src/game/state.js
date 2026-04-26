@@ -20,4 +20,5 @@ export const gameState = {
     health: 0,
     splash: 0,
   },
+  waveInProgress: false,
 };
