@@ -3,8 +3,8 @@ export const CHUNK_SPLASH_DURATION = 0.5; // seconds
 export const CHUNK_SPLASH_SPEED = 0;
 
 // Group settings
-export const CHUNK_SPLASH_GROUP_INITIAL_BLEND = 0.1;
-export const CHUNK_SPLASH_GROUP_FINAL_BLEND = 0.1;
+export const CHUNK_SPLASH_GROUP_INITIAL_BLEND = 0;
+export const CHUNK_SPLASH_GROUP_FINAL_BLEND = 0;
 
 // Sphere 1 (additive)
 export const CHUNK_SPLASH_SPHERE1_INITIAL_RADIUS = 0.2;
