@@ -10,7 +10,6 @@ import {
   MELT_BLEND_START,
   MELT_BLEND_END
 } from './melt-constants.js';
-import { setFaceExpression, updateFacePosition } from './face.js';
 
 function lerp(a, b, t) {
   return a + (b - a) * t;
@@ -36,9 +35,6 @@ export function updateMeltingEnemies(currentTime) {
       });
       
       if (!enemy.marshmallow.noiseOffset) enemy.marshmallow.noiseOffset = { x: 0, y: 0, z: 0 };
-      
-      // Set dead expression when melting starts
-      setFaceExpression(enemy, 'dead');
     }
     
     // Smooth easing
@@ -60,9 +56,6 @@ export function updateMeltingEnemies(currentTime) {
     enemy.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
     
     enemy.marshmallow.noiseOffset.y += MELT_NOISE_SPEED * (1.0 / 60.0);
-    
-    // Update face position to follow marshmallow
-    updateFacePosition(enemy);
   }
   
   for (const enemy of toRemove) {

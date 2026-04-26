@@ -256,16 +256,10 @@ function rebuildObjectList() {
   if (gameState.boss) {
     gameState.objects.push(gameState.boss.marshmallow);
     gameState.objects.push(...gameState.boss.holes);
-    if (gameState.boss.face) {
-      gameState.objects.push(...gameState.boss.face);
-    }
   }
   for (const melting of gameState.meltingEnemies) {
     gameState.objects.push(melting.marshmallow);
     gameState.objects.push(...melting.holes);
-    if (melting.face) {
-      gameState.objects.push(...melting.face);
-    }
   }
   gameState.objects.push(...activeFX);
 }

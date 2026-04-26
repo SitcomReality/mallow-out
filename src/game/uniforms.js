@@ -52,7 +52,7 @@ export function updateUniforms(uniforms, time) {
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
     
     // Pass noise parameters
-    uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, 0, 0);
+    uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, obj.expression || 0, 0);
     const nOffset = obj.noiseOffset || { x: 0, y: 0, z: 0 };
     uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
   });

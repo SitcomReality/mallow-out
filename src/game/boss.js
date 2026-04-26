@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT } from './constants.js';
 import { BOSS_BASE_HEALTH, BOSS_HEALTH_PER_WAVE, BOSS_SIZE_BASE, BOSS_SIZE_PER_WAVE } from './wave-constants.js';
-import { createFace, setFaceExpression } from './face.js';
+import { EXPRESSION_DEFAULT_EYES } from './face-constants.js';
 
 let nextId = 1;
 
@@ -36,6 +36,7 @@ export function createBoss(wave) {
     operation: 'union',
     blendRadius: 0.1,
     parentId: null,
+    expression: EXPRESSION_DEFAULT_EYES,
   };
   
   const boss = {
@@ -47,28 +48,13 @@ export function createBoss(wave) {
     wave: wave,
     isBoss: true,
     id: bossId,
-    face: null,
   };
-  
-  // Add face with neutral expression
-  boss.face = createFace(marshmallow, 'neutral');
   
   return boss;
 }
 
 export function damageBoss(boss, damage) {
   boss.currentHealth = Math.max(0, boss.currentHealth - damage);
-  
-  // Update expression based on health
-  const healthPercent = boss.currentHealth / boss.maxHealth;
-  if (boss.currentHealth <= 0) {
-    // Dead - will be set when melting starts
-  } else if (healthPercent < 0.3) {
-    setFaceExpression(boss, 'hurt');
-  } else if (healthPercent < 0.6) {
-    setFaceExpression(boss, 'angry');
-  }
-  
   return boss.currentHealth <= 0;
 }
 

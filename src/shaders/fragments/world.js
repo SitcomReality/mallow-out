@@ -133,6 +133,17 @@ vec4 map(vec3 p) {
     vec3 col = uObjData3[i].xyz;
     float op = uObjData0[i].y;
     float blend = uObjData0[i].z;
+    
+    // Apply expression textures without adding to CSG limits
+    float expression = uObjData5[i].z;
+    if (expression > 0.5) {
+      vec3 localP = p - uObjData1[i].xyz;
+      vec3 rot = uObjData4[i].xyz;
+      localP.yz *= rot2(-rot.x);
+      localP.xz *= rot2(rot.y);
+      localP.xy *= rot2(-rot.z);
+      col = getFaceColor(localP, uObjData2[i].xyz, col, expression);
+    }
 
     if (gid != lastGid) {
       // Close existing group if it was active

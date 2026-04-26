@@ -67,7 +67,7 @@ export function flattenHierarchyForRender(uniforms) {
     uniforms.uObjData4.value[i].set(obj.rotation.x, obj.rotation.y, obj.rotation.z, 0);
     const color = new THREE.Color(obj.color);
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
-    uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, 0, 0);
+    uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, obj.expression || 0, 0);
     const no = obj.noiseOffset || { x: 0, y: 0, z: 0 };
     const charCode = obj.type === 'text' ? (obj.textChar || 'A').charCodeAt(0) : 0;
     uniforms.uObjData6.value[i].set(no.x, no.y, no.z, charCode);

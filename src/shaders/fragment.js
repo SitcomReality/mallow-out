@@ -1,11 +1,13 @@
 import { common } from './fragments/common.js';
 import { sdf } from './fragments/sdf.js';
+import { face } from './fragments/face.js';
 import { world } from './fragments/world.js';
 import { lighting } from './fragments/lighting.js';
 
 export const fragmentShader = `
 ${common}
 ${sdf}
+${face}
 ${world}
 ${lighting}
 
