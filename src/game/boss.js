@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT } from './constants.js';
 import { BOSS_BASE_HEALTH, BOSS_HEALTH_PER_WAVE, BOSS_SIZE_BASE, BOSS_SIZE_PER_WAVE } from './wave-constants.js';
-import { createFaceFeatures, getExpressionForHealth, updateFaceExpression } from './face.js';
-import { MATERIAL_BODY } from './face-constants.js';
+import { createFace, setFaceExpression } from './face.js';
 
 let nextId = 1;
 
@@ -37,24 +36,22 @@ export function createBoss(wave) {
     operation: 'union',
     blendRadius: 0.1,
     parentId: null,
-    materialId: MATERIAL_BODY,
   };
   
   const boss = {
     marshmallow,
     holes: [],
-    faceFeatures: [],
     hitCount: 0,
     maxHealth: BOSS_BASE_HEALTH + (wave - 1) * BOSS_HEALTH_PER_WAVE,
     currentHealth: BOSS_BASE_HEALTH + (wave - 1) * BOSS_HEALTH_PER_WAVE,
     wave: wave,
     isBoss: true,
     id: bossId,
-    currentExpression: 'happy',
+    face: null,
   };
   
-  // Create initial face
-  boss.faceFeatures = createFaceFeatures(boss, boss.currentExpression);
+  // Add face with neutral expression
+  boss.face = createFace(marshmallow, 'neutral');
   
   return boss;
 }
@@ -64,10 +61,12 @@ export function damageBoss(boss, damage) {
   
   // Update expression based on health
   const healthPercent = boss.currentHealth / boss.maxHealth;
-  const newExpression = getExpressionForHealth(healthPercent);
-  if (newExpression !== boss.currentExpression) {
-    boss.currentExpression = newExpression;
-    updateFaceExpression(boss, newExpression);
+  if (boss.currentHealth <= 0) {
+    // Dead - will be set when melting starts
+  } else if (healthPercent < 0.3) {
+    setFaceExpression(boss, 'hurt');
+  } else if (healthPercent < 0.6) {
+    setFaceExpression(boss, 'angry');
   }
   
   return boss.currentHealth <= 0;

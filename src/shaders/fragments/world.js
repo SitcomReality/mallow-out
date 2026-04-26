@@ -87,7 +87,7 @@ float getObjectDist(vec3 p, int idx) {
   return d;
 }
 
-vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend, float matId) {
+vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
   if (op < 0.5) {
     if (blend > 0.01) {
       float h = clamp(0.5 + 0.5 * (res.x - d) / blend, 0.0, 1.0);
@@ -106,8 +106,7 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend, float matId) {
     } else {
       h = (-d > res.x) ? 1.0 : 0.0;
     }
-    // For subtraction, use the subtracting object's material/color when inside the hole
-    vec3 newCol = (h > 0.5 && matId > 0.5) ? col : res.yzw;
+    vec3 newCol = mix(res.yzw, col, h);
     return vec4(newD, newCol);
   } else {
     float oldD = res.x;
@@ -134,7 +133,6 @@ vec4 map(vec3 p) {
     vec3 col = uObjData3[i].xyz;
     float op = uObjData0[i].y;
     float blend = uObjData0[i].z;
-    float matId = uObjData6[i].w;
 
     if (gid != lastGid) {
       // Close existing group if it was active
@@ -146,7 +144,7 @@ vec4 map(vec3 p) {
           worldRes = groupRes;
           worldFirst = false;
         } else {
-          worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend, 0.0);
+          worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
         }
       }
       
@@ -160,19 +158,19 @@ vec4 map(vec3 p) {
           worldRes = vec4(d, col);
           worldFirst = false;
         } else {
-          worldRes = blendOp(worldRes, d, col, op, blend, matId);
+          worldRes = blendOp(worldRes, d, col, op, blend);
         }
       }
     } else {
       // Continue same state (group or no group)
       if (gid > 0.5) {
-        groupRes = blendOp(groupRes, d, col, op, blend, matId);
+        groupRes = blendOp(groupRes, d, col, op, blend);
       } else {
         if (worldFirst) {
           worldRes = vec4(d, col);
           worldFirst = false;
         } else {
-          worldRes = blendOp(worldRes, d, col, op, blend, matId);
+          worldRes = blendOp(worldRes, d, col, op, blend);
         }
       }
     }
@@ -186,7 +184,7 @@ vec4 map(vec3 p) {
     if (worldFirst) {
       worldRes = groupRes;
     } else {
-      worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend, 0.0);
+      worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
     }
   }
   
@@ -216,7 +214,7 @@ float mapSelected(vec3 p) {
           groupRes = vec4(d, 0.0, 0.0, 0.0);
           groupFirst = false;
         } else {
-          groupRes = blendOp(groupRes, d, vec3(0.0), op, blend, 0.0);
+          groupRes = blendOp(groupRes, d, vec3(0.0), op, blend);
         }
       }
     }

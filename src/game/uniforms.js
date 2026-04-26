@@ -43,7 +43,7 @@ export function updateUniforms(uniforms, time) {
       typeMap[obj.type] || 0,
       opMap[obj.operation] || 0,
       obj.blendRadius || 0,
-      obj.materialId || 0
+      0 // No groups for now
     );
     uniforms.uObjData1.value[i].set(obj.position.x, obj.position.y, obj.position.z, 0);
     uniforms.uObjData2.value[i].set(obj.scale.x, obj.scale.y, obj.scale.z, 0);
@@ -54,7 +54,7 @@ export function updateUniforms(uniforms, time) {
     // Pass noise parameters
     uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, 0, 0);
     const nOffset = obj.noiseOffset || { x: 0, y: 0, z: 0 };
-    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, obj.materialId || 0);
+    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
   });
   
   // Marsh sky and floor

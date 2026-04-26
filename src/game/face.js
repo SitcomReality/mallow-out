@@ -1,126 +1,226 @@
+import * as THREE from 'three';
 import {
-  EYE_RADIUS, EYE_SPACING, EYE_HEIGHT, EYE_DEPTH,
-  EYEBROW_WIDTH, EYEBROW_LENGTH, EYEBROW_HEIGHT, EYEBROW_DEPTH,
-  MOUTH_RADIUS, MOUTH_WIDTH, MOUTH_HEIGHT, MOUTH_DEPTH,
-  EXPRESSION_HAPPY, EXPRESSION_CONCERNED, EXPRESSION_HURT, EXPRESSION_DEFEATED,
-  EYEBROW_ANGLES, MOUTH_ARCS, EYE_SCALES,
-  MATERIAL_EYE, MATERIAL_EYEBROW, MATERIAL_MOUTH
+  FACE_EYE_SPACING,
+  FACE_EYE_Y_OFFSET,
+  FACE_EYE_SIZE,
+  FACE_EYEBROW_SPACING,
+  FACE_EYEBROW_Y_OFFSET,
+  FACE_EYEBROW_SIZE,
+  FACE_DEPTH_OFFSET,
+  EXPRESSIONS
 } from './face-constants.js';
 
-let nextFaceId = 50000;
+let nextFaceId = 20000;
 
-export function getExpressionForHealth(healthPercent) {
-  if (healthPercent > 0.75) return EXPRESSION_HAPPY;
-  if (healthPercent > 0.5) return EXPRESSION_CONCERNED;
-  if (healthPercent > 0.25) return EXPRESSION_HURT;
-  return EXPRESSION_DEFEATED;
+/**
+ * Creates facial features for a marshmallow.
+ * Returns an array of text objects for eyes and eyebrows.
+ */
+export function createFace(marshmallow, expression = 'neutral') {
+  const expr = EXPRESSIONS[expression];
+  const center = new THREE.Vector3(
+    marshmallow.position.x,
+    marshmallow.position.y,
+    marshmallow.position.z
+  );
+  
+  // Get marshmallow's orientation
+  const euler = new THREE.Euler(
+    marshmallow.rotation.x,
+    marshmallow.rotation.y,
+    marshmallow.rotation.z
+  );
+  const q = new THREE.Quaternion().setFromEuler(euler);
+  
+  // Local forward (where the face looks) - marshmallow's Z axis in world space
+  const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
+  // Local right
+  const right = new THREE.Vector3(1, 0, 0).applyQuaternion(q);
+  // Local up
+  const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+  
+  // Position features on the surface
+  const faceOffset = marshmallow.scale.x + FACE_DEPTH_OFFSET;
+  const faceCenter = center.clone().add(forward.clone().multiplyScalar(faceOffset));
+  
+  // Create eyes
+  const leftEyePos = faceCenter.clone()
+    .add(right.clone().multiplyScalar(-FACE_EYE_SPACING))
+    .add(up.clone().multiplyScalar(FACE_EYE_Y_OFFSET));
+  
+  const rightEyePos = faceCenter.clone()
+    .add(right.clone().multiplyScalar(FACE_EYE_SPACING))
+    .add(up.clone().multiplyScalar(FACE_EYE_Y_OFFSET));
+  
+  // Create eyebrows
+  const leftBrowPos = faceCenter.clone()
+    .add(right.clone().multiplyScalar(-FACE_EYEBROW_SPACING))
+    .add(up.clone().multiplyScalar(FACE_EYEBROW_Y_OFFSET));
+  
+  const rightBrowPos = faceCenter.clone()
+    .add(right.clone().multiplyScalar(FACE_EYEBROW_SPACING))
+    .add(up.clone().multiplyScalar(FACE_EYEBROW_Y_OFFSET));
+  
+  const faceObjects = [];
+  
+  // Left eye
+  faceObjects.push({
+    id: nextFaceId++,
+    type: 'text',
+    textChar: expr.eyeChar,
+    position: { x: leftEyePos.x, y: leftEyePos.y, z: leftEyePos.z },
+    rotation: { x: marshmallow.rotation.x, y: marshmallow.rotation.y, z: marshmallow.rotation.z },
+    scale: { x: FACE_EYE_SIZE, y: FACE_EYE_SIZE, z: 0.05 },
+    color: '#000000',
+    operation: 'union',
+    blendRadius: 0,
+    isFaceFeature: true,
+    featureType: 'leftEye'
+  });
+  
+  // Right eye
+  faceObjects.push({
+    id: nextFaceId++,
+    type: 'text',
+    textChar: expr.eyeChar,
+    position: { x: rightEyePos.x, y: rightEyePos.y, z: rightEyePos.z },
+    rotation: { x: marshmallow.rotation.x, y: marshmallow.rotation.y, z: marshmallow.rotation.z },
+    scale: { x: FACE_EYE_SIZE, y: FACE_EYE_SIZE, z: 0.05 },
+    color: '#000000',
+    operation: 'union',
+    blendRadius: 0,
+    isFaceFeature: true,
+    featureType: 'rightEye'
+  });
+  
+  // Left eyebrow
+  faceObjects.push({
+    id: nextFaceId++,
+    type: 'text',
+    textChar: expr.leftEyebrowChar,
+    position: { x: leftBrowPos.x, y: leftBrowPos.y, z: leftBrowPos.z },
+    rotation: { 
+      x: marshmallow.rotation.x, 
+      y: marshmallow.rotation.y, 
+      z: marshmallow.rotation.z + expr.leftEyebrowRotation 
+    },
+    scale: { x: FACE_EYEBROW_SIZE, y: FACE_EYEBROW_SIZE, z: 0.05 },
+    color: '#000000',
+    operation: 'union',
+    blendRadius: 0,
+    isFaceFeature: true,
+    featureType: 'leftEyebrow'
+  });
+  
+  // Right eyebrow
+  faceObjects.push({
+    id: nextFaceId++,
+    type: 'text',
+    textChar: expr.rightEyebrowChar,
+    position: { x: rightBrowPos.x, y: rightBrowPos.y, z: rightBrowPos.z },
+    rotation: { 
+      x: marshmallow.rotation.x, 
+      y: marshmallow.rotation.y, 
+      z: marshmallow.rotation.z + expr.rightEyebrowRotation 
+    },
+    scale: { x: FACE_EYEBROW_SIZE, y: FACE_EYEBROW_SIZE, z: 0.05 },
+    color: '#000000',
+    operation: 'union',
+    blendRadius: 0,
+    isFaceFeature: true,
+    featureType: 'rightEyebrow'
+  });
+  
+  return faceObjects;
 }
 
-export function createFaceFeatures(boss, expression = EXPRESSION_HAPPY) {
-  const features = [];
-  const scale = boss.marshmallow.scale.x; // Use radius as base scale
-  const pos = boss.marshmallow.position;
-  const rot = boss.marshmallow.rotation;
+/**
+ * Updates face expression by recreating face objects
+ */
+export function setFaceExpression(enemy, expression) {
+  // Remove old face
+  if (enemy.face) {
+    enemy.face = null;
+  }
   
-  // Eyes
-  const eyeScale = EYE_SCALES[expression];
-  const leftEye = {
-    id: nextFaceId++,
-    type: 'sphere',
-    position: { 
-      x: pos.x - EYE_SPACING * scale, 
-      y: pos.y + EYE_HEIGHT * scale, 
-      z: pos.z + EYE_DEPTH * scale 
-    },
-    rotation: { x: rot.x, y: rot.y, z: rot.z },
-    scale: { x: EYE_RADIUS * scale * eyeScale, y: EYE_RADIUS * scale * eyeScale, z: EYE_RADIUS * scale * eyeScale },
-    color: '#000000',
-    operation: 'subtract',
-    blendRadius: 0.02,
-    materialId: MATERIAL_EYE,
-    isFaceFeature: true,
-  };
-  
-  const rightEye = {
-    id: nextFaceId++,
-    type: 'sphere',
-    position: { 
-      x: pos.x + EYE_SPACING * scale, 
-      y: pos.y + EYE_HEIGHT * scale, 
-      z: pos.z + EYE_DEPTH * scale 
-    },
-    rotation: { x: rot.x, y: rot.y, z: rot.z },
-    scale: { x: EYE_RADIUS * scale * eyeScale, y: EYE_RADIUS * scale * eyeScale, z: EYE_RADIUS * scale * eyeScale },
-    color: '#000000',
-    operation: 'subtract',
-    blendRadius: 0.02,
-    materialId: MATERIAL_EYE,
-    isFaceFeature: true,
-  };
-  
-  // Eyebrows
-  const angles = EYEBROW_ANGLES[expression];
-  const leftBrow = {
-    id: nextFaceId++,
-    type: 'cylinder',
-    position: { 
-      x: pos.x - EYE_SPACING * scale, 
-      y: pos.y + EYEBROW_HEIGHT * scale, 
-      z: pos.z + EYEBROW_DEPTH * scale 
-    },
-    rotation: { x: rot.x, y: rot.y, z: rot.z + angles.left },
-    scale: { x: EYEBROW_WIDTH * scale, y: EYEBROW_LENGTH * scale / 2, z: 0 },
-    color: '#000000',
-    operation: 'subtract',
-    blendRadius: 0.02,
-    materialId: MATERIAL_EYEBROW,
-    isFaceFeature: true,
-  };
-  
-  const rightBrow = {
-    id: nextFaceId++,
-    type: 'cylinder',
-    position: { 
-      x: pos.x + EYE_SPACING * scale, 
-      y: pos.y + EYEBROW_HEIGHT * scale, 
-      z: pos.z + EYEBROW_DEPTH * scale 
-    },
-    rotation: { x: rot.x, y: rot.y, z: rot.z + angles.right },
-    scale: { x: EYEBROW_WIDTH * scale, y: EYEBROW_LENGTH * scale / 2, z: 0 },
-    color: '#000000',
-    operation: 'subtract',
-    blendRadius: 0.02,
-    materialId: MATERIAL_EYEBROW,
-    isFaceFeature: true,
-  };
-  
-  // Mouth (torus for smile/frown arc)
-  const mouthArc = MOUTH_ARCS[expression];
-  const mouth = {
-    id: nextFaceId++,
-    type: 'torus',
-    position: { 
-      x: pos.x, 
-      y: pos.y + MOUTH_HEIGHT * scale + mouthArc * scale, 
-      z: pos.z + MOUTH_DEPTH * scale 
-    },
-    rotation: { x: rot.x, y: rot.y, z: rot.z },
-    scale: { x: MOUTH_RADIUS * scale, y: MOUTH_WIDTH * scale, z: 0 },
-    color: '#000000',
-    operation: 'subtract',
-    blendRadius: 0.03,
-    materialId: MATERIAL_MOUTH,
-    isFaceFeature: true,
-  };
-  
-  features.push(leftEye, rightEye, leftBrow, rightBrow, mouth);
-  return features;
+  // Create new face with expression
+  enemy.face = createFace(enemy.marshmallow, expression);
 }
 
-export function updateFaceExpression(boss, expression) {
-  // Remove old face features
-  boss.faceFeatures = boss.faceFeatures || [];
+/**
+ * Updates face position to follow marshmallow (for melting)
+ */
+export function updateFacePosition(enemy) {
+  if (!enemy.face) return;
   
-  // Generate new face with updated expression
-  boss.faceFeatures = createFaceFeatures(boss, expression);
+  const marshmallow = enemy.marshmallow;
+  const center = new THREE.Vector3(
+    marshmallow.position.x,
+    marshmallow.position.y,
+    marshmallow.position.z
+  );
+  
+  const euler = new THREE.Euler(
+    marshmallow.rotation.x,
+    marshmallow.rotation.y,
+    marshmallow.rotation.z
+  );
+  const q = new THREE.Quaternion().setFromEuler(euler);
+  
+  const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(q);
+  const right = new THREE.Vector3(1, 0, 0).applyQuaternion(q);
+  const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+  
+  const faceOffset = marshmallow.scale.x + FACE_DEPTH_OFFSET;
+  const faceCenter = center.clone().add(forward.clone().multiplyScalar(faceOffset));
+  
+  // Update positions
+  enemy.face.forEach(feature => {
+    if (feature.featureType === 'leftEye') {
+      const pos = faceCenter.clone()
+        .add(right.clone().multiplyScalar(-FACE_EYE_SPACING))
+        .add(up.clone().multiplyScalar(FACE_EYE_Y_OFFSET));
+      feature.position.x = pos.x;
+      feature.position.y = pos.y;
+      feature.position.z = pos.z;
+    } else if (feature.featureType === 'rightEye') {
+      const pos = faceCenter.clone()
+        .add(right.clone().multiplyScalar(FACE_EYE_SPACING))
+        .add(up.clone().multiplyScalar(FACE_EYE_Y_OFFSET));
+      feature.position.x = pos.x;
+      feature.position.y = pos.y;
+      feature.position.z = pos.z;
+    } else if (feature.featureType === 'leftEyebrow') {
+      const pos = faceCenter.clone()
+        .add(right.clone().multiplyScalar(-FACE_EYEBROW_SPACING))
+        .add(up.clone().multiplyScalar(FACE_EYEBROW_Y_OFFSET));
+      feature.position.x = pos.x;
+      feature.position.y = pos.y;
+      feature.position.z = pos.z;
+    } else if (feature.featureType === 'rightEyebrow') {
+      const pos = faceCenter.clone()
+        .add(right.clone().multiplyScalar(FACE_EYEBROW_SPACING))
+        .add(up.clone().multiplyScalar(FACE_EYEBROW_Y_OFFSET));
+      feature.position.x = pos.x;
+      feature.position.y = pos.y;
+      feature.position.z = pos.z;
+    }
+    
+    // Update rotation to match marshmallow
+    feature.rotation.x = marshmallow.rotation.x;
+    feature.rotation.y = marshmallow.rotation.y;
+    // Keep eyebrow rotation offsets
+    if (feature.featureType.includes('Eyebrow')) {
+      const expr = Object.values(EXPRESSIONS).find(e => 
+        (feature.featureType === 'leftEyebrow' && e.leftEyebrowChar === feature.textChar) ||
+        (feature.featureType === 'rightEyebrow' && e.rightEyebrowChar === feature.textChar)
+      );
+      if (expr) {
+        feature.rotation.z = marshmallow.rotation.z + 
+          (feature.featureType === 'leftEyebrow' ? expr.leftEyebrowRotation : expr.rightEyebrowRotation);
+      }
+    } else {
+      feature.rotation.z = marshmallow.rotation.z;
+    }
+  });
 }
