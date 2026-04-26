@@ -83,20 +83,32 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
 }
 
 export function addChunkToEnemy(enemy, hitPoint) {
-  // Calculate cylinder surface normal at intersection point
-  const localP = hitPoint.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z));
+  // Calculate cylinder surface normal at intersection point in world-space.
+  // We compute the vector from the marshmallow center to the hit point, project
+  // it onto the marshmallow's local axis (which may be rotated), and decide if
+  // the hit is on a cap (use axis direction) or on the side (use radial).
+  const center = new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z);
   const euler = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
-  const localToWorld = new THREE.Quaternion().setFromEuler(euler);
-  const worldToLocal = localToWorld.clone().invert();
-  localP.applyQuaternion(worldToLocal);
-  
-  let localNormal = new THREE.Vector3();
-  if (Math.abs(localP.y) >= enemy.marshmallow.scale.y - 0.01) {
-    localNormal.set(0, Math.sign(localP.y), 0); // Flat cap normal
+  const q = new THREE.Quaternion().setFromEuler(euler);
+  const axisWorld = new THREE.Vector3(0, 1, 0).applyQuaternion(q); // marshmallow local 'up' in world space
+
+  const toHit = hitPoint.clone().sub(center);
+  const proj = toHit.dot(axisWorld);
+
+  let worldNormal = new THREE.Vector3();
+  // If the hit is on the caps (near top/bottom), normal is along the axis direction
+  if (Math.abs(proj) >= enemy.marshmallow.scale.y - 0.01) {
+    worldNormal.copy(axisWorld).multiplyScalar(Math.sign(proj));
   } else {
-    localNormal.set(localP.x, 0, localP.z).normalize(); // Radial cylinder surface normal
+    // Side hit: radial normal is the component perpendicular to the axis
+    const radial = toHit.clone().sub(axisWorld.clone().multiplyScalar(proj));
+    if (radial.lengthSq() < 1e-6) {
+      // Fallback to axis if numerical issues occur
+      worldNormal.copy(axisWorld).multiplyScalar(1.0);
+    } else {
+      worldNormal.copy(radial).normalize();
+    }
   }
-  const worldNormal = localNormal.applyQuaternion(localToWorld).normalize();
 
   const chunk = {
     id: nextId++,
