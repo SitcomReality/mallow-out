@@ -1,6 +1,7 @@
 import { gameState } from './state.js';
 import { 
   REPAIR_DURATION, 
+  REPAIR_DELAY,
   CHUNK_REPAIR_SPEED, 
   CHUNK_REPAIR_NOISE_SPEED, 
   CHUNK_REPAIR_INITIAL_BLEND, 
@@ -19,7 +20,11 @@ export function updateRepairs(currentTime, delta) {
       if (!hole.repairData) continue;
       
       const elapsed = currentTime - hole.repairData.startTime;
-      const t = Math.min(elapsed / REPAIR_DURATION, 1.0);
+      
+      // Delay repair start
+      if (elapsed < REPAIR_DELAY) continue;
+      
+      const t = Math.min((elapsed - REPAIR_DELAY) / REPAIR_DURATION, 1.0);
       
       if (t >= 1.0) {
         toRemove.push(hole);
