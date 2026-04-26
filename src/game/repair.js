@@ -2,9 +2,9 @@ import { gameState } from './state.js';
 import { REPAIR_DURATION, CHUNK_REPAIR_SPEED, CHUNK_REPAIR_NOISE_SPEED } from './repair-constants.js';
 
 export function updateRepairs(currentTime, delta) {
+  // Only repair the active boss; melting marshmallows stop repairing
   const allEnemies = [];
   if (gameState.boss) allEnemies.push(gameState.boss);
-  allEnemies.push(...gameState.meltingEnemies);
 
   for (const enemy of allEnemies) {
     const toRemove = [];
@@ -29,6 +29,10 @@ export function updateRepairs(currentTime, delta) {
         hole.position.x += hole.repairData.normal.x * speed;
         hole.position.y += hole.repairData.normal.y * speed;
         hole.position.z += hole.repairData.normal.z * speed;
+
+        // Shrink the chunk as it moves away
+        const scale = (hole.repairData.initialScale || 0.6) * (1.0 - t);
+        hole.scale.x = hole.scale.y = hole.scale.z = scale;
         
         // Animate surface noise to match melting
         if (!hole.noiseOffset) hole.noiseOffset = { x: 0, y: 0, z: 0 };
