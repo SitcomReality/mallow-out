@@ -1,16 +1,3 @@
-// Chunk Splash (Torus) FX
-export const CHUNK_SPLASH_DURATION = 0.2; // seconds
-export const CHUNK_SPLASH_INITIAL_RADIUS = 0.2;
-export const CHUNK_SPLASH_FINAL_RADIUS = 0.6;
-export const CHUNK_SPLASH_TUBE_RADIUS = 0.15;
-export const CHUNK_SPLASH_SPEED = 0.01;
-export const CHUNK_SPLASH_INITIAL_NOISE_AMOUNT = 0.1;
-export const CHUNK_SPLASH_FINAL_NOISE_AMOUNT = 3;
-export const CHUNK_SPLASH_INITIAL_NOISE_SCALE = 1;
-export const CHUNK_SPLASH_FINAL_NOISE_SCALE = 5;
-export const CHUNK_SPLASH_INITIAL_BLEND = 0.3;
-export const CHUNK_SPLASH_FINAL_BLEND = 0.02;
-
 // Hole Spray (Sphere) FX
 export const HOLE_SPRAY_DURATION = 0.4; // seconds
 export const HOLE_SPRAY_INITIAL_RADIUS = 0.25;

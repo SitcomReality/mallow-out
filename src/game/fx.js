@@ -1,16 +1,25 @@
 import * as THREE from 'three';
 import {
   CHUNK_SPLASH_DURATION,
-  CHUNK_SPLASH_INITIAL_RADIUS,
-  CHUNK_SPLASH_FINAL_RADIUS,
-  CHUNK_SPLASH_TUBE_RADIUS,
   CHUNK_SPLASH_SPEED,
-  CHUNK_SPLASH_INITIAL_NOISE_AMOUNT,
-  CHUNK_SPLASH_FINAL_NOISE_AMOUNT,
-  CHUNK_SPLASH_INITIAL_NOISE_SCALE,
-  CHUNK_SPLASH_FINAL_NOISE_SCALE,
-  CHUNK_SPLASH_INITIAL_BLEND,
-  CHUNK_SPLASH_FINAL_BLEND,
+  CHUNK_SPLASH_GROUP_INITIAL_BLEND,
+  CHUNK_SPLASH_GROUP_FINAL_BLEND,
+  CHUNK_SPLASH_SPHERE1_INITIAL_RADIUS,
+  CHUNK_SPLASH_SPHERE1_FINAL_RADIUS,
+  CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_AMOUNT,
+  CHUNK_SPLASH_SPHERE1_FINAL_NOISE_AMOUNT,
+  CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_SCALE,
+  CHUNK_SPLASH_SPHERE1_FINAL_NOISE_SCALE,
+  CHUNK_SPLASH_SPHERE2_INITIAL_RADIUS,
+  CHUNK_SPLASH_SPHERE2_FINAL_RADIUS,
+  CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_AMOUNT,
+  CHUNK_SPLASH_SPHERE2_FINAL_NOISE_AMOUNT,
+  CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_SCALE,
+  CHUNK_SPLASH_SPHERE2_FINAL_NOISE_SCALE,
+  CHUNK_SPLASH_SPHERE2_INITIAL_BLEND,
+  CHUNK_SPLASH_SPHERE2_FINAL_BLEND,
+} from './chunk-splash-constants.js';
+import {
   HOLE_SPRAY_DURATION,
   HOLE_SPRAY_INITIAL_RADIUS,
   HOLE_SPRAY_FINAL_RADIUS,
@@ -34,34 +43,83 @@ function lerp(a, b, t) {
 }
 
 export function createChunkSplashFX(position, direction, rotation) {
-  const id = nextFxId++;
+  const groupId = nextFxId++;
+  const sphere1Id = nextFxId++;
+  const sphere2Id = nextFxId++;
   
-  const fx = {
-    id,
-    type: 'torus',
+  // Group container
+  const group = {
+    id: groupId,
+    type: 'group',
     position: { x: position.x, y: position.y, z: position.z },
-    // Copy rotation from parent (enemy) to ensure it's "upright" relative to the body
-    rotation: rotation ? { ...rotation } : { x: 0, y: 0, z: 0 },
-    scale: { x: CHUNK_SPLASH_INITIAL_RADIUS, y: CHUNK_SPLASH_TUBE_RADIUS, z: 0 },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 1, y: 1, z: 1 },
     color: '#8B0000',
     operation: 'union',
-    blendRadius: CHUNK_SPLASH_INITIAL_BLEND,
-    noiseAmount: CHUNK_SPLASH_INITIAL_NOISE_AMOUNT,
-    noiseScale: CHUNK_SPLASH_INITIAL_NOISE_SCALE,
+    blendRadius: CHUNK_SPLASH_GROUP_INITIAL_BLEND,
+    noiseAmount: 0,
+    noiseScale: 1,
     noiseOffset: { x: 0, y: 0, z: 0 },
     
     fxData: {
-      type: 'chunk_splash',
+      type: 'chunk_splash_group',
       startTime: performance.now() * 0.001,
       duration: CHUNK_SPLASH_DURATION,
-      // Velocity is inverted so the splash "ejects" back towards the shooter
       velocity: direction.clone().multiplyScalar(-CHUNK_SPLASH_SPEED),
       startPos: position.clone(),
     }
   };
   
-  activeFX.push(fx);
-  return fx;
+  // Sphere 1 (additive)
+  const sphere1 = {
+    id: sphere1Id,
+    type: 'sphere',
+    position: { x: position.x, y: position.y, z: position.z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: CHUNK_SPLASH_SPHERE1_INITIAL_RADIUS, y: CHUNK_SPLASH_SPHERE1_INITIAL_RADIUS, z: CHUNK_SPLASH_SPHERE1_INITIAL_RADIUS },
+    color: '#8B0000',
+    operation: 'union',
+    blendRadius: 0,
+    noiseAmount: CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_AMOUNT,
+    noiseScale: CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_SCALE,
+    noiseOffset: { x: 0, y: 0, z: 0 },
+    parentId: groupId,
+    
+    fxData: {
+      type: 'chunk_splash_sphere1',
+      startTime: performance.now() * 0.001,
+      duration: CHUNK_SPLASH_DURATION,
+      velocity: direction.clone().multiplyScalar(-CHUNK_SPLASH_SPEED),
+      startPos: position.clone(),
+    }
+  };
+  
+  // Sphere 2 (subtractive)
+  const sphere2 = {
+    id: sphere2Id,
+    type: 'sphere',
+    position: { x: position.x, y: position.y, z: position.z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: CHUNK_SPLASH_SPHERE2_INITIAL_RADIUS, y: CHUNK_SPLASH_SPHERE2_INITIAL_RADIUS, z: CHUNK_SPLASH_SPHERE2_INITIAL_RADIUS },
+    color: '#8B0000',
+    operation: 'subtract',
+    blendRadius: CHUNK_SPLASH_SPHERE2_INITIAL_BLEND,
+    noiseAmount: CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_AMOUNT,
+    noiseScale: CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_SCALE,
+    noiseOffset: { x: 0, y: 0, z: 0 },
+    parentId: groupId,
+    
+    fxData: {
+      type: 'chunk_splash_sphere2',
+      startTime: performance.now() * 0.001,
+      duration: CHUNK_SPLASH_DURATION,
+      velocity: direction.clone().multiplyScalar(-CHUNK_SPLASH_SPEED),
+      startPos: position.clone(),
+    }
+  };
+  
+  activeFX.push(group, sphere1, sphere2);
+  return { group, sphere1, sphere2 };
 }
 
 export function createHoleSprayFX(entryPoint, exitPoint, direction) {
@@ -98,6 +156,8 @@ export function updateFX(currentTime) {
   const toRemove = [];
   
   for (const fx of activeFX) {
+    if (!fx.fxData) continue;
+    
     const elapsed = currentTime - fx.fxData.startTime;
     const t = Math.min(elapsed / fx.fxData.duration, 1.0);
     
@@ -121,19 +181,26 @@ export function updateFX(currentTime) {
     // Check if in dissipation phase (last 20%)
     const dissipateT = t > 0.8 ? (t - 0.8) / 0.2 : 0;
     
-    if (fx.fxData.type === 'chunk_splash') {
-      // Animate torus parameters
-      fx.scale.x = lerp(CHUNK_SPLASH_INITIAL_RADIUS, CHUNK_SPLASH_FINAL_RADIUS, t);
+    if (fx.fxData.type === 'chunk_splash_group') {
+      // Animate group blend
+      fx.blendRadius = lerp(CHUNK_SPLASH_GROUP_INITIAL_BLEND, CHUNK_SPLASH_GROUP_FINAL_BLEND, t);
       
-      if (dissipateT > 0) {
-        fx.noiseAmount = lerp(CHUNK_SPLASH_FINAL_NOISE_AMOUNT, DISSIPATE_NOISE_AMOUNT, dissipateT);
-        fx.noiseScale = lerp(CHUNK_SPLASH_FINAL_NOISE_SCALE, DISSIPATE_NOISE_SCALE, dissipateT);
-      } else {
-        fx.noiseAmount = lerp(CHUNK_SPLASH_INITIAL_NOISE_AMOUNT, CHUNK_SPLASH_FINAL_NOISE_AMOUNT, t);
-        fx.noiseScale = lerp(CHUNK_SPLASH_INITIAL_NOISE_SCALE, CHUNK_SPLASH_FINAL_NOISE_SCALE, t);
-      }
+    } else if (fx.fxData.type === 'chunk_splash_sphere1') {
+      // Animate sphere 1 (additive)
+      const radius = lerp(CHUNK_SPLASH_SPHERE1_INITIAL_RADIUS, CHUNK_SPLASH_SPHERE1_FINAL_RADIUS, t);
+      fx.scale.x = fx.scale.y = fx.scale.z = radius;
       
-      fx.blendRadius = lerp(CHUNK_SPLASH_INITIAL_BLEND, CHUNK_SPLASH_FINAL_BLEND, t);
+      fx.noiseAmount = lerp(CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_AMOUNT, CHUNK_SPLASH_SPHERE1_FINAL_NOISE_AMOUNT, t);
+      fx.noiseScale = lerp(CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_SCALE, CHUNK_SPLASH_SPHERE1_FINAL_NOISE_SCALE, t);
+      
+    } else if (fx.fxData.type === 'chunk_splash_sphere2') {
+      // Animate sphere 2 (subtractive)
+      const radius = lerp(CHUNK_SPLASH_SPHERE2_INITIAL_RADIUS, CHUNK_SPLASH_SPHERE2_FINAL_RADIUS, t);
+      fx.scale.x = fx.scale.y = fx.scale.z = radius;
+      
+      fx.noiseAmount = lerp(CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_AMOUNT, CHUNK_SPLASH_SPHERE2_FINAL_NOISE_AMOUNT, t);
+      fx.noiseScale = lerp(CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_SCALE, CHUNK_SPLASH_SPHERE2_FINAL_NOISE_SCALE, t);
+      fx.blendRadius = lerp(CHUNK_SPLASH_SPHERE2_INITIAL_BLEND, CHUNK_SPLASH_SPHERE2_FINAL_BLEND, t);
       
     } else if (fx.fxData.type === 'hole_spray') {
       // Animate sphere parameters

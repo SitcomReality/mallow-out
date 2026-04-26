@@ -36,7 +36,7 @@ export function updateUniforms(uniforms, time) {
   uniforms.uNumObjects.value = objects.length;
   
   const opMap = { union: 0, subtract: 1, intersect: 2 };
-  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3 };
+  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3, group: 5 };
   
   objects.forEach((obj, i) => {
     uniforms.uObjData0.value[i].set(
