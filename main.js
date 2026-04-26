@@ -13,6 +13,7 @@ import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { activeFX, updateFX, clearAllFX, createChunkSplashFX, createHoleSprayFX } from './src/game/fx.js';
 import { updateMeltingEnemies } from './src/game/melting.js';
+import { updateRepairs } from './src/game/repair.js';
 import { STARTING_WAVE } from './src/game/wave-constants.js';
 
 let isPlaying = false;
@@ -150,6 +151,7 @@ function startGame() {
       updateControls(delta);
       updateFX(time * 0.001);
       updateMeltingEnemies(time * 0.001);
+      updateRepairs(time * 0.001, delta);
       rebuildObjectList();
     }
     

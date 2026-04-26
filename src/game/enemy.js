@@ -70,6 +70,11 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
+    repairData: {
+      type: 'hole',
+      startTime: performance.now() * 0.001,
+      initialRadius: HOLE_RADIUS
+    }
   };
   
   enemy.holes.push(hole);
@@ -78,6 +83,20 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
 }
 
 export function addChunkToEnemy(enemy, hitPoint) {
+  // Calculate cylinder surface normal at intersection point
+  const localP = hitPoint.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z));
+  const euler = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
+  const q = new THREE.Quaternion().setFromEuler(euler);
+  localP.applyQuaternion(q.invert());
+  
+  let localNormal = new THREE.Vector3();
+  if (Math.abs(localP.y) >= enemy.marshmallow.scale.y - 0.01) {
+    localNormal.set(0, Math.sign(localP.y), 0); // Flat cap normal
+  } else {
+    localNormal.set(localP.x, 0, localP.z).normalize(); // Radial cylinder surface normal
+  }
+  const worldNormal = localNormal.applyQuaternion(q).normalize();
+
   const chunk = {
     id: nextId++,
     type: 'sphere',
@@ -91,6 +110,11 @@ export function addChunkToEnemy(enemy, hitPoint) {
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
+    repairData: {
+      type: 'chunk',
+      startTime: performance.now() * 0.001,
+      normal: worldNormal
+    }
   };
   
   enemy.holes.push(chunk);
