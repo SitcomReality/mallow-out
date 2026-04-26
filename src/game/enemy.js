@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT, HOLE_RADIUS, CHUNK_RADIUS } from './constants.js';
 import { EXPRESSION_DEFAULT_EYES } from './face-constants.js';
+import { CHUNK_REPAIR_INITIAL_BLEND } from './repair-constants.js';
 
 let nextId = 1;
 
@@ -121,7 +122,7 @@ export function addChunkToEnemy(enemy, hitPoint) {
     scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
     color: '#8B0000',
     operation: 'subtract',
-    blendRadius: 0.1,
+    blendRadius: CHUNK_REPAIR_INITIAL_BLEND,
     parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,

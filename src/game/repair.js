@@ -1,5 +1,11 @@
 import { gameState } from './state.js';
-import { REPAIR_DURATION, CHUNK_REPAIR_SPEED, CHUNK_REPAIR_NOISE_SPEED } from './repair-constants.js';
+import { 
+  REPAIR_DURATION, 
+  CHUNK_REPAIR_SPEED, 
+  CHUNK_REPAIR_NOISE_SPEED, 
+  CHUNK_REPAIR_INITIAL_BLEND, 
+  CHUNK_REPAIR_FINAL_BLEND 
+} from './repair-constants.js';
 
 export function updateRepairs(currentTime, delta) {
   // Only repair the active boss; melting marshmallows stop repairing
@@ -39,6 +45,9 @@ export function updateRepairs(currentTime, delta) {
         // Shrink the chunk as it moves away
         const scale = (hole.repairData.initialScale || 0.6) * (1.0 - t);
         hole.scale.x = hole.scale.y = hole.scale.z = scale;
+
+        // Sharpen the blend as it repairs
+        hole.blendRadius = CHUNK_REPAIR_INITIAL_BLEND * (1.0 - t) + CHUNK_REPAIR_FINAL_BLEND * t;
         
         // Animate surface noise to match melting
         if (!hole.noiseOffset) hole.noiseOffset = { x: 0, y: 0, z: 0 };
