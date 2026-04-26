@@ -216,7 +216,7 @@ float mapSelected(vec3 p) {
           groupRes = vec4(d, 0.0, 0.0, 0.0);
           groupFirst = false;
         } else {
-          groupRes = blendOp(groupRes, d, vec3(0.0), op, blend);
+          groupRes = blendOp(groupRes, d, vec3(0.0), op, blend, 0.0);
         }
       }
     }
