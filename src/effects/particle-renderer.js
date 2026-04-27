@@ -91,7 +91,8 @@ export class ParticleRenderer {
         cameraUp: { value: new THREE.Vector3() },
       },
       transparent: true,
-      depthTest: true,
+      // Render particles on top of the raymarching quad by disabling depth testing.
+      depthTest: false,
       depthWrite: false,
       blending: THREE.NormalBlending,
     });
