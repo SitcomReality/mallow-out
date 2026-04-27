@@ -31,19 +31,43 @@ export function updateUniforms(uniforms, time) {
   uniforms.uShadowsEnabled.value = settings.shadowsEnabled ? 1 : 0;
   uniforms.uAOEnabled.value = settings.aoEnabled ? 1 : 0;
   
+  const opMap = { union: 0, subtract: 1, intersect: 2 };
+  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3, group: 5 };
+  
+  let nextGid = 1;
+  const groupMap = new Map();
+  
+  // Clear old group data to prevent stale values
+  uniforms.uGroupData.value.forEach(v => v.set(0, 0, 0, 0));
+  
+  // First pass: identify groups and assign their group data
+  gameState.objects.forEach(obj => {
+    if (obj.type === 'group') {
+      if (!groupMap.has(obj.id)) {
+        groupMap.set(obj.id, nextGid++);
+        const gIdx = groupMap.get(obj.id) - 1;
+        if (gIdx < 32) {
+          uniforms.uGroupData.value[gIdx].set(opMap[obj.operation] || 0, obj.blendRadius || 0, 0, 0);
+        }
+      }
+    }
+  });
+
   // Scene objects (limit to 32 max to prevent array out of bounds)
   const objects = gameState.objects.slice(0, 32);
   uniforms.uNumObjects.value = objects.length;
   
-  const opMap = { union: 0, subtract: 1, intersect: 2 };
-  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3, group: 5 };
-  
   objects.forEach((obj, i) => {
+    let gid = 0;
+    if (obj.parentId && groupMap.has(obj.parentId)) {
+      gid = groupMap.get(obj.parentId);
+    }
+
     uniforms.uObjData0.value[i].set(
       typeMap[obj.type] || 0,
       opMap[obj.operation] || 0,
       obj.blendRadius || 0,
-      0 // No groups for now
+      gid
     );
     uniforms.uObjData1.value[i].set(obj.position.x, obj.position.y, obj.position.z, 0);
     uniforms.uObjData2.value[i].set(obj.scale.x, obj.scale.y, obj.scale.z, 0);
