@@ -39,7 +39,7 @@ export class PostProcessor {
     this.renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
       minFilter: THREE.LinearFilter,
       magFilter: THREE.LinearFilter,
-      format: THREE.RGBFormat,
+      format: THREE.RGBAFormat,
     });
     
     // Post-process scene
@@ -65,10 +65,17 @@ export class PostProcessor {
     this.renderTarget.setSize(width, height);
   }
 
-  render(scene, camera) {
+  render(mainScene, mainCamera, effectScene = null, effectCamera = null) {
     // Render scene to texture
     this.renderer.setRenderTarget(this.renderTarget);
-    this.renderer.render(scene, camera);
+    this.renderer.autoClear = true;
+    this.renderer.render(mainScene, mainCamera);
+    
+    // Render effects on top if provided
+    if (effectScene && effectCamera) {
+      this.renderer.autoClear = false;
+      this.renderer.render(effectScene, effectCamera);
+    }
     
     // Render post-process to screen
     this.renderer.setRenderTarget(null);

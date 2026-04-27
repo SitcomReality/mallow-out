@@ -91,8 +91,9 @@ export class ParticleRenderer {
         cameraUp: { value: new THREE.Vector3() },
       },
       transparent: true,
+      depthTest: true,
       depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.NormalBlending,
     });
     
     this.mesh = new THREE.Mesh(geometry, material);
@@ -143,5 +144,9 @@ export class ParticleRenderer {
     
     this.material.uniforms.cameraRight.value.copy(right);
     this.material.uniforms.cameraUp.value.copy(up);
+
+    // Update matrices for RawShaderMaterial
+    this.material.uniforms.projectionMatrix.value.copy(camera.projectionMatrix);
+    this.material.uniforms.viewMatrix.value.copy(camera.matrixWorldInverse);
   }
 }
