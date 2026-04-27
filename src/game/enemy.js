@@ -72,7 +72,11 @@ export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
     parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,
-    noiseOffset: { x: 0, y: 0, z: 0 },
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
     repairData: {
       type: 'hole',
       startTime: performance.now() * 0.001,
@@ -126,7 +130,11 @@ export function addChunkToEnemy(enemy, hitPoint) {
     parentId: null,
     noiseAmount: 0.4,
     noiseScale: 1.0,
-    noiseOffset: { x: 0, y: 0, z: 0 },
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
     repairData: {
       type: 'chunk',
       startTime: performance.now() * 0.001,

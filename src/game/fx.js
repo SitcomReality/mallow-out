@@ -59,7 +59,11 @@ export function createChunkSplashFX(position, direction, rotation) {
     blendRadius: CHUNK_SPLASH_GROUP_INITIAL_BLEND,
     noiseAmount: 0,
     noiseScale: 1,
-    noiseOffset: { x: 0, y: 0, z: 0 },
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
     
     fxData: {
       type: 'chunk_splash_group',
@@ -82,7 +86,11 @@ export function createChunkSplashFX(position, direction, rotation) {
     blendRadius: 0,
     noiseAmount: CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_AMOUNT,
     noiseScale: CHUNK_SPLASH_SPHERE1_INITIAL_NOISE_SCALE,
-    noiseOffset: { x: 0, y: 0, z: 0 },
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
     parentId: groupId,
     
     fxData: {
@@ -106,7 +114,11 @@ export function createChunkSplashFX(position, direction, rotation) {
     blendRadius: CHUNK_SPLASH_SPHERE2_INITIAL_BLEND,
     noiseAmount: CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_AMOUNT,
     noiseScale: CHUNK_SPLASH_SPHERE2_INITIAL_NOISE_SCALE,
-    noiseOffset: { x: 0, y: 0, z: 0 },
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
     parentId: groupId,
     
     fxData: {
@@ -136,7 +148,11 @@ export function createHoleSprayFX(entryPoint, exitPoint, direction) {
     blendRadius: HOLE_SPRAY_INITIAL_BLEND,
     noiseAmount: HOLE_SPRAY_INITIAL_NOISE_AMOUNT,
     noiseScale: HOLE_SPRAY_INITIAL_NOISE_SCALE,
-    noiseOffset: { x: 0, y: 0, z: 0 },
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
     
     fxData: {
       type: 'hole_spray',
