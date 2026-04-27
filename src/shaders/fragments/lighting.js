@@ -73,22 +73,12 @@ struct LightEnv {
 
 LightEnv getLightEnv(float dayTime) {
   LightEnv env;
-  float sunAngle = dayTime * 6.28318 - 1.5708;
-  env.sunDir = normalize(vec3(cos(sunAngle) * 0.7, sin(sunAngle), cos(sunAngle) * 0.3));
-  // Marsh atmosphere - greener, murkier tones
-  vec3 daySun = vec3(1.2, 1.3, 1.0), dayAmbient = vec3(0.2, 0.3, 0.25), daySky = vec3(0.4, 0.55, 0.5), dayFog = vec3(0.5, 0.65, 0.6);
-  vec3 nightSun = vec3(0.1, 0.15, 0.12), nightAmbient = vec3(0.03, 0.06, 0.05), nightSky = vec3(0.02, 0.04, 0.03), nightFog = vec3(0.03, 0.05, 0.04);
-  float sunH = clamp(env.sunDir.y * 2.0, 0.0, 1.0);
-  float nightFactor = 1.0 - sunH;
-  env.sunColor = mix(daySun, nightSun, nightFactor);
-  env.ambientColor = mix(dayAmbient, nightAmbient, nightFactor);
-  env.skyColor = mix(daySky, nightSky, nightFactor);
-  env.fogColor = mix(dayFog, nightFog, nightFactor);
-  env.fogDensity = mix(0.035, 0.05, nightFactor);
-  
-  // Ensure fog color matches the horizon color for a seamless transition
-  env.fogColor = mix(env.fogColor, env.skyColor, 0.5);
-  
+  env.sunDir = uSunDir;
+  env.sunColor = uSunColor;
+  env.ambientColor = uAmbientColor;
+  env.skyColor = uSkyColor;
+  env.fogColor = uFogColor;
+  env.fogDensity = uFogDensity;
   return env;
 }
 `;

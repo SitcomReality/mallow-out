@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
 import { settings, worldState } from '../state.js';
+import { ENV_COLORS, ENV_SETTINGS } from './environment-constants.js';
 
 export function updateUniforms(uniforms, time) {
   const player = gameState.player;
@@ -81,13 +82,39 @@ export function updateUniforms(uniforms, time) {
     uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
   });
   
-  // Marsh sky and floor
-  uniforms.uSkyColor.value.setHex(0x7A9B8E); // Misty green-gray
-  uniforms.uSkyColor2.value.setHex(0x4A6A5C); // Darker marsh tone
-  uniforms.uSkyTextured.value = 1;
+  // Environment calculations
+  const sunAngle = worldState.time * 6.28318 - 1.5708;
+  const sunDir = new THREE.Vector3(
+    Math.cos(sunAngle) * 0.7, 
+    Math.sin(sunAngle), 
+    Math.cos(sunAngle) * ENV_SETTINGS.sunOrbitInclination
+  ).normalize();
+  
+  const sunH = Math.max(0, Math.min(1, sunDir.y * 2.0));
+  const nightFactor = 1.0 - sunH;
+  
+  const cDay = ENV_COLORS.day;
+  const cNight = ENV_COLORS.night;
+  
+  const lerpCol = (target, hex1, hex2, t) => {
+    const c1 = new THREE.Color(hex1);
+    const c2 = new THREE.Color(hex2);
+    target.copy(c1).lerp(c2, t);
+  };
+
+  lerpCol(uniforms.uSunColor.value, cDay.sun, cNight.sun, nightFactor);
+  lerpCol(uniforms.uAmbientColor.value, cDay.ambient, cNight.ambient, nightFactor);
+  lerpCol(uniforms.uSkyColor.value, cDay.sky, cNight.sky, nightFactor);
+  lerpCol(uniforms.uSkyColor2.value, cDay.sky2, cNight.sky2, nightFactor);
+  lerpCol(uniforms.uFogColor.value, cDay.fog, cNight.fog, nightFactor);
+  
+  uniforms.uSunDir.value.copy(sunDir);
+  uniforms.uFogDensity.value = ENV_SETTINGS.dayFogDensity * (1 - nightFactor) + ENV_SETTINGS.nightFogDensity * nightFactor;
+
+  uniforms.uFloorColor.value.setHex(ENV_COLORS.floor);
   uniforms.uFloorEnabled.value = 1;
-  uniforms.uFloorColor.value.setHex(0x5A7A6A); // Murky marsh ground
-  uniforms.uFloorTextured.value = 1;
+  uniforms.uFloorTextured.value = ENV_SETTINGS.floorTextured;
+  uniforms.uSkyTextured.value = ENV_SETTINGS.skyTextured;
   
   // Selection/outline (disabled for now)
   uniforms.uSelectionInfo.value.set(0, 0);

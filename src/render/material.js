@@ -42,6 +42,11 @@ export function createMainMaterial() {
       uFloorEnabled: { value: 1.0 },
       uFloorTextured: { value: 1.0 },
       uFloorColor: { value: new THREE.Color() },
+      uSunDir: { value: new THREE.Vector3() },
+      uSunColor: { value: new THREE.Color() },
+      uAmbientColor: { value: new THREE.Color() },
+      uFogColor: { value: new THREE.Color() },
+      uFogDensity: { value: 0.04 },
     },
     vertexShader,
     fragmentShader
