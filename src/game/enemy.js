@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT, HOLE_RADIUS, CHUNK_RADIUS } from './constants.js';
-import { EXPRESSION_DEFAULT_EYES } from './face-constants.js';
+import { EXPRESSION_DEFAULT } from './face-constants.js';
 import { CHUNK_REPAIR_INITIAL_BLEND } from './repair-constants.js';
 
 let nextId = 1;
@@ -31,7 +31,7 @@ export function createEnemy() {
     operation: 'union',
     blendRadius: 0,
     parentId: null,
-    expression: EXPRESSION_DEFAULT_EYES,
+    expression: EXPRESSION_DEFAULT,
   };
   
   return {

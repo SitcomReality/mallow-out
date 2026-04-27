@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT } from './constants.js';
 import { BOSS_BASE_HEALTH, BOSS_HEALTH_PER_WAVE, BOSS_SIZE_BASE, BOSS_SIZE_PER_WAVE } from './wave-constants.js';
-import { EXPRESSION_DEFAULT_EYES } from './face-constants.js';
+import { EXPRESSION_DEFAULT } from './face-constants.js';
 
 let nextId = 1;
 
@@ -36,7 +36,7 @@ export function createBoss(wave) {
     operation: 'union',
     blendRadius: 0.1,
     parentId: null,
-    expression: EXPRESSION_DEFAULT_EYES,
+    expression: EXPRESSION_DEFAULT,
   };
   
   const boss = {
