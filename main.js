@@ -11,7 +11,7 @@ import { createHUD } from './src/ui/hud.js';
 import { createBossHUD } from './src/ui/boss-hud.js';
 import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
-import { activeFX, updateFX, clearAllFX, createChunkSplashFX, createHoleSprayFX } from './src/game/fx.js';
+import { ParticleSystem } from './src/effects/particles.js';
 import { updateMeltingEnemies } from './src/game/melting.js';
 import { updateRepairs } from './src/game/repair.js';
 import { STARTING_WAVE } from './src/game/wave-constants.js';
@@ -23,6 +23,7 @@ let hud = null;
 let bossHUD = null;
 let upgradeScreen = null;
 let pauseMenu = null;
+let particleSystem = null;
 
 document.getElementById('newGame').addEventListener('click', () => {
   document.getElementById('menu').style.display = 'none';
@@ -53,7 +54,7 @@ function quitToMenu() {
     health: 0,
     splash: 0,
   };
-  clearAllFX();
+  if (particleSystem) particleSystem.clear();
 }
 
 function startGame() {
@@ -62,7 +63,10 @@ function startGame() {
   isPaused = false;
   
   const container = document.getElementById('gameContainer');
-  const { render, uniforms, renderer } = createRenderer(container);
+  const { render, uniforms, renderer, postProcessor } = createRenderer(container);
+  
+  // Initialize particle system
+  particleSystem = new ParticleSystem();
   
   // Initialize UI
   hud = createHUD();
@@ -160,13 +164,13 @@ function startGame() {
       }
 
       updateControls(delta);
-      updateFX(time * 0.001);
+      particleSystem.update(delta);
       updateMeltingEnemies(time * 0.001);
       updateRepairs(time * 0.001, delta);
       rebuildObjectList();
     }
     
-    render(time);
+    render(time, particleSystem);
     requestAnimationFrame(gameLoop);
   }
   
@@ -219,13 +223,20 @@ function shoot() {
     
     if (gameState.currentWeapon === 0) {
       addChunkToEnemy(gameState.boss, result.point);
-      createChunkSplashFX(result.point, direction, gameState.boss.marshmallow.rotation);
+      
+      // Calculate surface normal for blood splatter
+      const center = new THREE.Vector3(
+        gameState.boss.marshmallow.position.x,
+        gameState.boss.marshmallow.position.y,
+        gameState.boss.marshmallow.position.z
+      );
+      const normal = result.point.clone().sub(center).normalize();
+      particleSystem.createBloodSplatter(result.point, normal);
+      
       damage = BASE_DAMAGE_CHUNK + gameState.upgrades.damage;
     } else {
-      const hole = addHoleToEnemy(gameState.boss, result.point, direction);
-      const holeLength = hole.scale.y * 2;
-      const exitPoint = result.point.clone().add(direction.clone().multiplyScalar(holeLength));
-      createHoleSprayFX(result.point, exitPoint, direction);
+      addHoleToEnemy(gameState.boss, result.point, direction);
+      particleSystem.createHoleSpray(result.point, direction);
       damage = BASE_DAMAGE_HOLE + gameState.upgrades.damage;
     }
     
@@ -261,5 +272,4 @@ function rebuildObjectList() {
     gameState.objects.push(melting.marshmallow);
     gameState.objects.push(...melting.holes);
   }
-  gameState.objects.push(...activeFX);
 }
