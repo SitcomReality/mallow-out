@@ -143,7 +143,14 @@ vec4 map(vec3 p) {
       localP.yz *= rot2(-rot.x);
       localP.xz *= rot2(rot.y);
       localP.xy *= rot2(-rot.z);
-      col = getFaceColor(localP, uObjData2[i].xyz, col, expression);
+      
+      // uObjData5.w holds pupil look X, uObjData6.w holds pupil look Y (if needed, otherwise 0)
+      vec2 lookDir = vec2(uObjData5[i].w, 0.0); 
+      // We'll hijack the unused Y component in uObjData5 or just stay horizontal for now.
+      // Wait, uObjData6.w is charCode. Let's use uObjData2.w for lookY if needed.
+      lookDir.y = uObjData2[i].w; 
+      
+      col = getFaceColor(localP, uObjData2[i].xyz, col, expression, lookDir);
     }
 
     if (gid != lastGid) {

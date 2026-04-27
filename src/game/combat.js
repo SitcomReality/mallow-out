@@ -43,6 +43,20 @@ export function shoot(particleSystem, bossHUD) {
   if (result.hit) {
     let damage = 0;
     
+    // Set pupil look direction based on hit point relative to face
+    // The face is on the "top" of the cylinder (local Y near max)
+    // and looks forward in its local orientation.
+    const bossPos = new THREE.Vector3(gameState.boss.marshmallow.position.x, gameState.boss.marshmallow.position.y, gameState.boss.marshmallow.position.z);
+    const hitRelative = result.point.clone().sub(bossPos);
+    // Rotate relative hit into marshmallow local space
+    const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(gameState.boss.marshmallow.rotation.x, gameState.boss.marshmallow.rotation.y, gameState.boss.marshmallow.rotation.z));
+    hitRelative.applyQuaternion(q.invert());
+    
+    // hitRelative.z is horizontal face axis, hitRelative.y is vertical
+    // scale to range -1 to 1 roughly
+    gameState.boss.marshmallow.pupilLookX = THREE.MathUtils.clamp(hitRelative.z / gameState.boss.marshmallow.scale.x, -1, 1);
+    gameState.boss.marshmallow.pupilLookY = THREE.MathUtils.clamp((hitRelative.y - (gameState.boss.marshmallow.scale.y - 0.2)) / 0.5, -1, 1);
+
     if (gameState.currentWeapon === 0) {
       // Chunking weapon
       const chunk = addChunkToEnemy(gameState.boss, result.point);

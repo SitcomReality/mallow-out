@@ -18,6 +18,14 @@ export function updateRepairs(currentTime, delta) {
       const diff = enemy.marshmallow.targetExpression - enemy.marshmallow.expression;
       enemy.marshmallow.expression += diff * delta * 5.0;
     }
+    
+    // Return pupils to center over time
+    if (enemy.marshmallow.pupilLookX !== undefined) {
+        enemy.marshmallow.pupilLookX *= Math.pow(0.1, delta); // fast decay
+    }
+    if (enemy.marshmallow.pupilLookY !== undefined) {
+        enemy.marshmallow.pupilLookY *= Math.pow(0.1, delta);
+    }
 
     const toRemove = [];
     

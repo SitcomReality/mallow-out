@@ -9,7 +9,8 @@ struct FaceParams {
     float browAngle;
     vec2 eyePos;
     vec2 eyeSize;
-    float pupilFill;
+    vec2 pupilPos;
+    vec2 pupilSize;
     vec2 catchlightPos;
     vec2 catchlightSize;
     vec2 mouthPos;
@@ -25,7 +26,8 @@ FaceParams getDefaultFace() {
     p.browAngle = DEF_BROW_A;
     p.eyePos = DEF_EYE_P;
     p.eyeSize = DEF_EYE_S;
-    p.pupilFill = DEF_PUPIL;
+    p.pupilPos = DEF_PUPIL_P;
+    p.pupilSize = DEF_PUPIL_S;
     p.catchlightPos = DEF_CATCH_P;
     p.catchlightSize = DEF_CATCH_S;
     p.mouthPos = DEF_MOUTH_P;
@@ -39,7 +41,7 @@ FaceParams getAngryFace() {
     FaceParams p = getDefaultFace();
     p.browPos = ANG_BROW_P;
     p.browAngle = ANG_BROW_A;
-    p.pupilFill = ANG_PUPIL;
+    p.pupilSize = ANG_PUPIL_S;
     p.mouthPos = ANG_MOUTH_P;
     p.mouthSize = ANG_MOUTH_S;
     p.mouthAngle = ANG_MOUTH_A;
@@ -52,7 +54,7 @@ FaceParams getSurprisedFace() {
     p.browAngle = SUR_BROW_A;
     p.eyePos = SUR_EYE_P;
     p.eyeSize = SUR_EYE_S;
-    p.pupilFill = SUR_PUPIL;
+    p.pupilSize = SUR_PUPIL_S;
     p.mouthPos = SUR_MOUTH_P;
     p.mouthSize = SUR_MOUTH_S;
     return p;
@@ -65,7 +67,8 @@ FaceParams mixParams(FaceParams a, FaceParams b, float t) {
     r.browAngle = mix(a.browAngle, b.browAngle, t);
     r.eyePos = mix(a.eyePos, b.eyePos, t);
     r.eyeSize = mix(a.eyeSize, b.eyeSize, t);
-    r.pupilFill = mix(a.pupilFill, b.pupilFill, t);
+    r.pupilPos = mix(a.pupilPos, b.pupilPos, t);
+    r.pupilSize = mix(a.pupilSize, b.pupilSize, t);
     r.catchlightPos = mix(a.catchlightPos, b.catchlightPos, t);
     r.catchlightSize = mix(a.catchlightSize, b.catchlightSize, t);
     r.mouthPos = mix(a.mouthPos, b.mouthPos, t);
@@ -88,7 +91,7 @@ float drawHollowBox(vec2 p, vec2 center, vec2 size, float angle, float thickness
     return abs(d) - thickness;
 }
 
-vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression) {
+vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 lookDir) {
   if (expression < 0.5) return baseCol;
   
   float capDist = scale.y - localP.y;
@@ -135,19 +138,21 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression) {
   float eyeFrameDist = drawHollowBox(uvMirrored, p.eyePos, p.eyeSize, 0.0, p.lineThickness);
   
   vec2 innerSize = max(vec2(0.0), p.eyeSize - p.lineThickness);
-  float pupilHalfHeight = innerSize.y * p.pupilFill;
-  vec2 pupilCenter = vec2(p.eyePos.x, p.eyePos.y - innerSize.y + pupilHalfHeight);
-  vec2 pupilSize = vec2(innerSize.x, pupilHalfHeight);
   
-  float pupilDist = drawBox(uvMirrored, pupilCenter, pupilSize, 0.0);
+  // Dynamic Pupil Position based on lookDir
+  vec2 lookRange = innerSize - p.pupilSize;
+  vec2 currentPupilCenter = p.eyePos + p.pupilPos + lookDir * lookRange;
+  
+  float pupilDist = drawBox(uvMirrored, currentPupilCenter, p.pupilSize, 0.0);
   float innerEyeBox = drawBox(uvMirrored, p.eyePos, innerSize, 0.0);
   float pupilClipped = max(pupilDist, innerEyeBox);
   
-  vec2 catchCenterUnmirroredLeft = vec2(-p.eyePos.x, pupilCenter.y) + p.catchlightPos;
-  vec2 catchCenterUnmirroredRight = vec2(p.eyePos.x, pupilCenter.y) + p.catchlightPos;
+  // Catchlights follow the pupil slightly but stay mostly in place
+  vec2 catchL = vec2(-currentPupilCenter.x, currentPupilCenter.y) + p.catchlightPos + lookDir * 0.02;
+  vec2 catchR = vec2(currentPupilCenter.x, currentPupilCenter.y) + p.catchlightPos + lookDir * 0.02;
   
-  float catchDistL = drawBox(uv, catchCenterUnmirroredLeft, p.catchlightSize, 0.0);
-  float catchDistR = drawBox(uv, catchCenterUnmirroredRight, p.catchlightSize, 0.0);
+  float catchDistL = drawBox(uv, catchL, p.catchlightSize, 0.0);
+  float catchDistR = drawBox(uv, catchR, p.catchlightSize, 0.0);
   float catchDist = min(catchDistL, catchDistR);
   float catchClipped = max(catchDist, pupilClipped);
 
