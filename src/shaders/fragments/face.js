@@ -1,4 +1,8 @@
+import { FACE_GLSL_PARAMS } from '../../game/face-constants.js';
+
 export const face = `
+${FACE_GLSL_PARAMS}
+
 struct FaceParams {
     vec2 browPos;
     vec2 browSize;
@@ -16,45 +20,41 @@ struct FaceParams {
 
 FaceParams getDefaultFace() {
     FaceParams p;
-    p.browPos = vec2(0.35, 0.45);
-    p.browSize = vec2(0.18, 0.03);
-    p.browAngle = 0.0;
-    
-    p.eyePos = vec2(0.32, 0.1);
-    p.eyeSize = vec2(0.15, 0.2);
-    p.pupilFill = 0.6; 
-    
-    p.catchlightPos = vec2(0.02, 0.04);
-    p.catchlightSize = vec2(0.015, 0.03);
-    
-    p.mouthPos = vec2(0.0, -0.25);
-    p.mouthSize = vec2(0.12, 0.02);
-    p.mouthAngle = 0.0;
-    
-    p.lineThickness = 0.025;
+    p.browPos = DEF_BROW_P;
+    p.browSize = DEF_BROW_S;
+    p.browAngle = DEF_BROW_A;
+    p.eyePos = DEF_EYE_P;
+    p.eyeSize = DEF_EYE_S;
+    p.pupilFill = DEF_PUPIL;
+    p.catchlightPos = DEF_CATCH_P;
+    p.catchlightSize = DEF_CATCH_S;
+    p.mouthPos = DEF_MOUTH_P;
+    p.mouthSize = DEF_MOUTH_S;
+    p.mouthAngle = DEF_MOUTH_A;
+    p.lineThickness = FACE_LINE_THICKNESS;
     return p;
 }
 
 FaceParams getAngryFace() {
     FaceParams p = getDefaultFace();
-    p.browPos = vec2(0.28, 0.35);
-    p.browAngle = 0.35; 
-    p.pupilFill = 0.9;
-    p.mouthPos = vec2(0.0, -0.35);
-    p.mouthSize = vec2(0.22, 0.03);
-    p.mouthAngle = -0.15;
+    p.browPos = ANG_BROW_P;
+    p.browAngle = ANG_BROW_A;
+    p.pupilFill = ANG_PUPIL;
+    p.mouthPos = ANG_MOUTH_P;
+    p.mouthSize = ANG_MOUTH_S;
+    p.mouthAngle = ANG_MOUTH_A;
     return p;
 }
 
 FaceParams getSurprisedFace() {
     FaceParams p = getDefaultFace();
-    p.browPos = vec2(0.4, 0.55);
-    p.browAngle = -0.25; 
-    p.eyeSize = vec2(0.15, 0.1); 
-    p.eyePos = vec2(0.32, 0.2); 
-    p.pupilFill = 0.5; 
-    p.mouthSize = vec2(0.05, 0.05); 
-    p.mouthPos = vec2(0.05, -0.3); 
+    p.browPos = SUR_BROW_P;
+    p.browAngle = SUR_BROW_A;
+    p.eyePos = SUR_EYE_P;
+    p.eyeSize = SUR_EYE_S;
+    p.pupilFill = SUR_PUPIL;
+    p.mouthPos = SUR_MOUTH_P;
+    p.mouthSize = SUR_MOUTH_S;
     return p;
 }
 
