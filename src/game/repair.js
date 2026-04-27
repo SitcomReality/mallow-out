@@ -20,11 +20,15 @@ export function updateRepairs(currentTime, delta) {
     }
     
     // Return pupils to center over time
-    if (enemy.marshmallow.pupilLookX !== undefined) {
-        enemy.marshmallow.pupilLookX *= Math.pow(0.1, delta); // fast decay
-    }
-    if (enemy.marshmallow.pupilLookY !== undefined) {
-        enemy.marshmallow.pupilLookY *= Math.pow(0.1, delta);
+    if (enemy.marshmallow.pupilLookHold !== undefined && enemy.marshmallow.pupilLookHold > 0) {
+        enemy.marshmallow.pupilLookHold -= delta;
+    } else {
+        if (enemy.marshmallow.pupilLookX !== undefined) {
+            enemy.marshmallow.pupilLookX *= Math.pow(0.01, delta); // fast decay
+        }
+        if (enemy.marshmallow.pupilLookY !== undefined) {
+            enemy.marshmallow.pupilLookY *= Math.pow(0.01, delta);
+        }
     }
 
     const toRemove = [];

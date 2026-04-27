@@ -52,10 +52,11 @@ export function shoot(particleSystem, bossHUD) {
     const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(gameState.boss.marshmallow.rotation.x, gameState.boss.marshmallow.rotation.y, gameState.boss.marshmallow.rotation.z));
     hitRelative.applyQuaternion(q.invert());
     
-    // hitRelative.z is horizontal face axis, hitRelative.y is vertical
+    // hitRelative.z is horizontal face axis, hitRelative.x is vertical
     // scale to range -1 to 1 roughly
     gameState.boss.marshmallow.pupilLookX = THREE.MathUtils.clamp(hitRelative.z / gameState.boss.marshmallow.scale.x, -1, 1);
-    gameState.boss.marshmallow.pupilLookY = THREE.MathUtils.clamp((hitRelative.y - (gameState.boss.marshmallow.scale.y - 0.2)) / 0.5, -1, 1);
+    gameState.boss.marshmallow.pupilLookY = THREE.MathUtils.clamp(hitRelative.x / gameState.boss.marshmallow.scale.x, -1, 1);
+    gameState.boss.marshmallow.pupilLookHold = 0.8;
 
     if (gameState.currentWeapon === 0) {
       // Chunking weapon

@@ -141,7 +141,9 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   
   // Dynamic Pupil Position based on lookDir
   vec2 lookRange = innerSize - p.pupilSize;
-  vec2 currentPupilCenter = p.eyePos + p.pupilPos + lookDir * lookRange;
+  vec2 pupilLookDir = lookDir;
+  pupilLookDir.x *= sideSign; // Invert x for the left eye in mirrored space
+  vec2 currentPupilCenter = p.eyePos + p.pupilPos + pupilLookDir * lookRange;
   
   float pupilDist = drawBox(uvMirrored, currentPupilCenter, p.pupilSize, 0.0);
   float innerEyeBox = drawBox(uvMirrored, p.eyePos, innerSize, 0.0);
