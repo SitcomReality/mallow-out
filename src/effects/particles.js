@@ -31,18 +31,14 @@ export class ParticleSystem {
       
       const spread = new THREE.Vector3(
         Math.sin(phi) * Math.cos(theta),
-        Math.sin(phi) * Math.sin(theta),
-        Math.cos(phi)
+        Math.cos(phi),
+        Math.sin(phi) * Math.sin(theta)
       );
       
       // Align with normal
       const up = new THREE.Vector3(0, 1, 0);
-      const axis = new THREE.Vector3().crossVectors(up, normal);
-      if (axis.lengthSq() > 0.001) {
-        const angle = Math.acos(up.dot(normal));
-        const q = new THREE.Quaternion().setFromAxisAngle(axis.normalize(), angle);
-        spread.applyQuaternion(q);
-      }
+      const q = new THREE.Quaternion().setFromUnitVectors(up, normal);
+      spread.applyQuaternion(q);
       
       const speed = BLOOD_PARTICLE_MIN_SPEED + Math.random() * (BLOOD_PARTICLE_MAX_SPEED - BLOOD_PARTICLE_MIN_SPEED);
       

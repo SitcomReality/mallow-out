@@ -222,16 +222,10 @@ function shoot() {
     let damage = 0;
     
     if (gameState.currentWeapon === 0) {
-      addChunkToEnemy(gameState.boss, result.point);
+      const chunk = addChunkToEnemy(gameState.boss, result.point);
       
-      // Calculate surface normal for blood splatter
-      const center = new THREE.Vector3(
-        gameState.boss.marshmallow.position.x,
-        gameState.boss.marshmallow.position.y,
-        gameState.boss.marshmallow.position.z
-      );
-      const normal = result.point.clone().sub(center).normalize();
-      particleSystem.createBloodSplatter(result.point, normal);
+      // Use correctly calculated surface normal from chunk
+      particleSystem.createBloodSplatter(result.point, chunk.repairData.normal);
       
       damage = BASE_DAMAGE_CHUNK + gameState.upgrades.damage;
     } else {
