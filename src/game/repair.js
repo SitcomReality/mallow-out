@@ -14,6 +14,11 @@ export function updateRepairs(currentTime, delta) {
   if (gameState.boss) allEnemies.push(gameState.boss);
 
   for (const enemy of allEnemies) {
+    if (enemy.marshmallow.targetExpression !== undefined) {
+      const diff = enemy.marshmallow.targetExpression - enemy.marshmallow.expression;
+      enemy.marshmallow.expression += diff * delta * 5.0;
+    }
+
     const toRemove = [];
     
     for (const hole of enemy.holes) {

@@ -55,6 +55,11 @@ export function updateMeltingEnemies(currentTime) {
     enemy.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
     enemy.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
     
+    if (enemy.marshmallow.targetExpression !== undefined) {
+      const diff = enemy.marshmallow.targetExpression - enemy.marshmallow.expression;
+      enemy.marshmallow.expression += diff * (1.0 / 60.0) * 5.0;
+    }
+    
     enemy.marshmallow.noiseOffset.y += MELT_NOISE_SPEED * (1.0 / 60.0);
   }
   

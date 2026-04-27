@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT } from './constants.js';
 import { BOSS_BASE_HEALTH, BOSS_HEALTH_PER_WAVE, BOSS_SIZE_BASE, BOSS_SIZE_PER_WAVE } from './wave-constants.js';
-import { EXPRESSION_DEFAULT } from './face-constants.js';
+import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 
 let nextId = 1;
 
@@ -55,6 +55,13 @@ export function createBoss(wave) {
 
 export function damageBoss(boss, damage) {
   boss.currentHealth = Math.max(0, boss.currentHealth - damage);
+  
+  if (boss.currentHealth <= 0) {
+    boss.marshmallow.targetExpression = EXPRESSION_SURPRISED;
+  } else if (boss.currentHealth < boss.maxHealth * 0.5) {
+    boss.marshmallow.targetExpression = EXPRESSION_ANGRY;
+  }
+  
   return boss.currentHealth <= 0;
 }
 
