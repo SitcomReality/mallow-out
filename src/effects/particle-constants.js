@@ -1,10 +1,10 @@
 // Blood Splatter Particles
-export const BLOOD_PARTICLE_COUNT = 32; // particles per hit
-export const BLOOD_PARTICLE_LIFETIME = 0.4; // seconds
-export const BLOOD_PARTICLE_MIN_SPEED = 2.0;
-export const BLOOD_PARTICLE_MAX_SPEED = 6.0;
-export const BLOOD_PARTICLE_SIZE_START = 0.15;
-export const BLOOD_PARTICLE_SIZE_END = 0.05;
+export const BLOOD_PARTICLE_COUNT = 64; // particles per hit
+export const BLOOD_PARTICLE_LIFETIME = 0.5; // seconds
+export const BLOOD_PARTICLE_MIN_SPEED = 3.0;
+export const BLOOD_PARTICLE_MAX_SPEED = 8.0;
+export const BLOOD_PARTICLE_SIZE_START = 0.25;
+export const BLOOD_PARTICLE_SIZE_END = 0.1;
 export const BLOOD_PARTICLE_GRAVITY = -5.0;
 export const BLOOD_PARTICLE_DRAG = 0.92;
 

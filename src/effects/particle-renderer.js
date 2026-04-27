@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 
 const particleVertexShader = `
-attribute vec3 position;
-attribute vec2 uv;
 attribute vec3 particlePos;
 attribute float particleSize;
 attribute vec3 particleColor;
@@ -12,8 +10,6 @@ varying vec2 vUv;
 varying vec3 vColor;
 varying float vAlpha;
 
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
 uniform vec3 cameraRight;
 uniform vec3 cameraUp;
 
@@ -22,15 +18,13 @@ void main() {
   vColor = particleColor;
   vAlpha = particleAlpha;
   
-  // Billboard quad
+  // Billboard quad (position is a built-in attribute in ShaderMaterial)
   vec3 worldPos = particlePos + cameraRight * position.x * particleSize + cameraUp * position.y * particleSize;
   gl_Position = projectionMatrix * viewMatrix * vec4(worldPos, 1.0);
 }
 `;
 
 const particleFragmentShader = `
-precision highp float;
-
 varying vec2 vUv;
 varying vec3 vColor;
 varying float vAlpha;
@@ -39,7 +33,7 @@ void main() {
   // Circular particle
   float dist = length(vUv - vec2(0.5));
   float alpha = smoothstep(0.5, 0.3, dist) * vAlpha;
-  
+  if (alpha < 0.01) discard;
   gl_FragColor = vec4(vColor, alpha);
 }
 `;
@@ -47,7 +41,7 @@ void main() {
 export class ParticleRenderer {
   constructor() {
     // Create a single quad geometry that will be instanced
-    const geometry = new THREE.BufferGeometry();
+    const geometry = new THREE.InstancedBufferGeometry();
     const vertices = new Float32Array([
       -0.5, -0.5, 0,
        0.5, -0.5, 0,
@@ -81,12 +75,10 @@ export class ParticleRenderer {
     geometry.setAttribute('particleColor', new THREE.InstancedBufferAttribute(particleColors, 3));
     geometry.setAttribute('particleAlpha', new THREE.InstancedBufferAttribute(particleAlphas, 1));
     
-    const material = new THREE.RawShaderMaterial({
+    const material = new THREE.ShaderMaterial({
       vertexShader: particleVertexShader,
       fragmentShader: particleFragmentShader,
       uniforms: {
-        projectionMatrix: { value: new THREE.Matrix4() },
-        viewMatrix: { value: new THREE.Matrix4() },
         cameraRight: { value: new THREE.Vector3() },
         cameraUp: { value: new THREE.Vector3() },
       },
@@ -145,9 +137,5 @@ export class ParticleRenderer {
     
     this.material.uniforms.cameraRight.value.copy(right);
     this.material.uniforms.cameraUp.value.copy(up);
-
-    // Update matrices for RawShaderMaterial
-    this.material.uniforms.projectionMatrix.value.copy(camera.projectionMatrix);
-    this.material.uniforms.viewMatrix.value.copy(camera.matrixWorldInverse);
   }
 }

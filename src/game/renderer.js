@@ -44,7 +44,9 @@ export function createRenderer(container) {
     
     // Sync particle camera with player state
     particleCamera.position.copy(gameState.player.position);
-    particleCamera.rotation.set(gameState.player.pitch, gameState.player.yaw, 0, 'YXZ');
+    // Negate yaw because Three.js camera rotation Y is counter-clockwise (positive turns left),
+    // while our raymarching yaw is positive for turning right.
+    particleCamera.rotation.set(gameState.player.pitch, -gameState.player.yaw, 0, 'YXZ');
     
     // Update particles
     if (particleSystem) {
