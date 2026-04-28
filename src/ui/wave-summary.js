@@ -13,10 +13,25 @@ export function createWaveSummary(onContinue) {
     // Build petal triggers section
     let petalTriggersHTML = '';
     if (gameState.petalTriggersThisWave.length > 0) {
-      const triggersHTML = gameState.petalTriggersThisWave.map(trigger => {
+      // Group Caramel Vapor triggers to avoid UI clutter
+      const vaporTriggers = gameState.petalTriggersThisWave.filter(t => t.name === 'Caramel Vapor');
+      const otherTriggers = gameState.petalTriggersThisWave.filter(t => t.name !== 'Caramel Vapor');
+      
+      const processedTriggers = [...otherTriggers];
+      if (vaporTriggers.length > 0) {
+        const totalBonus = vaporTriggers.reduce((sum, t) => sum + (t.bonus || 0), 0);
+        processedTriggers.push({
+          name: `Caramel Vapor${vaporTriggers.length > 1 ? ' x' + vaporTriggers.length : ''}`,
+          icon: '💨',
+          bonus: totalBonus,
+          isVapor: true
+        });
+      }
+
+      const triggersHTML = processedTriggers.map(trigger => {
         if (trigger.bonus) {
-          // Vapor bonus
-          return `<div class="petal-trigger vapor">
+          // Vapor bonus or any petal with an immediate bonus
+          return `<div class="petal-trigger ${trigger.isVapor ? 'vapor' : ''}">
             <span class="petal-icon">${trigger.icon}</span>
             <span class="petal-name">${trigger.name}</span>
             <span class="petal-effect">+${trigger.bonus} 🍯</span>
