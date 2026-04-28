@@ -58,22 +58,44 @@ export function updateRepairs(currentTime, delta) {
           hole.scale.y = hole.repairData.initialHeight * (1.0 - lengthT);
         }
       } else if (hole.repairData.type === 'chunk') {
-        // Move away from mallow body along surface normal
         const speed = CHUNK_REPAIR_SPEED * delta;
         hole.position.x += hole.repairData.normal.x * speed;
         hole.position.y += hole.repairData.normal.y * speed;
         hole.position.z += hole.repairData.normal.z * speed;
 
-        // Shrink the chunk as it moves away
         const scale = (hole.repairData.initialScale || 0.6) * (1.0 - t);
         hole.scale.x = hole.scale.y = hole.scale.z = scale;
 
-        // Sharpen the blend as it repairs
         hole.blendRadius = CHUNK_REPAIR_INITIAL_BLEND * (1.0 - t) + CHUNK_REPAIR_FINAL_BLEND * t;
         
-        // Animate surface noise to match melting
         if (!hole.noiseOffset) hole.noiseOffset = { x: 0, y: 0, z: 0 };
         hole.noiseOffset.y += CHUNK_REPAIR_NOISE_SPEED * delta;
+        
+      } else if (hole.repairData.type === 'spatterer') {
+        // Move away from surface
+        const speed = 1.0 * delta;
+        hole.position.x += hole.repairData.normal.x * speed;
+        hole.position.y += hole.repairData.normal.y * speed;
+        hole.position.z += hole.repairData.normal.z * speed;
+        
+        // Animate noise parameters
+        hole.noiseAmount = hole.repairData.initialNoiseAmount * (1.0 - t) + 0.4 * t;
+        hole.noiseScale = hole.repairData.initialNoiseScale * (1.0 - t) + 3.0 * t;
+        
+      } else if (hole.repairData.type === 'cleaver') {
+        // Move away along attack direction
+        const speed = 1.5 * delta;
+        hole.position.x += hole.repairData.normal.x * speed;
+        hole.position.y += hole.repairData.normal.y * speed;
+        hole.position.z += hole.repairData.normal.z * speed;
+        
+        // Reduce blend to 0
+        hole.blendRadius = hole.repairData.initialBlend * (1.0 - t);
+        
+      } else if (hole.repairData.type === 'laser') {
+        // Fast repair - shrinks quickly
+        const scale = hole.repairData.initialScale * (1.0 - t);
+        hole.scale.x = hole.scale.y = hole.scale.z = scale;
       }
     }
     

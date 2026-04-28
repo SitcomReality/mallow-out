@@ -14,7 +14,7 @@ import { createPauseMenu } from './src/ui/pause-menu.js';
 import { ParticleSystem } from './src/effects/particles.js';
 import { session, spawnBoss, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
 import { runGameLoop } from './src/game/loop.js';
-import { shoot } from './src/game/combat.js';
+import { shoot, releaseCleaver } from './src/game/combat.js';
 
 // Setup Main Menu
 document.getElementById('newGame').addEventListener('click', () => {
@@ -75,15 +75,45 @@ function startGame() {
       if (e.key === '1') switchWeapon(0);
       if (e.key === '2') switchWeapon(1);
       if (e.key === '3') switchWeapon(2);
+      if (e.key === '4') switchWeapon(3);
+      if (e.key === '5') switchWeapon(4);
+    }
+  });
+  
+  document.addEventListener('keyup', (e) => {
+    if (!session.isPlaying || session.isPaused) return;
+    
+    // Release cleaver when mouse button released while charging
+    if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
+      releaseCleaver(session.particleSystem, session.bossHUD);
     }
   });
   
   // Mouse Click / Shooting
-  container.addEventListener('click', () => {
+  let mouseDown = false;
+  
+  container.addEventListener('mousedown', () => {
     if (document.pointerLockElement === container && !session.isPaused) {
+      mouseDown = true;
       shoot(session.particleSystem, session.bossHUD);
     }
   });
+  
+  container.addEventListener('mouseup', () => {
+    mouseDown = false;
+    if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
+      releaseCleaver(session.particleSystem, session.bossHUD);
+    }
+  });
+  
+  // Continuous firing for melter
+  setInterval(() => {
+    if (session.isPlaying && !session.isPaused && mouseDown && document.pointerLockElement === container) {
+      if (gameState.currentWeapon === 4) {
+        shoot(session.particleSystem, session.bossHUD);
+      }
+    }
+  }, 1000/30); // 30 FPS for continuous beam
   
   // Begin the adventure
   spawnBoss();

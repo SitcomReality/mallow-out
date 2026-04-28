@@ -55,7 +55,16 @@ export function quitToMenu() {
   gameState.boss = null;
   gameState.meltingEnemies = [];
   gameState.objects = [];
+  gameState.projectiles = [];
   gameState.currentWave = STARTING_WAVE;
+  gameState.weaponStates = {
+    skewerReady: true,
+    spattererCooldown: 0,
+    cleaverCharge: 0,
+    cleaverCharging: false,
+    melterHeat: 0,
+    melterOverheated: false,
+  };
   gameState.upgrades = {
     damage: 0,
     fireRate: 0,

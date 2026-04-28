@@ -5,6 +5,16 @@ import { updateMeltingEnemies } from './melting.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { session } from './manager.js';
+import { 
+  SKEWER_RECOIL_DURATION, 
+  SKEWER_RECOIL_RECOVERY,
+  MELTER_COOLDOWN_PER_SECOND,
+  CLEAVER_CHARGE_TIME,
+} from './constants.js';
+import { castRay, getEnemyDistanceAt } from './shooting.js';
+import { addLaserDamage } from './enemy.js';
+import { damageBoss } from './boss.js';
+import * as THREE from 'three';
 
 let lastTime = 0;
 let frameCount = 0;
@@ -45,6 +55,90 @@ export function runGameLoop(time) {
         frameCount = 0;
         totalDelta = 0;
       }
+    }
+
+    // Weapon state updates
+    const ws = gameState.weaponStates;
+    
+    // Skewer recoil recovery
+    if (!ws.skewerReady) {
+      gameState.player.recoilTime += delta;
+      if (gameState.player.recoilTime < SKEWER_RECOIL_DURATION) {
+        const t = gameState.player.recoilTime / SKEWER_RECOIL_DURATION;
+        gameState.player.pitch -= gameState.player.recoilAmount * (1 - t) * delta / SKEWER_RECOIL_DURATION;
+      } else if (gameState.player.recoilTime >= SKEWER_RECOIL_DURATION + SKEWER_RECOIL_RECOVERY) {
+        ws.skewerReady = true;
+        gameState.player.recoilAmount = 0;
+      }
+    }
+    
+    // Spatterer cooldown
+    if (ws.spattererCooldown > 0) {
+      ws.spattererCooldown = Math.max(0, ws.spattererCooldown - delta);
+    }
+    
+    // Cleaver charging
+    if (ws.cleaverCharging) {
+      ws.cleaverCharge = Math.min(CLEAVER_CHARGE_TIME, ws.cleaverCharge + delta);
+    }
+    
+    // Melter heat management
+    if (ws.melterOverheated) {
+      ws.melterHeat = Math.max(0, ws.melterHeat - MELTER_COOLDOWN_PER_SECOND * delta);
+      if (ws.melterHeat <= 0) {
+        ws.melterOverheated = false;
+      }
+    } else if (gameState.currentWeapon !== 4) {
+      ws.melterHeat = Math.max(0, ws.melterHeat - MELTER_COOLDOWN_PER_SECOND * delta * 0.5);
+    }
+    
+    // Update projectiles
+    const toRemove = [];
+    for (const proj of gameState.projectiles) {
+      proj.position.x += proj.velocity.x * delta;
+      proj.position.y += proj.velocity.y * delta;
+      proj.position.z += proj.velocity.z * delta;
+      proj.lifetime -= delta;
+      
+      // Check collision with boss
+      if (gameState.boss) {
+        const distFunc = (p) => getEnemyDistanceAt(gameState.boss, p);
+        const dist = distFunc(proj.position);
+        
+        if (dist < proj.size) {
+          // Hit!
+          const direction = proj.velocity.clone().normalize();
+          const { addChunkToEnemy } = await import('./enemy.js');
+          const chunk = addChunkToEnemy(gameState.boss, proj.position);
+          session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
+          
+          const damage = 2 + gameState.upgrades.damage;
+          const defeated = damageBoss(gameState.boss, damage);
+          if (session.bossHUD) session.bossHUD.update(gameState.boss);
+          
+          if (defeated) {
+            if (gameState.meltingEnemies.length >= 2) {
+              gameState.meltingEnemies.shift();
+            }
+            const deadBoss = gameState.boss;
+            deadBoss.meltStartTime = time * 0.001;
+            gameState.meltingEnemies.push(deadBoss);
+            gameState.boss = null;
+            if (session.bossHUD) session.bossHUD.hide();
+          }
+          
+          toRemove.push(proj);
+        }
+      }
+      
+      if (proj.lifetime <= 0) {
+        toRemove.push(proj);
+      }
+    }
+    
+    for (const proj of toRemove) {
+      const idx = gameState.projectiles.indexOf(proj);
+      if (idx > -1) gameState.projectiles.splice(idx, 1);
     }
 
     // Logic updates
