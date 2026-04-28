@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { STARTING_WAVE } from './wave-constants.js';
+import { WaveTimer } from './wave-timer.js';
 
 export const gameState = {
   player: {
@@ -10,12 +11,15 @@ export const gameState = {
     recoilTime: 0, // for skewer recoil
     recoilAmount: 0,
   },
-  boss: null,
-  meltingEnemies: [],
+  currentMarshmallow: null,
+  meltingMarshmallows: [],
   objects: [],
   projectiles: [], // for globber projectiles
   currentWeapon: 0,
   currentWave: STARTING_WAVE,
+  waveTimer: new WaveTimer(),
+  marshmallowsSpawnedThisWave: 0,
+  marshmallowsDestroyedThisWave: 0,
   weaponStates: {
     skewerReady: true,
     spattererCooldown: 0,

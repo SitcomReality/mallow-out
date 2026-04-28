@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { gameState } from './state.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, addLaserDamage } from './enemy.js';
-import { damageBoss } from './boss.js';
+import { damageMarshmallow } from './marshmallow.js';
+import { onMarshmallowDefeated } from './manager.js';
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -24,32 +25,32 @@ import {
  */
 export function rebuildObjectList() {
   gameState.objects = [];
-  if (gameState.boss) {
-    gameState.objects.push(gameState.boss.marshmallow);
-    gameState.objects.push(...gameState.boss.holes);
+  if (gameState.currentMarshmallow) {
+    gameState.objects.push(gameState.currentMarshmallow.marshmallow);
+    gameState.objects.push(...gameState.currentMarshmallow.holes);
   }
-  for (const melting of gameState.meltingEnemies) {
+  for (const melting of gameState.meltingMarshmallows) {
     gameState.objects.push(melting.marshmallow);
     gameState.objects.push(...melting.holes);
   }
 }
 
-function setPupilLook(boss, hitPoint) {
-  const bossPos = new THREE.Vector3(boss.marshmallow.position.x, boss.marshmallow.position.y, boss.marshmallow.position.z);
-  const hitRelative = hitPoint.clone().sub(bossPos);
-  const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(boss.marshmallow.rotation.x, boss.marshmallow.rotation.y, boss.marshmallow.rotation.z));
+function setPupilLook(marshmallow, hitPoint) {
+  const marshmallowPos = new THREE.Vector3(marshmallow.marshmallow.position.x, marshmallow.marshmallow.position.y, marshmallow.marshmallow.position.z);
+  const hitRelative = hitPoint.clone().sub(marshmallowPos);
+  const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.marshmallow.rotation.x, marshmallow.marshmallow.rotation.y, marshmallow.marshmallow.rotation.z));
   hitRelative.applyQuaternion(q.invert());
   
-  boss.marshmallow.pupilLookX = THREE.MathUtils.clamp(hitRelative.z / boss.marshmallow.scale.x, -1, 1);
-  boss.marshmallow.pupilLookY = THREE.MathUtils.clamp(hitRelative.x / boss.marshmallow.scale.x, -1, 1);
-  boss.marshmallow.pupilLookHold = 0.8;
+  marshmallow.marshmallow.pupilLookX = THREE.MathUtils.clamp(hitRelative.z / marshmallow.marshmallow.scale.x, -1, 1);
+  marshmallow.marshmallow.pupilLookY = THREE.MathUtils.clamp(hitRelative.x / marshmallow.marshmallow.scale.x, -1, 1);
+  marshmallow.marshmallow.pupilLookHold = 0.8;
 }
 
 /**
  * Handles weapon firing logic, raycasting, and damaging enemies.
  */
 export function shoot(particleSystem, bossHUD) {
-  if (!gameState.boss) return;
+  if (!gameState.currentMarshmallow) return;
   
   const weapon = gameState.currentWeapon;
   const player = gameState.player;
@@ -87,16 +88,16 @@ export function shoot(particleSystem, bossHUD) {
     return; // Continue charging
   }
   
-  const distFunc = (p) => getEnemyDistanceAt(gameState.boss, p);
+  const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
   const result = castRay(origin, direction, distFunc);
   
   if (result.hit) {
     let damage = 0;
-    setPupilLook(gameState.boss, result.point);
+    setPupilLook(gameState.currentMarshmallow, result.point);
     
     if (weapon === 0) {
       // Skewer - Hole punch with recoil
-      addHoleToEnemy(gameState.boss, result.point, direction);
+      addHoleToEnemy(gameState.currentMarshmallow, result.point, direction);
       particleSystem.createHoleSpray(result.point, direction);
       damage = BASE_DAMAGE_HOLE + gameState.upgrades.damage;
       
@@ -110,7 +111,7 @@ export function shoot(particleSystem, bossHUD) {
       const distance = result.distance;
       const rangeFactor = Math.max(0, 1 - (distance - 3) / (SPATTERER_MAX_RANGE - 3));
       
-      addSpattererDamage(gameState.boss, result.point, distance);
+      addSpattererDamage(gameState.currentMarshmallow, result.point, distance);
       particleSystem.createBloodSplatter(result.point, direction);
       damage = Math.floor((BASE_DAMAGE_SPATTERER + gameState.upgrades.damage) * rangeFactor);
       
@@ -118,7 +119,7 @@ export function shoot(particleSystem, bossHUD) {
       
     } else if (weapon === 4) {
       // Melter - Laser beam (continuous on hold)
-      addLaserDamage(gameState.boss, result.point);
+      addLaserDamage(gameState.currentMarshmallow, result.point);
       damage = 0.5; // Small damage per frame
       
       ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
@@ -128,19 +129,20 @@ export function shoot(particleSystem, bossHUD) {
     }
     
     if (damage > 0) {
-      const defeated = damageBoss(gameState.boss, damage);
-      if (bossHUD) bossHUD.update(gameState.boss);
+      const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
+      if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
       
       if (defeated) {
-        if (gameState.meltingEnemies.length >= 2) {
-          gameState.meltingEnemies.shift();
+        if (gameState.meltingMarshmallows.length >= 2) {
+          gameState.meltingMarshmallows.shift();
         }
         
-        const deadBoss = gameState.boss;
-        deadBoss.meltStartTime = performance.now() * 0.001;
-        gameState.meltingEnemies.push(deadBoss);
-        gameState.boss = null;
+        const deadMarshmallow = gameState.currentMarshmallow;
+        deadMarshmallow.meltStartTime = performance.now() * 0.001;
+        gameState.meltingMarshmallows.push(deadMarshmallow);
+        gameState.currentMarshmallow = null;
         if (bossHUD) bossHUD.hide();
+        onMarshmallowDefeated();
       }
     }
     
@@ -170,28 +172,29 @@ export function releaseCleaver(particleSystem, bossHUD) {
     -Math.cos(player.yaw) * Math.cos(player.pitch)
   ).normalize();
   
-  const distFunc = (p) => getEnemyDistanceAt(gameState.boss, p);
+  const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
   const result = castRay(origin, direction, distFunc);
   
-  if (result.hit && gameState.boss) {
-    setPupilLook(gameState.boss, result.point);
-    addCleaverDamage(gameState.boss, result.point, direction);
+  if (result.hit && gameState.currentMarshmallow) {
+    setPupilLook(gameState.currentMarshmallow, result.point);
+    addCleaverDamage(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createBloodSplatter(result.point, direction);
     
     const damage = BASE_DAMAGE_CLEAVER + gameState.upgrades.damage;
-    const defeated = damageBoss(gameState.boss, damage);
-    if (bossHUD) bossHUD.update(gameState.boss);
+    const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
+    if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
     
     if (defeated) {
-      if (gameState.meltingEnemies.length >= 2) {
-        gameState.meltingEnemies.shift();
+      if (gameState.meltingMarshmallows.length >= 2) {
+        gameState.meltingMarshmallows.shift();
       }
       
-      const deadBoss = gameState.boss;
-      deadBoss.meltStartTime = performance.now() * 0.001;
-      gameState.meltingEnemies.push(deadBoss);
-      gameState.boss = null;
+      const deadMarshmallow = gameState.currentMarshmallow;
+      deadMarshmallow.meltStartTime = performance.now() * 0.001;
+      gameState.meltingMarshmallows.push(deadMarshmallow);
+      gameState.currentMarshmallow = null;
       if (bossHUD) bossHUD.hide();
+      onMarshmallowDefeated();
     }
     
     rebuildObjectList();

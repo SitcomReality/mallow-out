@@ -1,6 +1,6 @@
 import { gameState } from './state.js';
-import { STARTING_WAVE } from './wave-constants.js';
-import { createBoss } from './boss.js';
+import { STARTING_WAVE, DEFAULT_WAVE_DURATION, TIME_BONUS_PER_KILL } from './wave-constants.js';
+import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 
 /**
@@ -17,12 +17,33 @@ export const session = {
   renderFn: null
 };
 
-export function spawnBoss() {
-  const boss = createBoss(gameState.currentWave);
-  gameState.boss = boss;
+export function startWave() {
+  gameState.marshmallowsSpawnedThisWave = 0;
+  gameState.marshmallowsDestroyedThisWave = 0;
+  gameState.waveTimer.start(DEFAULT_WAVE_DURATION);
   gameState.waveInProgress = true;
-  if (session.bossHUD) session.bossHUD.update(boss);
+  spawnNextMarshmallow();
+}
+
+export function spawnNextMarshmallow() {
+  // Don't spawn if there's already an active marshmallow or more than 1 melting
+  if (gameState.currentMarshmallow) return;
+  if (gameState.meltingMarshmallows.length > 1) return;
+  
+  const marshmallow = createMarshmallow(gameState.currentWave, gameState.marshmallowsSpawnedThisWave);
+  gameState.currentMarshmallow = marshmallow;
+  gameState.marshmallowsSpawnedThisWave++;
+  
+  if (session.bossHUD) session.bossHUD.update(marshmallow);
   rebuildObjectList();
+}
+
+export function onMarshmallowDefeated() {
+  gameState.marshmallowsDestroyedThisWave++;
+  gameState.waveTimer.addTimeBonus(TIME_BONUS_PER_KILL);
+  
+  // Marshmallow will be moved to melting state by combat system
+  // Next marshmallow spawns after check in loop
 }
 
 export function switchWeapon(index) {
@@ -52,11 +73,14 @@ export function quitToMenu() {
   if (session.upgradeScreen) session.upgradeScreen.hide();
   if (session.pauseMenu) session.pauseMenu.hide();
   
-  gameState.boss = null;
-  gameState.meltingEnemies = [];
+  gameState.currentMarshmallow = null;
+  gameState.meltingMarshmallows = [];
   gameState.objects = [];
   gameState.projectiles = [];
   gameState.currentWave = STARTING_WAVE;
+  gameState.marshmallowsSpawnedThisWave = 0;
+  gameState.marshmallowsDestroyedThisWave = 0;
+  gameState.waveTimer.stop();
   gameState.weaponStates = {
     skewerReady: true,
     spattererCooldown: 0,

@@ -1,9 +1,12 @@
 // Wave system constants
 export const STARTING_WAVE = 1;
-export const BOSS_BASE_HEALTH = 12;
-export const BOSS_HEALTH_PER_WAVE = 4;
-export const BOSS_SIZE_BASE = 1.5;
-export const BOSS_SIZE_PER_WAVE = 0.2;
+export const DEFAULT_WAVE_DURATION = 30; // seconds
+export const TIME_BONUS_PER_KILL = 3; // seconds added per kill
+
+// Marshmallow health scaling
+export const BASE_MARSHMALLOW_HEALTH = 12;
+export const HEALTH_INCREASE_PER_WAVE = 0.15; // 15% increase per wave
+export const HEALTH_INCREASE_PER_SPAWN = 0.05; // 5% increase per spawn within wave
 
 // Upgrade system
 export const UPGRADES_PER_SCREEN = 3;

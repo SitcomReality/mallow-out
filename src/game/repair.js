@@ -9,9 +9,9 @@ import {
 } from './repair-constants.js';
 
 export function updateRepairs(currentTime, delta) {
-  // Only repair the active boss; melting marshmallows stop repairing
+  // Only repair the active marshmallow; melting marshmallows stop repairing
   const allEnemies = [];
-  if (gameState.boss) allEnemies.push(gameState.boss);
+  if (gameState.currentMarshmallow) allEnemies.push(gameState.currentMarshmallow);
 
   for (const enemy of allEnemies) {
     if (enemy.marshmallow.targetExpression !== undefined) {

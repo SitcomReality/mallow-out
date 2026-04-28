@@ -4,7 +4,7 @@ import { updateControls } from './controls.js';
 import { updateMeltingEnemies } from './melting.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
-import { session } from './manager.js';
+import { session, spawnNextMarshmallow } from './manager.js';
 import { 
   SKEWER_RECOIL_DURATION, 
   SKEWER_RECOIL_RECOVERY,
@@ -30,13 +30,24 @@ export function runGameLoop(time) {
   lastTime = time;
   
   if (!session.isPaused) {
-    // Wave transition check
-    if (gameState.waveInProgress && !gameState.boss && gameState.meltingEnemies.length === 0) {
+    // Update wave timer
+    if (gameState.waveTimer.active) {
+      gameState.waveTimer.update(delta);
+    }
+    
+    // Wave transition check - timer expired
+    if (gameState.waveTimer.isComplete() && gameState.meltingMarshmallows.length === 0) {
       gameState.waveInProgress = false;
+      gameState.waveTimer.stop();
       if (session.upgradeScreen) {
         session.upgradeScreen.show(gameState.currentWave);
         document.exitPointerLock();
       }
+    }
+    
+    // Spawn next marshmallow if needed
+    if (gameState.waveInProgress && !gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
+      spawnNextMarshmallow();
     }
 
     // Dynamic resolution scaling based on framerate
@@ -100,31 +111,32 @@ export function runGameLoop(time) {
       proj.position.z += proj.velocity.z * delta;
       proj.lifetime -= delta;
       
-      // Check collision with boss
-      if (gameState.boss) {
-        const distFunc = (p) => getEnemyDistanceAt(gameState.boss, p);
+      // Check collision with current marshmallow
+      if (gameState.currentMarshmallow) {
+        const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
         const dist = distFunc(proj.position);
         
         if (dist < proj.size) {
           // Hit!
-          if (gameState.boss) {
-            const chunk = addChunkToEnemy(gameState.boss, proj.position);
-            session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
-          }
+          const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
+          session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
+          const { damageMarshmallow } = await import('./marshmallow.js');
+          const { onMarshmallowDefeated } = await import('./manager.js');
           const damage = 2 + gameState.upgrades.damage;
-          const defeated = damageBoss(gameState.boss, damage);
-          if (session.bossHUD) session.bossHUD.update(gameState.boss);
+          const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
+          if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
           
           if (defeated) {
-            if (gameState.meltingEnemies.length >= 2) {
-              gameState.meltingEnemies.shift();
+            if (gameState.meltingMarshmallows.length >= 2) {
+              gameState.meltingMarshmallows.shift();
             }
-            const deadBoss = gameState.boss;
-            deadBoss.meltStartTime = time * 0.001;
-            gameState.meltingEnemies.push(deadBoss);
-            gameState.boss = null;
+            const deadMarshmallow = gameState.currentMarshmallow;
+            deadMarshmallow.meltStartTime = time * 0.001;
+            gameState.meltingMarshmallows.push(deadMarshmallow);
+            gameState.currentMarshmallow = null;
             if (session.bossHUD) session.bossHUD.hide();
+            onMarshmallowDefeated();
           }
           
           toRemove.push(proj);

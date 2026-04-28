@@ -18,7 +18,7 @@ function lerp(a, b, t) {
 export function updateMeltingEnemies(currentTime) {
   const toRemove = [];
   
-  for (const enemy of gameState.meltingEnemies) {
+  for (const enemy of gameState.meltingMarshmallows) {
     const elapsed = currentTime - enemy.meltStartTime;
     const t = Math.min(elapsed / MELT_DURATION, 1.0);
     
@@ -64,10 +64,10 @@ export function updateMeltingEnemies(currentTime) {
   }
   
   for (const enemy of toRemove) {
-    const index = gameState.meltingEnemies.indexOf(enemy);
+    const index = gameState.meltingMarshmallows.indexOf(enemy);
     if (index > -1) {
-      gameState.meltingEnemies.splice(index, 1);
-      console.log("[Melting Complete] Mallow removed from melting state. Remaining melting enemies:", gameState.meltingEnemies.length);
+      gameState.meltingMarshmallows.splice(index, 1);
+      console.log("[Melting Complete] Mallow removed from melting state. Remaining melting marshmallows:", gameState.meltingMarshmallows.length);
     }
   }
 }

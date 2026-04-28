@@ -1,18 +1,18 @@
 export function createBossHUD() {
   const hud = document.getElementById('bossHUD');
   
-  function update(boss) {
-    if (!boss) {
+  function update(marshmallow) {
+    if (!marshmallow) {
       hud.style.display = 'none';
       return;
     }
     
-    const healthPercent = (boss.currentHealth / boss.maxHealth) * 100;
+    const healthPercent = (marshmallow.currentHealth / marshmallow.maxHealth) * 100;
     
     hud.innerHTML = `
       <div class="boss-info">
-        <h2 class="boss-name">Giant Marshmallow</h2>
-        <p class="boss-wave">Wave ${boss.wave}</p>
+        <h2 class="boss-name">Marshmallow #${marshmallow.spawnIndex + 1}</h2>
+        <p class="boss-wave">Wave ${marshmallow.wave}</p>
       </div>
       <div class="boss-health-bar">
         <div class="boss-health-fill" style="width: ${healthPercent}%"></div>

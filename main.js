@@ -12,7 +12,7 @@ import { createBossHUD } from './src/ui/boss-hud.js';
 import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { ParticleSystem } from './src/effects/particles.js';
-import { session, spawnBoss, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
+import { session, startWave, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
 import { runGameLoop } from './src/game/loop.js';
 import { shoot, releaseCleaver } from './src/game/combat.js';
 
@@ -55,7 +55,7 @@ function startGame() {
     }
     
     gameState.currentWave++;
-    spawnBoss();
+    startWave();
   });
   
   session.pauseMenu = createPauseMenu(
@@ -116,6 +116,6 @@ function startGame() {
   }, 1000/30); // 30 FPS for continuous beam
   
   // Begin the adventure
-  spawnBoss();
+  startWave();
   requestAnimationFrame(runGameLoop);
 }
