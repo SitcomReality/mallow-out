@@ -31,12 +31,16 @@ export function startWave() {
   
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
+  gameState.petalTriggersThisWave = []; // Reset petal triggers for new wave
   resetWaveStats();
   gameState.waveTimer.start(DEFAULT_WAVE_DURATION);
   gameState.waveInProgress = true;
   
   rebuildObjectList();
   spawnNextMarshmallow();
+  
+  // Update petal HUD at wave start
+  if (session.petalHUD) session.petalHUD.update();
 }
 
 export function spawnNextMarshmallow() {
@@ -56,6 +60,13 @@ export function onMarshmallowDefeated() {
   gameState.marshmallowsDestroyedThisWave++;
   gameState.waveTimer.addTimeBonus(TIME_BONUS_PER_KILL);
   awardCaramel();
+  
+  // Trigger random petal on marshmallow death
+  const { triggerRandomPetal } = require('./petals/petal-trigger.js');
+  triggerRandomPetal();
+  
+  // Update petal HUD after trigger
+  if (session.petalHUD) session.petalHUD.update();
   
   // Marshmallow will be moved to melting state by combat system
   // Next marshmallow spawns after check in loop

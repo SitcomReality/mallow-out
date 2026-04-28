@@ -12,6 +12,8 @@ import { createBossHUD } from './src/ui/boss-hud.js';
 import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
 import { createWaveSummary } from './src/ui/wave-summary.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
+import { createPetalShop } from './src/ui/petal-shop.js';
+import { createPetalHUD } from './src/ui/petal-hud.js';
 import { ParticleSystem } from './src/effects/particles.js';
 import { session, startWave, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
 import { runGameLoop } from './src/game/loop.js';
@@ -46,11 +48,21 @@ function startGame() {
   session.bossHUD = createBossHUD();
   
   session.waveSummary = createWaveSummary(() => {
-    // After wave summary, show upgrade screen
+    // After wave summary, show petal shop
+    if (session.petalShop) {
+      session.petalShop.show();
+    }
+  });
+  
+  session.petalShop = createPetalShop(() => {
+    // After petal shop, show upgrade screen
     if (session.upgradeScreen) {
       session.upgradeScreen.show(gameState.currentWave);
     }
   });
+  
+  session.petalHUD = createPetalHUD();
+  session.petalHUD.show();
   
   session.upgradeScreen = createUpgradeScreen((upgradeId) => {
     // Apply selected upgrade

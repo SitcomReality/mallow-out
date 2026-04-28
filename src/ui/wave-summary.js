@@ -10,6 +10,36 @@ export function createWaveSummary(onContinue) {
   function show() {
     const stats = gameState.currentWaveStats;
     
+    // Build petal triggers section
+    let petalTriggersHTML = '';
+    if (gameState.petalTriggersThisWave.length > 0) {
+      const triggersHTML = gameState.petalTriggersThisWave.map(trigger => {
+        if (trigger.bonus) {
+          // Vapor bonus
+          return `<div class="petal-trigger vapor">
+            <span class="petal-icon">${trigger.icon}</span>
+            <span class="petal-name">${trigger.name}</span>
+            <span class="petal-effect">+${trigger.bonus} 🍯</span>
+          </div>`;
+        } else {
+          // Regular petal
+          return `<div class="petal-trigger">
+            <span class="petal-icon">${trigger.icon}</span>
+            <span class="petal-name">${trigger.name}</span>
+          </div>`;
+        }
+      }).join('');
+      
+      petalTriggersHTML = `
+        <div class="petal-triggers-section">
+          <h3>Petals Triggered</h3>
+          <div class="petal-triggers">
+            ${triggersHTML}
+          </div>
+        </div>
+      `;
+    }
+    
     container.innerHTML = `
       <div class="wave-summary-content">
         <h2 class="wave-summary-title">Wave ${gameState.currentWave} Complete!</h2>
@@ -25,6 +55,8 @@ export function createWaveSummary(onContinue) {
           </div>
         </div>
         
+        ${petalTriggersHTML}
+        
         <div class="currency-earned">
           <div class="currency-row pollen">
             <span class="currency-icon">🌼</span>
@@ -38,7 +70,7 @@ export function createWaveSummary(onContinue) {
           </div>
         </div>
         
-        <button class="continue-btn" id="summaryContBtn">Continue to Shop</button>
+        <button class="continue-btn" id="summaryContBtn">Continue to Shops</button>
       </div>
     `;
     

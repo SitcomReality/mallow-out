@@ -559,6 +559,169 @@ html,body{
   text-align:right;
 }
 
+/* Petal Shop Styles */
+.petal-inventory{
+  margin-bottom:24px;
+  background:rgba(45,74,45,0.3);
+  border-radius:8px;
+  padding:20px;
+}
+
+.petal-inventory h3{
+  margin:0 0 12px;
+  color:var(--marshmallow-white);
+  font-size:16px;
+  text-transform:uppercase;
+}
+
+.petal-slots{
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  margin-bottom:12px;
+}
+
+.petal-slot{
+  width:50px;
+  height:50px;
+  border:2px solid var(--marsh-water);
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  background:rgba(45,74,45,0.5);
+  transition:all 0.2s ease;
+}
+
+.petal-slot.filled{
+  border-color:var(--marshmallow-white);
+  background:rgba(74,122,74,0.5);
+}
+
+.petal-slot.empty{
+  opacity:0.5;
+}
+
+.petal-hint{
+  font-size:12px;
+  color:rgba(255,255,255,0.6);
+  text-align:center;
+  margin:0;
+}
+
+.petal-offer{
+  position:relative;
+}
+
+.petal-cost{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  margin-top:8px;
+  font-size:14px;
+  color:var(--marshmallow-white);
+  font-weight:bold;
+}
+
+.petal-offer.disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.petal-offer.disabled:hover{
+  transform:none;
+  box-shadow:none;
+}
+
+/* Petal HUD */
+.petal-hud{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%);
+  pointer-events:none;
+  z-index:50;
+}
+
+.petal-display{
+  background:rgba(26,46,26,0.8);
+  border:2px solid var(--marsh-water);
+  border-radius:8px;
+  padding:12px;
+  box-shadow:0 0 20px var(--marsh-glow);
+}
+
+.petal-label{
+  text-align:center;
+  font-size:12px;
+  color:rgba(255,255,255,0.7);
+  margin-bottom:8px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+
+.petal-display .petal-slots{
+  display:flex;
+  gap:8px;
+}
+
+.petal-display .petal-slot{
+  width:40px;
+  height:40px;
+  font-size:22px;
+}
+
+/* Petal Triggers in Wave Summary */
+.petal-triggers-section{
+  margin:20px 0;
+  background:rgba(45,74,45,0.3);
+  border-radius:8px;
+  padding:16px;
+}
+
+.petal-triggers-section h3{
+  margin:0 0 12px;
+  color:var(--marshmallow-white);
+  font-size:16px;
+  text-align:center;
+}
+
+.petal-triggers{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.petal-trigger{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 12px;
+  background:rgba(74,122,74,0.4);
+  border-radius:6px;
+}
+
+.petal-trigger.vapor{
+  background:rgba(74,122,122,0.4);
+}
+
+.petal-icon{
+  font-size:20px;
+}
+
+.petal-name{
+  flex:1;
+  color:var(--marshmallow-white);
+  font-weight:bold;
+}
+
+.petal-effect{
+  color:var(--marshmallow-pink);
+  font-weight:bold;
+}
+
 /* HUD Top Bar */
 .hud-top{
   position:absolute;

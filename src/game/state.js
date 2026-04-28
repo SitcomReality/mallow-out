@@ -45,4 +45,9 @@ export const gameState = {
     splash: 0,
   },
   waveInProgress: false,
+  equippedPetals: [null, null, null, null, null], // 5 petal slots
+  activePetalEffects: [], // Currently active timed effects
+  petalTriggersThisWave: [], // Track which petals triggered for wave summary
+  guaranteedFloaty: false, // Lucky Clover effect flag
+  nextKillBonus: false, // Sweet Tooth effect flag
 };

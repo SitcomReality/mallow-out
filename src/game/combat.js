@@ -5,6 +5,7 @@ import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, 
 import { damageMarshmallow } from './marshmallow.js';
 import { onMarshmallowDefeated } from './manager.js';
 import { awardPollen } from './economy.js';
+import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -100,7 +101,7 @@ export function shoot(particleSystem, bossHUD) {
       // Skewer - Hole punch with recoil
       addHoleToEnemy(gameState.currentMarshmallow, result.point, direction);
       particleSystem.createHoleSpray(result.point, direction);
-      damage = BASE_DAMAGE_HOLE + gameState.upgrades.damage;
+      damage = (BASE_DAMAGE_HOLE + gameState.upgrades.damage) * getDamageMultiplier();
       
       // Apply recoil
       ws.skewerReady = false;
@@ -114,14 +115,14 @@ export function shoot(particleSystem, bossHUD) {
       
       addSpattererDamage(gameState.currentMarshmallow, result.point, distance);
       particleSystem.createBloodSplatter(result.point, direction);
-      damage = Math.floor((BASE_DAMAGE_SPATTERER + gameState.upgrades.damage) * rangeFactor);
+      damage = Math.floor((BASE_DAMAGE_SPATTERER + gameState.upgrades.damage) * rangeFactor * getDamageMultiplier());
       
       ws.spattererCooldown = 1.0;
       
     } else if (weapon === 4) {
       // Melter - Laser beam (continuous on hold)
       addLaserDamage(gameState.currentMarshmallow, result.point);
-      damage = 0.5; // Small damage per frame
+      damage = 0.5 * getDamageMultiplier(); // Small damage per frame
       
       ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
       if (ws.melterHeat >= MELTER_MAX_HEAT) {
@@ -182,7 +183,7 @@ export function releaseCleaver(particleSystem, bossHUD) {
     addCleaverDamage(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createBloodSplatter(result.point, direction);
     
-    const damage = BASE_DAMAGE_CLEAVER + gameState.upgrades.damage;
+    const damage = (BASE_DAMAGE_CLEAVER + gameState.upgrades.damage) * getDamageMultiplier();
     awardPollen(damage);
     const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
     if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
