@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+
 :root{
   --marsh-dark:#1a2e1a;
   --marsh-base:#2d4a2d;
@@ -15,7 +17,7 @@ html,body{
   margin:0;
   background: linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
   color:#fff;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+  font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
@@ -168,7 +170,7 @@ html,body{
   inset:0;
   pointer-events:none;
   z-index:50;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+  font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', cursive;
 }
 
 .weapon-bar{
