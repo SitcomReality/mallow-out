@@ -37,10 +37,13 @@ export function getEnemyDistanceAt(enemy, point) {
   
   let dist = Math.min(Math.max(dx, dy), 0) + Math.sqrt(Math.max(dx, 0) ** 2 + Math.max(dy, 0) ** 2);
   
-  // Subtract holes
+  // Subtract holes with a small blend for "juicy" look
   for (const hole of enemy.holes) {
     const holeDist = getHoleDistanceAt(hole, point);
-    dist = Math.max(dist, -holeDist);
+    // Smooth subtraction logic
+    const k = 0.1;
+    const h = Math.max(k - Math.abs(dist - (-holeDist)), 0.0) / k;
+    dist = Math.max(dist, -holeDist) + h * h * k * 0.25;
   }
   
   return dist;

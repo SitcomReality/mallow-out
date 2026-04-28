@@ -24,6 +24,8 @@ export function createRenderer(container) {
   
   // Create post-processor
   const postProcessor = new PostProcessor(renderer);
+  postProcessor.setBrightness(1.15); // Make the world pop
+  postProcessor.setVignette(0.2);   // Softer vignette
   
   let lastScale = -1;
 

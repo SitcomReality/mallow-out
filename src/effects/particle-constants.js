@@ -8,10 +8,10 @@ export const BLOOD_PARTICLE_SIZE_END = 0.05;
 export const BLOOD_PARTICLE_GRAVITY = -15;
 export const BLOOD_PARTICLE_DRAG = 0.92;
 
-// Colors
-export const BLOOD_COLOR_R = 0.545;
-export const BLOOD_COLOR_G = 0.0;
-export const BLOOD_COLOR_B = 0.0;
+// Colors (Strawberry Jam)
+export const BLOOD_COLOR_R = 1.0;
+export const BLOOD_COLOR_G = 0.2;
+export const BLOOD_COLOR_B = 0.4;
 
 // Hole spray particles
 export const HOLE_SPRAY_PARTICLE_COUNT = 8;
