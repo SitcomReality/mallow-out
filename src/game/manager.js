@@ -4,6 +4,7 @@ import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { clearAllFX } from './fx.js';
 import { awardCaramel, resetWaveStats } from './economy.js';
+import { triggerRandomPetal } from './petals/petal-trigger.js';
 
 /**
  * Central session state for UI and system references that aren't part of core game state.
@@ -62,7 +63,6 @@ export function onMarshmallowDefeated() {
   awardCaramel();
   
   // Trigger random petal on marshmallow death
-  const { triggerRandomPetal } = require('./petals/petal-trigger.js');
   triggerRandomPetal();
   
   // Update petal HUD after trigger
