@@ -4,7 +4,8 @@ import { updateControls } from './controls.js';
 import { updateMeltingEnemies } from './melting.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
-import { session, spawnNextMarshmallow } from './manager.js';
+import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.js';
+import { damageMarshmallow } from './marshmallow.js';
 import { 
   SKEWER_RECOIL_DURATION, 
   SKEWER_RECOIL_RECOVERY,
@@ -121,8 +122,6 @@ export function runGameLoop(time) {
           const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
           session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
-          const { damageMarshmallow } = await import('./marshmallow.js');
-          const { onMarshmallowDefeated } = await import('./manager.js');
           const damage = 2 + gameState.upgrades.damage;
           const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
