@@ -15,7 +15,7 @@ html,body{
   margin:0;
   background: linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
   color:#fff;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Comic Neue', 'Comic Sans', cursive, sans-serif;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
