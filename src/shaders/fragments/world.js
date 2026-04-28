@@ -18,13 +18,6 @@ float sdFloor(vec3 p) {
 uniform sampler2D uFontTex;
 
 float sdText(vec3 p, vec3 scale, float charCode) {
-  // Fallback when font texture is not loaded
-  if (uFontTex == -1.0) {
-    float d = sdBox(p, scale);
-    float d2 = sdBox(p, scale * 0.7);
-    return max(d, -d2);
-  }
-  
   float idx = charCode - 32.0;
   if (idx < 0.0 || idx > 94.0) idx = 31.0;
   

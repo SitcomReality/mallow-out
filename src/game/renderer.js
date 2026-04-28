@@ -11,14 +11,6 @@ export function createRenderer(container) {
   const { renderer, scene, camera, quad } = createEngine(container);
   const material = createMainMaterial();
   quad.material = material;
-  
-  // Create a separate scene and perspective camera for 3D effects (particles)
-  const particleScene = new THREE.Scene();
-  const particleCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  
-  // Create particle renderer
-  const particleRenderer = new ParticleRenderer();
-  particleScene.add(particleRenderer.mesh);
 
   const uniforms = material.uniforms;
   
