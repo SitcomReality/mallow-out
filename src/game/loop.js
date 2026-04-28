@@ -14,7 +14,7 @@ import {
 } from './constants.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
-import { damageBoss } from './boss.js';
+
 import * as THREE from 'three';
 
 let lastTime = 0;
@@ -122,7 +122,6 @@ export function runGameLoop(time) {
           const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
           session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
-          const damage = 2 + gameState.upgrades.damage;
           const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
           
