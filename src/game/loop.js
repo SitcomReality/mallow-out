@@ -108,8 +108,11 @@ export function runGameLoop(time) {
         if (dist < proj.size) {
           // Hit!
           const direction = proj.velocity.clone().normalize();
-          const { addChunkToEnemy } = await import('./enemy.js');
-          const chunk = addChunkToEnemy(gameState.boss, proj.position);
+          import('./enemy.js').then(mod => {
+            const chunk = mod.addChunkToEnemy(gameState.boss, proj.position);
+            session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
+          });
+          const chunk = { repairData: { normal: direction } }; // fallback for immediate use
           session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
           const damage = 2 + gameState.upgrades.damage;
