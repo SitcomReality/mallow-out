@@ -28,7 +28,7 @@ Key functions:
 - startWaveTimer(duration)
 - updateWaveTimer(delta)
 - getRemainingTime()
-- addTimeBonus(seconds) - for when marshmallows are destroyed
+- addTimeBonus(percentage) - adds n% of wave duration when marshmallows are destroyed
 - isWaveComplete()
 
 Add to gameState:
@@ -40,6 +40,7 @@ Update src/game/manager.js
 New function: spawnNextMarshmallow()
 - Called when wave starts
 - Called when a marshmallow is destroyed (after melt animation starts)
+- *Constraint:* If there is >1 melting marshmallow, wait until there is at most 1 before spawning the next
 - Increments a counter for "marshmallows spawned this wave"
 - Each subsequent marshmallow has slightly more health
 

@@ -13,7 +13,7 @@ Implement the permanent upgrade system using Caramel currency with exponential c
 Create src/game/upgrades/upgrade-types.js
 
 Define upgrade categories:
-- Weapon upgrades (rate of fire, damage, crit chance/damage, drawback reduction)
+- Weapon upgrades (rate of fire, damage, crit chance/damage, drawback reduction) - *Applies globally to all weapons*
 - Economy upgrades (pollen per damage, wave duration)
 - Marshmallow upgrades (movement, spawn chances)
 
