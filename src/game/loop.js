@@ -37,7 +37,7 @@ export function runGameLoop(time) {
     }
     
     // Wave transition check - timer expired
-    if (gameState.waveTimer.isComplete() && gameState.meltingMarshmallows.length === 0) {
+    if (gameState.waveTimer.isComplete()) {
       gameState.waveInProgress = false;
       gameState.waveTimer.stop();
       if (session.upgradeScreen) {

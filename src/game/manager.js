@@ -2,6 +2,7 @@ import { gameState } from './state.js';
 import { STARTING_WAVE, DEFAULT_WAVE_DURATION, TIME_BONUS_PER_KILL } from './wave-constants.js';
 import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
+import { clearAllFX } from './fx.js';
 
 /**
  * Central session state for UI and system references that aren't part of core game state.
@@ -18,10 +19,21 @@ export const session = {
 };
 
 export function startWave() {
+  // Clear any existing entities and effects from previous rounds for a clean restart
+  gameState.currentMarshmallow = null;
+  gameState.meltingMarshmallows = [];
+  gameState.objects = [];
+  gameState.projectiles = [];
+  
+  if (session.particleSystem) session.particleSystem.clear();
+  clearAllFX();
+  
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
   gameState.waveTimer.start(DEFAULT_WAVE_DURATION);
   gameState.waveInProgress = true;
+  
+  rebuildObjectList();
   spawnNextMarshmallow();
 }
 
