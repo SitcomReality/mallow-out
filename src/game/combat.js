@@ -4,6 +4,7 @@ import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, addLaserDamage } from './enemy.js';
 import { damageMarshmallow } from './marshmallow.js';
 import { onMarshmallowDefeated } from './manager.js';
+import { awardPollen } from './economy.js';
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -129,6 +130,7 @@ export function shoot(particleSystem, bossHUD) {
     }
     
     if (damage > 0) {
+      awardPollen(damage);
       const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
       if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
       
@@ -181,6 +183,7 @@ export function releaseCleaver(particleSystem, bossHUD) {
     particleSystem.createBloodSplatter(result.point, direction);
     
     const damage = BASE_DAMAGE_CLEAVER + gameState.upgrades.damage;
+    awardPollen(damage);
     const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
     if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
     

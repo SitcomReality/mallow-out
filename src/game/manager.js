@@ -3,6 +3,7 @@ import { STARTING_WAVE, DEFAULT_WAVE_DURATION, TIME_BONUS_PER_KILL } from './wav
 import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { clearAllFX } from './fx.js';
+import { awardCaramel, resetWaveStats } from './economy.js';
 
 /**
  * Central session state for UI and system references that aren't part of core game state.
@@ -30,6 +31,7 @@ export function startWave() {
   
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
+  resetWaveStats();
   gameState.waveTimer.start(DEFAULT_WAVE_DURATION);
   gameState.waveInProgress = true;
   
@@ -53,6 +55,7 @@ export function spawnNextMarshmallow() {
 export function onMarshmallowDefeated() {
   gameState.marshmallowsDestroyedThisWave++;
   gameState.waveTimer.addTimeBonus(TIME_BONUS_PER_KILL);
+  awardCaramel();
   
   // Marshmallow will be moved to melting state by combat system
   // Next marshmallow spawns after check in loop

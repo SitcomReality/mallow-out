@@ -20,6 +20,15 @@ export const gameState = {
   waveTimer: new WaveTimer(),
   marshmallowsSpawnedThisWave: 0,
   marshmallowsDestroyedThisWave: 0,
+  currencies: {
+    pollen: 0,
+    caramel: 0,
+  },
+  currentWaveStats: {
+    pollenEarned: 0,
+    caramelEarned: 0,
+    damageDealt: 0,
+  },
   weaponStates: {
     skewerReady: true,
     spattererCooldown: 0,

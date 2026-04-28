@@ -10,6 +10,7 @@ import { initControls } from './src/game/controls.js';
 import { createHUD } from './src/ui/hud.js';
 import { createBossHUD } from './src/ui/boss-hud.js';
 import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
+import { createWaveSummary } from './src/ui/wave-summary.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { ParticleSystem } from './src/effects/particles.js';
 import { session, startWave, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
@@ -43,6 +44,13 @@ function startGame() {
   session.hud.show();
   
   session.bossHUD = createBossHUD();
+  
+  session.waveSummary = createWaveSummary(() => {
+    // After wave summary, show upgrade screen
+    if (session.upgradeScreen) {
+      session.upgradeScreen.show(gameState.currentWave);
+    }
+  });
   
   session.upgradeScreen = createUpgradeScreen((upgradeId) => {
     // Apply selected upgrade

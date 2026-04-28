@@ -471,3 +471,140 @@ html,body{
   background:var(--marsh-light);
   box-shadow:0 0 20px var(--marsh-glow);
 }
+
+/* Wave Summary */
+.wave-summary-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(26,46,26,0.95);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:300;
+  backdrop-filter:blur(8px);
+}
+
+.wave-summary-content{
+  background:var(--marsh-dark);
+  border:3px solid var(--marshmallow-white);
+  border-radius:16px;
+  padding:40px;
+  max-width:600px;
+  width:90%;
+  box-shadow:0 0 40px var(--marsh-glow);
+}
+
+.wave-summary-title{
+  font-size:36px;
+  text-align:center;
+  margin:0 0 30px;
+  color:var(--marshmallow-white);
+  text-transform:uppercase;
+  letter-spacing:3px;
+  text-shadow:0 0 10px var(--marsh-glow);
+}
+
+.wave-stats{
+  background:rgba(45,74,45,0.4);
+  border-radius:8px;
+  padding:20px;
+  margin-bottom:24px;
+}
+
+.stat-row{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 0;
+  font-size:16px;
+}
+
+.stat-label{
+  color:rgba(255,255,255,0.8);
+}
+
+.stat-value{
+  color:var(--marshmallow-white);
+  font-weight:bold;
+}
+
+.currency-earned{
+  margin:24px 0;
+}
+
+.currency-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:16px;
+  background:rgba(45,74,45,0.4);
+  border-radius:8px;
+  margin-bottom:12px;
+}
+
+.currency-row .currency-icon{
+  font-size:28px;
+}
+
+.currency-row .currency-label{
+  flex:1;
+  font-size:18px;
+  color:rgba(255,255,255,0.9);
+}
+
+.currency-row .currency-amount{
+  font-size:24px;
+  font-weight:bold;
+  color:var(--marshmallow-white);
+  min-width:80px;
+  text-align:right;
+}
+
+/* HUD Top Bar */
+.hud-top{
+  position:absolute;
+  top:20px;
+  left:0;
+  right:0;
+  display:flex;
+  justify-content:space-between;
+  padding:0 20px;
+  pointer-events:none;
+}
+
+.currency-display{
+  display:flex;
+  gap:20px;
+  background:rgba(26,46,26,0.8);
+  border:2px solid var(--marsh-water);
+  border-radius:8px;
+  padding:12px 16px;
+  box-shadow:0 0 20px var(--marsh-glow);
+}
+
+.currency-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.currency-item .currency-icon{
+  font-size:20px;
+}
+
+.currency-item .currency-value{
+  font-size:18px;
+  font-weight:bold;
+  color:var(--marshmallow-white);
+  min-width:40px;
+}
+
+.timer-display{
+  background:rgba(26,46,26,0.8);
+  border:2px solid var(--marshmallow-pink);
+  border-radius:8px;
+  padding:12px 24px;
+  font-size:24px;
+  font-weight:bold;
+  color:var(--marshmallow-white);
+  box-shadow:0 0 20px var(--marsh-glow);
+}

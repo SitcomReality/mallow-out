@@ -6,11 +6,13 @@ import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.js';
 import { damageMarshmallow } from './marshmallow.js';
+import { awardPollen } from './economy.js';
 import { 
   SKEWER_RECOIL_DURATION, 
   SKEWER_RECOIL_RECOVERY,
   MELTER_COOLDOWN_PER_SECOND,
   CLEAVER_CHARGE_TIME,
+  BASE_DAMAGE_CHUNK,
 } from './constants.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
@@ -40,8 +42,8 @@ export function runGameLoop(time) {
     if (gameState.waveTimer.isComplete()) {
       gameState.waveInProgress = false;
       gameState.waveTimer.stop();
-      if (session.upgradeScreen) {
-        session.upgradeScreen.show(gameState.currentWave);
+      if (session.waveSummary) {
+        session.waveSummary.show();
         document.exitPointerLock();
       }
     }
@@ -122,6 +124,8 @@ export function runGameLoop(time) {
           const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
           session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
+          const damage = BASE_DAMAGE_CHUNK + gameState.upgrades.damage;
+          awardPollen(damage);
           const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
           
@@ -157,6 +161,9 @@ export function runGameLoop(time) {
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
     rebuildObjectList();
+    
+    // Update HUD
+    if (session.hud) session.hud.update();
   }
   
   // Render call
