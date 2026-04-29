@@ -11,7 +11,7 @@ export const BASE_DAMAGE_CLEAVER = 4.5;
 export const BASE_DAMAGE_LASER_PER_TICK = 0.6;
 
 // Weapon-specific constants
-export const SKEWER_RECOIL_PITCH = 0.15; // radians
+export const SKEWER_RECOIL_PITCH = -0.5; // radians
 export const SKEWER_RECOIL_DURATION = 0.2; // seconds
 export const SKEWER_RECOIL_RECOVERY = 0.3; // seconds
 
