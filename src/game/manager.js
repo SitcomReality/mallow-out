@@ -59,6 +59,7 @@ export function spawnNextMarshmallow() {
   if (gameState.meltingMarshmallows.length > 1) return;
   
   const marshmallow = createMarshmallow(gameState.currentWave, gameState.marshmallowsSpawnedThisWave);
+  marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
   gameState.marshmallowsSpawnedThisWave++;
   

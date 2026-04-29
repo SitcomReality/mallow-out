@@ -2,6 +2,7 @@ import { settings } from '../state.js';
 import { gameState } from './state.js';
 import { updateControls } from './controls.js';
 import { updateMeltingEnemies } from './melting.js';
+import { updateSpawningMarshmallows } from './spawning.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.js';
@@ -189,6 +190,7 @@ export function runGameLoop(time) {
     session.particleSystem.update(delta);
     session.floatingTextSystem.update(delta);
     if (session.tracerSystem) session.tracerSystem.update(delta);
+    updateSpawningMarshmallows(time * 0.001);
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
     updatePetalEffects(time * 0.001);
