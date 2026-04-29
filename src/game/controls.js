@@ -44,7 +44,7 @@ export function initControls(container) {
 export function updateControls(delta) {
   // Basic WASD movement (fixed directions)
   const baseSpeed = 5;
-  const speedBonus = gameState.upgrades.moveSpeed * 0.2;
+  const speedBonus = (gameState.upgrades.move_speed || 0) * 0.2;
   const speed = baseSpeed * (1 + speedBonus) * delta;
   const yaw = gameState.player.yaw;
 
