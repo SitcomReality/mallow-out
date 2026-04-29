@@ -45,11 +45,7 @@ export function updateMeltingEnemies(currentTime) {
     
     enemy.marshmallow.position.y = currentY;
     
-    enemy.holes.forEach(hole => {
-      if (hole.meltStartY !== undefined) {
-        hole.position.y += dy;
-      }
-    });
+
     
     enemy.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
     enemy.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);

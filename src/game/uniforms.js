@@ -69,7 +69,7 @@ export function updateUniforms(uniforms, time) {
       }
       
       // Transform local to world space if parent is found
-      const parent = objects.find(o => o.id === obj.parentId);
+      const parent = gameState.objects.find(o => o.id === obj.parentId);
       if (parent) {
         const pPos = new THREE.Vector3(parent.position.x, parent.position.y, parent.position.z);
         const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
@@ -95,21 +95,23 @@ export function updateUniforms(uniforms, time) {
       gid
     );
     uniforms.uObjData1.value[i].set(finalPos.x, finalPos.y, finalPos.z, 0);
-    uniforms.uObjData2.value[i].set(obj.scale.x, obj.scale.y, obj.scale.z, 0);
     uniforms.uObjData4.value[i].set(finalRot.x, finalRot.y, finalRot.z, 0);
     const color = new THREE.Color(obj.color);
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
     
     // Pass noise parameters
-    // uObjData5.w = pupilLookX
-    // uObjData2.w = pupilLookY (hijacked)
+    const nOffset = obj.noiseOffset || { x: 0, y: 0, z: 0 };
+    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
+    
     const lookX = obj.pupilLookX || 0;
     const lookY = obj.pupilLookY || 0;
     uniforms.uObjData5.value[i].set(obj.noiseAmount || 0, obj.noiseScale || 1, obj.expression || 0, lookX);
-    uniforms.uObjData2.value[i].w = lookY;
     
-    const nOffset = obj.noiseOffset || { x: 0, y: 0, z: 0 };
-    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
+    // Set scale and hijacked lookY. Doing individual components to avoid .set() zeroing out .w
+    uniforms.uObjData2.value[i].x = obj.scale.x;
+    uniforms.uObjData2.value[i].y = obj.scale.y;
+    uniforms.uObjData2.value[i].z = obj.scale.z;
+    uniforms.uObjData2.value[i].w = lookY;
   });
   
   // Environment calculations
