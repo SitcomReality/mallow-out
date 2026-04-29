@@ -7,7 +7,7 @@ import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.js';
 import { damageMarshmallow } from './marshmallow.js';
-import { updateMarshmallowPop } from './marshmallow-pop.js';
+import { checkMarshmallowPop, executeMarshmallowPop } from './marshmallow-pop.js';
 import { awardPollen } from './economy.js';
 import { updatePetalEffects, getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
 import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultiplier, rollCriticalHit } from './upgrades/weapon-modifiers.js';
@@ -169,6 +169,9 @@ export function runGameLoop(time) {
           damage = applyCriticalMultiplier(damage);
           awardPollen(damage);
           
+          // Check for pop before applying damage
+          checkMarshmallowPop(gameState.currentMarshmallow, session.particleSystem);
+          
           const defeated = damageMarshmallow(gameState.currentMarshmallow, damage, session.particleSystem);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
           
@@ -204,14 +207,24 @@ export function runGameLoop(time) {
       
       // Update current marshmallow movement
       if (gameState.currentMarshmallow) {
-        if (gameState.currentMarshmallow.movement) {
+        if (gameState.currentMarshmallow.isPopping) {
+          // Process pop timer
+          gameState.currentMarshmallow.popTimer -= delta;
+          
+          // Telegraph visuals: Pulse red
+          const pulseSpeed = 15.0;
+          const flash = Math.sin(performance.now() * 0.02) * 0.5 + 0.5;
+          const r = Math.floor(255);
+          const g = Math.floor(255 * (1 - flash));
+          const b = Math.floor(255 * (1 - flash));
+          gameState.currentMarshmallow.marshmallow.color = `rgb(${r},${g},${b})`;
+          
+          if (gameState.currentMarshmallow.popTimer <= 0) {
+            executeMarshmallowPop(gameState.currentMarshmallow, session.particleSystem);
+            if (session.bossHUD) session.bossHUD.hide();
+          }
+        } else if (gameState.currentMarshmallow.movement) {
           updateMarshmallowMovement(gameState.currentMarshmallow, delta);
-        }
-        
-        // Update explosion countdown logic
-        const exploded = updateMarshmallowPop(gameState.currentMarshmallow, delta, session.particleSystem);
-        if (exploded && session.bossHUD) {
-          session.bossHUD.hide();
         }
       }
     }

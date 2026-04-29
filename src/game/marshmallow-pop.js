@@ -1,46 +1,35 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
-import { POP_HEALTH_THRESHOLD, POP_WARNING_DURATION, POP_KILL_DISTANCE } from './marshmallow-type-constants.js';
+import { POP_HEALTH_THRESHOLD, POP_CHANCE, POP_KILL_DISTANCE, POP_WARNING_DURATION } from './marshmallow-type-constants.js';
 import { getMarshmallowHealthPercent } from './marshmallow.js';
-import { awardCaramel, awardPollen } from './economy.js';
+import { awardCaramel } from './economy.js';
 import { createHoleSprayFX } from './fx.js';
 import { onMarshmallowDefeated } from './manager.js';
 
-export function updateMarshmallowPop(marshmallow, delta, particleSystem) {
-  if (!marshmallow) return false;
-  
+export function checkMarshmallowPop(marshmallow, particleSystem) {
   const healthPercent = getMarshmallowHealthPercent(marshmallow);
   
-  // Start countdown if health is low
-  if (healthPercent <= POP_HEALTH_THRESHOLD && !marshmallow.isAboutToPop) {
-    marshmallow.isAboutToPop = true;
-    marshmallow.popTimer = POP_WARNING_DURATION;
-    marshmallow.originalColor = marshmallow.marshmallow.color;
-  }
-
-  if (marshmallow.isAboutToPop) {
-    marshmallow.popTimer -= delta;
-    
-    // Pulsating visual effect
-    const t = 1.0 - (marshmallow.popTimer / POP_WARNING_DURATION);
-    const pulseFreq = 2.0 + t * 15.0; // Speeds up as time runs out
-    const flash = Math.sin(performance.now() * 0.01 * pulseFreq) > 0;
-    
-    if (flash) {
-      marshmallow.marshmallow.color = '#ff0000'; // Flash bright red
-    } else {
-      marshmallow.marshmallow.color = marshmallow.originalColor;
-    }
-
-    if (marshmallow.popTimer <= 0) {
-      return explodeMarshmallow(marshmallow, particleSystem);
-    }
-  }
+  if (healthPercent > POP_HEALTH_THRESHOLD) return false;
   
+  // Don't trigger if already popping
+  if (marshmallow.isPopping) return false;
+  
+  // Roll for pop chance
+  if (Math.random() > POP_CHANCE) return false;
+  
+  // Start pop sequence
+  marshmallow.isPopping = true;
+  marshmallow.popTimer = POP_WARNING_DURATION;
+  marshmallow.originalColor = marshmallow.marshmallow.color;
+  
+  console.log('[Pop] Marshmallow pop sequence started!');
+  
+  // Return false so combat.js doesn't immediately treat it as defeated
   return false;
 }
 
-function explodeMarshmallow(marshmallow, particleSystem) {
+export function executeMarshmallowPop(marshmallow, particleSystem) {
+  // Marshmallow pops!
   const marshmallowPos = new THREE.Vector3(
     marshmallow.marshmallow.position.x,
     marshmallow.marshmallow.position.y,
@@ -73,23 +62,21 @@ function explodeMarshmallow(marshmallow, particleSystem) {
     gameState.waveTimer.remaining = 0;
   }
   
-  // Award full remaining health as pollen and standard caramel
-  awardPollen(marshmallow.currentHealth);
+  // Still award caramel for the pop
   awardCaramel();
   
-  // Cleanup
+  // Clean up and mark as defeated
   if (gameState.meltingMarshmallows.length >= 2) {
     gameState.meltingMarshmallows.shift();
   }
   
-  const deadMarshmallow = gameState.currentMarshmallow;
-  deadMarshmallow.meltStartTime = performance.now() * 0.001;
-  // Restore original color for melting state so it doesn't stay red
-  deadMarshmallow.marshmallow.color = deadMarshmallow.originalColor || deadMarshmallow.marshmallow.color;
-  
-  gameState.meltingMarshmallows.push(deadMarshmallow);
+  marshmallow.meltStartTime = performance.now() * 0.001;
+  gameState.meltingMarshmallows.push(marshmallow);
   gameState.currentMarshmallow = null;
-  onMarshmallowDefeated();
   
-  return true;
+  if (window.sessionStorage.bossHUD) { // Check via session globally if possible or pass it
+      // This is handled in loop.js by clearing currentMarshmallow
+  }
+  
+  onMarshmallowDefeated();
 }
