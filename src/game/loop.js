@@ -6,6 +6,7 @@ import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.js';
 import { damageMarshmallow } from './marshmallow.js';
+import { checkMarshmallowPop } from './marshmallow-pop.js';
 import { awardPollen } from './economy.js';
 import { updatePetalEffects, getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
 import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultiplier } from './upgrades/weapon-modifiers.js';
@@ -135,7 +136,6 @@ export function runGameLoop(time) {
           awardPollen(damage);
           
           // Check for pop before applying damage
-          const { checkMarshmallowPop } = require('./marshmallow-pop.js');
           const popped = checkMarshmallowPop(gameState.currentMarshmallow, session.particleSystem);
           
           const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, session.particleSystem);

@@ -3,6 +3,7 @@ import { gameState } from './state.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, addLaserDamage } from './enemy.js';
 import { damageMarshmallow } from './marshmallow.js';
+import { checkMarshmallowPop } from './marshmallow-pop.js';
 import { onMarshmallowDefeated } from './manager.js';
 import { awardPollen } from './economy.js';
 import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
@@ -138,7 +139,6 @@ export function shoot(particleSystem, bossHUD) {
       awardPollen(damage);
       
       // Check for pop before applying damage
-      const { checkMarshmallowPop } = await import('./marshmallow-pop.js');
       const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
       
       const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
@@ -197,7 +197,6 @@ export function releaseCleaver(particleSystem, bossHUD) {
     awardPollen(damage);
     
     // Check for pop before applying damage  
-    const { checkMarshmallowPop } = await import('./marshmallow-pop.js');
     const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
     
     const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
