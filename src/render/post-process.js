@@ -65,20 +65,27 @@ export class PostProcessor {
     this.renderTarget.setSize(width, height);
   }
 
-  render(mainScene, mainCamera, effectScene = null, effectCamera = null) {
-    // Render scene to texture
+  render(mainScene, mainCamera, effectScene = null, effectCamera = null, viewmodelScene = null, viewmodelCamera = null) {
+    // 1. Render primary raymarched scene to texture
     this.renderer.setRenderTarget(this.renderTarget);
     this.renderer.autoClear = true;
     this.renderer.render(mainScene, mainCamera);
     
-    // Render effects on top if provided
+    // 2. Render particle/tracer effects on top (sharing depth)
     if (effectScene && effectCamera) {
       this.renderer.autoClear = false;
       this.renderer.clearDepth();
       this.renderer.render(effectScene, effectCamera);
     }
+
+    // 3. Render weapon viewmodel on top (clearing depth to ensure occlusion)
+    if (viewmodelScene && viewmodelCamera) {
+      this.renderer.autoClear = false;
+      this.renderer.clearDepth();
+      this.renderer.render(viewmodelScene, viewmodelCamera);
+    }
     
-    // Render post-process to screen
+    // 4. Render final post-process result to screen
     this.renderer.setRenderTarget(null);
     this.renderer.render(this.postScene, this.postCamera);
   }

@@ -20,6 +20,10 @@ export function createRenderer(container) {
   const particleScene = new THREE.Scene();
   const particleCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   particleScene.add(particleCamera);
+
+  // Create a dedicated scene for the weapon viewmodel to ensure it always renders on top
+  const viewmodelScene = new THREE.Scene();
+  viewmodelScene.add(particleCamera); // Reuse the same camera, but attached to this scene
   
   // Create particle renderer
   const particleRenderer = new ParticleRenderer();
@@ -67,9 +71,9 @@ export function createRenderer(container) {
     // Update projectiles
     projectileRenderer.update(gameState.projectiles);
     
-    // Render with post-processing, passing both the raymarching scene and particle scene
-    postProcessor.render(scene, camera, particleScene, particleCamera);
+    // Render with post-processing, passing raymarching, effects, and viewmodel scenes
+    postProcessor.render(scene, camera, particleScene, particleCamera, viewmodelScene, particleCamera);
   }
 
-  return { render, uniforms, renderer, postProcessor, tracerSystem, projectileRenderer, particleCamera, particleScene };
+  return { render, uniforms, renderer, postProcessor, tracerSystem, projectileRenderer, particleCamera, particleScene, viewmodelScene };
 }

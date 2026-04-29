@@ -43,7 +43,7 @@ function startGame() {
   session.isPaused = false;
   
   const container = document.getElementById('gameContainer');
-  const { render, tracerSystem, projectileRenderer, particleCamera, particleScene } = createRenderer(container);
+  const { render, tracerSystem, projectileRenderer, particleCamera, particleScene, viewmodelScene } = createRenderer(container);
   
   session.renderFn = render;
   session.particleSystem = new ParticleSystem();
@@ -101,8 +101,8 @@ function startGame() {
   // Initialize floating text renderer (needs camera for projection)
   session.floatingTextRenderer = new FloatingTextRenderer(particleCamera);
   
-  // Initialize weapon models (needs camera to attach to)
-  session.weaponModels = new WeaponModels(particleScene, particleCamera);
+  // Initialize weapon models (needs camera to attach to, and a scene to live in)
+  session.weaponModels = new WeaponModels(viewmodelScene, particleCamera);
   
   session.mobileControls = createMobileControls();
   session.mobileControls.show();
