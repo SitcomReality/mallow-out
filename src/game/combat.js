@@ -4,7 +4,6 @@ import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, addLaserDamage } from './enemy.js';
 import { activeFX } from './fx.js';
 import { damageMarshmallow } from './marshmallow.js';
-import { checkMarshmallowPop } from './marshmallow-pop.js';
 import { onMarshmallowDefeated, session } from './manager.js';
 import { awardPollen } from './economy.js';
 import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
