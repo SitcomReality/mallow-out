@@ -115,11 +115,6 @@ function startGame() {
   
   document.addEventListener('keyup', (e) => {
     if (!session.isPlaying || session.isPaused) return;
-    
-    // Release cleaver when mouse button released while charging
-    if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
-      releaseCleaver(session.particleSystem, session.bossHUD);
-    }
   });
   
   // Mouse Click / Shooting
