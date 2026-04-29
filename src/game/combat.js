@@ -15,8 +15,19 @@ import {
   BASE_DAMAGE_SPATTERER,
   BASE_DAMAGE_CLEAVER,
   BASE_DAMAGE_LASER_PER_TICK,
+} from './combat-constants.js';
+import {
   SKEWER_RECOIL_PITCH,
   SKEWER_RECOIL_DURATION,
+  SKEWER_RECOIL_RECOVERY,
+  GLOBBER_RECOIL_PITCH,
+  SPATTERER_RECOIL_PITCH,
+  CLEAVER_RECOIL_PITCH,
+  MELTER_RECOIL_PITCH,
+  GENERIC_RECOIL_DURATION,
+  GENERIC_RECOIL_RECOVERY,
+} from './weapons/recoil-constants.js';
+import {
   GLOBBER_PROJECTILE_SPEED,
   GLOBBER_PROJECTILE_SIZE,
   GLOBBER_FIRE_COOLDOWN,
@@ -24,7 +35,7 @@ import {
   CLEAVER_CHARGE_TIME,
   MELTER_HEAT_PER_SECOND,
   MELTER_MAX_HEAT,
-} from './constants.js';
+} from './weapons/weapon-stats.js';
 
 /**
  * Syncs the visual object list for the raymarching renderer with the current game state.

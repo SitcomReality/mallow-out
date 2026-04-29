@@ -14,11 +14,17 @@ import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultipl
 import { 
   SKEWER_RECOIL_DURATION, 
   SKEWER_RECOIL_RECOVERY,
+  GENERIC_RECOIL_DURATION,
+  GENERIC_RECOIL_RECOVERY,
+} from './weapons/recoil-constants.js';
+import {
   MELTER_COOLDOWN_PER_SECOND,
   CLEAVER_CHARGE_TIME,
-  BASE_DAMAGE_CHUNK,
   MELTER_MAX_HEAT,
-} from './constants.js';
+} from './weapons/weapon-stats.js';
+import {
+  BASE_DAMAGE_CHUNK,
+} from './combat-constants.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
 import { updateMarshmallowMovement } from './marshmallow-movement.js';

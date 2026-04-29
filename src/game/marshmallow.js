@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT } from './constants.js';
+import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_HEIGHT } from './marshmallow-constants.js';
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';

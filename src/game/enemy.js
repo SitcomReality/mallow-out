@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT, HOLE_RADIUS, CHUNK_RADIUS } from './constants.js';
+import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_HEIGHT, HOLE_RADIUS, CHUNK_RADIUS } from './marshmallow-constants.js';
 import { EXPRESSION_DEFAULT } from './face-constants.js';
 import { CHUNK_REPAIR_INITIAL_BLEND } from './repair-constants.js';
 

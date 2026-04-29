@@ -1,4 +1,4 @@
-import { MOUSE_SENSITIVITY } from './constants.js';
+import { MOUSE_SENSITIVITY } from './controls-constants.js';
 import { gameState } from './state.js';
 
 const keys = {};
