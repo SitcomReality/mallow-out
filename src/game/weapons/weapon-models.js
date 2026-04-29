@@ -99,7 +99,7 @@ export class WeaponModels {
       this.scene.remove(this.muzzleFlash);
     }
 
-    const geometry = new THREE.SphereGeometry(0.3, 8, 8);
+    const geometry = new THREE.SphereGeometry(0.12, 8, 8);
     const material = new THREE.MeshBasicMaterial({
       color: 0xffff00,
       transparent: true,
