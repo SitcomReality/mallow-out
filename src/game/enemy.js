@@ -42,34 +42,48 @@ export function createEnemy() {
   };
 }
 
+function getLocalTransform(worldPos, worldQuat, marshmallow) {
+  const mPos = new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z);
+  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
+  const mQuat = new THREE.Quaternion().setFromEuler(mRot);
+  const mQuatInv = mQuat.clone().invert();
+
+  const localPos = worldPos.clone().sub(mPos).applyQuaternion(mQuatInv);
+  const localQuat = mQuatInv.multiply(worldQuat);
+  const localRot = new THREE.Euler().setFromQuaternion(localQuat);
+
+  return { 
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
+    rotation: { x: localRot.x, y: localRot.y, z: localRot.z }
+  };
+}
+
 export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
   const holeLength = ENEMY_CYLINDER_RADIUS * 4; 
   const entryOverlap = 0.5;
-  const holePos = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2 - entryOverlap));
+  const holePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2 - entryOverlap));
   
   const up = new THREE.Vector3(0, 1, 0);
   const axis = new THREE.Vector3().crossVectors(up, rayDirection).normalize();
   const angle = Math.acos(up.dot(rayDirection));
   
-  let rotationX = 0, rotationY = 0, rotationZ = 0;
+  const worldQuat = new THREE.Quaternion();
   if (axis.length() > 0.001) {
-    const q = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-    const euler = new THREE.Euler().setFromQuaternion(q);
-    rotationX = euler.x;
-    rotationY = euler.y;
-    rotationZ = euler.z;
+    worldQuat.setFromAxisAngle(axis, angle);
   }
+
+  const local = getLocalTransform(holePosWorld, worldQuat, enemy.marshmallow);
   
   const hole = {
     id: nextId++,
     type: 'cylinder',
-    position: { x: holePos.x, y: holePos.y, z: holePos.z },
-    rotation: { x: rotationX, y: rotationY, z: rotationZ },
+    position: local.position,
+    rotation: local.rotation,
     scale: { x: HOLE_RADIUS, y: holeLength / 2, z: 0 },
     color: '#ff4d6d',
     operation: 'subtract',
     blendRadius: 0.05,
-    parentId: null,
+    parentId: enemy.marshmallow.id,
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { 
@@ -115,17 +129,23 @@ function calculateSurfaceNormal(enemy, hitPoint) {
 
 export function addChunkToEnemy(enemy, hitPoint) {
   const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
+  
+  const mRot = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  
+  const localPos = hitPoint.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z)).applyQuaternion(mQuatInv);
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
 
   const chunk = {
     id: nextId++,
     type: 'sphere',
-    position: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
     color: '#ff4d6d',
     operation: 'subtract',
     blendRadius: CHUNK_REPAIR_INITIAL_BLEND,
-    parentId: null,
+    parentId: enemy.marshmallow.id,
     noiseAmount: 0.4,
     noiseScale: 1.0,
     noiseOffset: { 
@@ -136,7 +156,7 @@ export function addChunkToEnemy(enemy, hitPoint) {
     repairData: {
       type: 'chunk',
       startTime: performance.now() * 0.001,
-      normal: worldNormal,
+      normal: localNormal,
       initialScale: CHUNK_RADIUS
     }
   };
@@ -149,24 +169,28 @@ export function addChunkToEnemy(enemy, hitPoint) {
 export function addSpattererDamage(enemy, hitPoint, distance) {
   const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
   
-  // Range-based positioning: closer shots have sphere closer to surface
+  const mRot = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  
   const maxRange = 15;
   const minRange = 3;
   const rangeFactor = Math.max(0, Math.min(1, (distance - minRange) / (maxRange - minRange)));
-  const offsetDistance = 0.2 + rangeFactor * 0.6; // 0.2 to 0.8 units from surface
+  const offsetDistance = 0.2 + rangeFactor * 0.6;
   
-  const damagePos = hitPoint.clone().add(worldNormal.clone().multiplyScalar(offsetDistance));
+  const damagePosWorld = hitPoint.clone().add(worldNormal.clone().multiplyScalar(offsetDistance));
+  const localPos = damagePosWorld.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z)).applyQuaternion(mQuatInv);
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
   
   const spatterer = {
     id: nextId++,
     type: 'sphere',
-    position: { x: damagePos.x, y: damagePos.y, z: damagePos.z },
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 0.4, y: 0.4, z: 0.4 },
     color: '#ff4d6d',
     operation: 'subtract',
     blendRadius: 0.1,
-    parentId: null,
+    parentId: enemy.marshmallow.id,
     noiseAmount: 1.5,
     noiseScale: 5.0,
     noiseOffset: { 
@@ -177,7 +201,7 @@ export function addSpattererDamage(enemy, hitPoint, distance) {
     repairData: {
       type: 'spatterer',
       startTime: performance.now() * 0.001,
-      normal: worldNormal,
+      normal: localNormal,
       initialNoiseAmount: 1.5,
       initialNoiseScale: 5.0,
       initialOffset: offsetDistance
@@ -190,43 +214,41 @@ export function addSpattererDamage(enemy, hitPoint, distance) {
 }
 
 export function addCleaverDamage(enemy, hitPoint, rayDirection) {
-  const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
-  
-  // Position cube so one corner penetrates the surface
   const penetrationDepth = 0.6;
-  const cubePos = hitPoint.clone().add(rayDirection.clone().multiplyScalar(penetrationDepth));
+  const cubePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(penetrationDepth));
   
-  // Orient cube so corner points toward hit
   const up = new THREE.Vector3(0, 1, 0);
   const axis = new THREE.Vector3().crossVectors(up, rayDirection).normalize();
   const angle = Math.acos(up.dot(rayDirection));
   
-  let rotationX = 0, rotationY = 0, rotationZ = 0;
+  const worldQuat = new THREE.Quaternion();
   if (axis.length() > 0.001) {
-    const q = new THREE.Quaternion().setFromAxisAngle(axis, angle);
-    const euler = new THREE.Euler().setFromQuaternion(q);
-    rotationX = euler.x;
-    rotationY = euler.y;
-    rotationZ = euler.z;
+    worldQuat.setFromAxisAngle(axis, angle);
   }
   
+  const local = getLocalTransform(cubePosWorld, worldQuat, enemy.marshmallow);
+  
+  const mRot = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  const localNormal = rayDirection.clone().applyQuaternion(mQuatInv);
+
   const cleaver = {
     id: nextId++,
     type: 'box',
-    position: { x: cubePos.x, y: cubePos.y, z: cubePos.z },
-    rotation: { x: rotationX + Math.PI / 4, y: rotationY, z: rotationZ + Math.PI / 4 },
+    position: local.position,
+    rotation: { x: local.rotation.x + Math.PI / 4, y: local.rotation.y, z: local.rotation.z + Math.PI / 4 },
     scale: { x: 0.8, y: 0.8, z: 0.8 },
     color: '#ff4d6d',
     operation: 'subtract',
     blendRadius: 0.3,
-    parentId: null,
+    parentId: enemy.marshmallow.id,
     noiseAmount: 0,
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
     repairData: {
       type: 'cleaver',
       startTime: performance.now() * 0.001,
-      normal: rayDirection.clone(),
+      normal: localNormal,
       initialBlend: 0.3
     }
   };
@@ -239,16 +261,22 @@ export function addCleaverDamage(enemy, hitPoint, rayDirection) {
 export function addLaserDamage(enemy, hitPoint) {
   const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
   
+  const mRot = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  
+  const localPos = hitPoint.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z)).applyQuaternion(mQuatInv);
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
+  
   const laser = {
     id: nextId++,
     type: 'sphere',
-    position: { x: hitPoint.x, y: hitPoint.y, z: hitPoint.z },
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: 0.15, y: 0.15, z: 0.15 },
     color: '#ff4d6d',
     operation: 'subtract',
     blendRadius: 0.05,
-    parentId: null,
+    parentId: enemy.marshmallow.id,
     noiseAmount: 0.3,
     noiseScale: 2.0,
     noiseOffset: { 
@@ -259,7 +287,7 @@ export function addLaserDamage(enemy, hitPoint) {
     repairData: {
       type: 'laser',
       startTime: performance.now() * 0.001,
-      normal: worldNormal,
+      normal: localNormal,
       initialScale: 0.15
     }
   };

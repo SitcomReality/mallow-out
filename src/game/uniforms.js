@@ -60,8 +60,32 @@ export function updateUniforms(uniforms, time) {
   
   objects.forEach((obj, i) => {
     let gid = 0;
-    if (obj.parentId && groupMap.has(obj.parentId)) {
-      gid = groupMap.get(obj.parentId);
+    let finalPos = { ...obj.position };
+    let finalRot = { ...obj.rotation };
+    
+    if (obj.parentId) {
+      if (groupMap.has(obj.parentId)) {
+        gid = groupMap.get(obj.parentId);
+      }
+      
+      // Transform local to world space if parent is found
+      const parent = objects.find(o => o.id === obj.parentId);
+      if (parent) {
+        const pPos = new THREE.Vector3(parent.position.x, parent.position.y, parent.position.z);
+        const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
+        const pQuat = new THREE.Quaternion().setFromEuler(pRot);
+        
+        const lPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+        const wPos = lPos.applyQuaternion(pQuat).add(pPos);
+        
+        const lRot = new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z);
+        const lQuat = new THREE.Quaternion().setFromEuler(lRot);
+        const wQuat = pQuat.clone().multiply(lQuat);
+        const wRot = new THREE.Euler().setFromQuaternion(wQuat);
+        
+        finalPos = { x: wPos.x, y: wPos.y, z: wPos.z };
+        finalRot = { x: wRot.x, y: wRot.y, z: wRot.z };
+      }
     }
 
     uniforms.uObjData0.value[i].set(
@@ -70,9 +94,9 @@ export function updateUniforms(uniforms, time) {
       obj.blendRadius || 0,
       gid
     );
-    uniforms.uObjData1.value[i].set(obj.position.x, obj.position.y, obj.position.z, 0);
+    uniforms.uObjData1.value[i].set(finalPos.x, finalPos.y, finalPos.z, 0);
     uniforms.uObjData2.value[i].set(obj.scale.x, obj.scale.y, obj.scale.z, 0);
-    uniforms.uObjData4.value[i].set(obj.rotation.x, obj.rotation.y, obj.rotation.z, 0);
+    uniforms.uObjData4.value[i].set(finalRot.x, finalRot.y, finalRot.z, 0);
     const color = new THREE.Color(obj.color);
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
     
