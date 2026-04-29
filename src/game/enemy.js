@@ -214,32 +214,34 @@ export function addSpattererDamage(enemy, hitPoint, distance) {
 }
 
 export function addCleaverDamage(enemy, hitPoint, rayDirection) {
-  const penetrationDepth = 0.15; // Shallower penetration creates a cleaner diamond profile at the surface
-  const cubePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(penetrationDepth));
+  // Use surface normal to orient the cube correctly relative to the cylinder surface
+  const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
   
+  // Base orientation: Align box Y-axis with the surface normal
   const up = new THREE.Vector3(0, 1, 0);
-  const axis = new THREE.Vector3().crossVectors(up, rayDirection).normalize();
-  const angle = Math.acos(up.dot(rayDirection));
+  const orientQuat = new THREE.Quaternion().setFromUnitVectors(up, worldNormal);
   
-  const worldQuat = new THREE.Quaternion();
-  if (axis.length() > 0.001) {
-    worldQuat.setFromAxisAngle(axis, angle);
-  }
+  // Apply 45-degree rotation on all axes to ensure a corner-first entry (diamond shape profile)
+  const angle45 = Math.PI / 4;
+  const cornerQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(angle45, angle45, angle45));
+  const worldQuat = orientQuat.multiply(cornerQuat);
+  
+  // Recess the position so only the corner enters the surface. 
+  // An offset of 0.55 relative to a 0.8 size box ensures a clean diamond-shaped indent.
+  const penetrationOffset = 0.55; 
+  const cubePosWorld = hitPoint.clone().add(worldNormal.clone().multiplyScalar(penetrationOffset));
   
   const local = getLocalTransform(cubePosWorld, worldQuat, enemy.marshmallow);
   
   const mRot = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
   const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
-  
-  // Use surface normal for repair direction so the wound retreats from the cylinder instead of digging deeper
-  const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
   const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
 
   const cleaver = {
     id: nextId++,
     type: 'box',
     position: local.position,
-    rotation: { x: local.rotation.x + Math.PI / 4, y: local.rotation.y, z: local.rotation.z + Math.PI / 4 },
+    rotation: local.rotation,
     scale: { x: 0.8, y: 0.8, z: 0.8 },
     color: '#ff4d6d',
     operation: 'subtract',
