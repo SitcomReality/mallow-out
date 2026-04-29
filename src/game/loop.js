@@ -9,7 +9,7 @@ import { damageMarshmallow } from './marshmallow.js';
 import { checkMarshmallowPop } from './marshmallow-pop.js';
 import { awardPollen } from './economy.js';
 import { updatePetalEffects, getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
-import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultiplier } from './upgrades/weapon-modifiers.js';
+import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultiplier, rollCriticalHit } from './upgrades/weapon-modifiers.js';
 import { 
   SKEWER_RECOIL_DURATION, 
   SKEWER_RECOIL_RECOVERY,
@@ -184,6 +184,8 @@ export function runGameLoop(time) {
     // Global systems that should continue processing (melting, cleanup, particles, and FX)
     // This prevents performance death between waves by allowing objects to clear themselves out.
     session.particleSystem.update(delta);
+    session.floatingTextSystem.update(delta);
+    if (session.tracerSystem) session.tracerSystem.update(delta);
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
     updatePetalEffects(time * 0.001);
@@ -192,11 +194,33 @@ export function runGameLoop(time) {
     
     // Update HUD
     if (session.hud) session.hud.update();
+    
+    // Update weapon status indicators
+    if (session.weaponStatus) {
+      const ws = gameState.weaponStates;
+      if (gameState.currentWeapon === 3 && ws.cleaverCharging) {
+        session.weaponStatus.updateCleaverCharge(ws.cleaverCharge, CLEAVER_CHARGE_TIME);
+      } else if (gameState.currentWeapon === 4 && (ws.melterHeat > 0 || ws.melterOverheated)) {
+        session.weaponStatus.updateMelterHeat(ws.melterHeat, 3.0, ws.melterOverheated);
+      } else {
+        session.weaponStatus.hide();
+      }
+    }
+    
+    // Update weapon model
+    if (session.weaponModels) {
+      session.weaponModels.update();
+    }
   }
   
   // Render call
   if (session.renderFn) {
-    session.renderFn(time, session.particleSystem);
+    session.renderFn(time, session.particleSystem, session.floatingTextSystem);
+  }
+  
+  // Render floating text
+  if (session.floatingTextRenderer) {
+    session.floatingTextRenderer.render(session.floatingTextSystem.getTexts());
   }
   
   requestAnimationFrame(runGameLoop);

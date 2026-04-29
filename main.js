@@ -15,12 +15,16 @@ import { createPauseMenu } from './src/ui/pause-menu.js';
 import { createPetalShop } from './src/ui/petal-shop.js';
 import { createPetalHUD } from './src/ui/petal-hud.js';
 import { ParticleSystem } from './src/effects/particles.js';
+import { FloatingTextSystem } from './src/effects/floating-text.js';
+import { FloatingTextRenderer } from './src/effects/floating-text-renderer.js';
 import { session, startWave, quitToMenu, togglePause } from './src/game/manager.js';
 import { createWeaponSelection } from './src/ui/weapon-selection.js';
 import { offerWeaponChoices, selectWeapon } from './src/game/weapon-selection.js';
 import { runGameLoop } from './src/game/loop.js';
 import { shoot, releaseCleaver } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
+import { WeaponModels } from './src/game/weapons/weapon-models.js';
+import { createWeaponStatus } from './src/ui/weapon-status.js';
 
 // Setup Main Menu
 document.getElementById('newGame').addEventListener('click', () => {
@@ -39,10 +43,13 @@ function startGame() {
   session.isPaused = false;
   
   const container = document.getElementById('gameContainer');
-  const { render } = createRenderer(container);
+  const { render, tracerSystem, projectileRenderer } = createRenderer(container);
   
   session.renderFn = render;
   session.particleSystem = new ParticleSystem();
+  session.floatingTextSystem = new FloatingTextSystem();
+  session.tracerSystem = tracerSystem;
+  session.projectileRenderer = projectileRenderer;
   
   // Initialize UI components
   session.hud = createHUD();
@@ -67,6 +74,8 @@ function startGame() {
   session.petalHUD = createPetalHUD();
   session.petalHUD.show();
   
+  session.weaponStatus = createWeaponStatus();
+  
   session.upgradeScreen = createUpgradeScreen(() => {
     // Continue to next wave (upgrades are purchased in the shop UI)
     gameState.currentWave++;
@@ -77,6 +86,7 @@ function startGame() {
   session.weaponSelection = createWeaponSelection((weaponIndex) => {
     selectWeapon(weaponIndex);
     if (session.hud) session.hud.setActiveWeapon(weaponIndex);
+    if (session.weaponModels) session.weaponModels.setWeapon(weaponIndex);
     startWave();
   });
   
@@ -86,7 +96,13 @@ function startGame() {
   );
   
   // Initialize Controls
-  initControls(container);
+  const { camera } = initControls(container);
+  
+  // Initialize floating text renderer (needs camera for projection)
+  session.floatingTextRenderer = new FloatingTextRenderer(camera);
+  
+  // Initialize weapon models (needs camera to attach to)
+  session.weaponModels = new WeaponModels(session.tracerSystem?.scene || new THREE.Scene(), camera);
   
   session.mobileControls = createMobileControls();
   session.mobileControls.show();

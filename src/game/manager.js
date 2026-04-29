@@ -6,6 +6,7 @@ import { rebuildObjectList } from './combat.js';
 import { clearAllFX } from './fx.js';
 import { awardCaramel, resetWaveStats } from './economy.js';
 import { triggerRandomPetal } from './petals/petal-trigger.js';
+import * as THREE from 'three';
 
 /**
  * Central session state for UI and system references that aren't part of core game state.
@@ -62,6 +63,17 @@ export function spawnNextMarshmallow() {
   gameState.marshmallowsSpawnedThisWave++;
   
   if (session.bossHUD) session.bossHUD.update(marshmallow);
+  
+  // Show spawn text
+  if (session.floatingTextSystem && marshmallow.type) {
+    const pos = new THREE.Vector3(
+      marshmallow.marshmallow.position.x,
+      marshmallow.marshmallow.position.y + 2,
+      marshmallow.marshmallow.position.z
+    );
+    session.floatingTextSystem.createInfoText(pos, marshmallow.type.name, 'info');
+  }
+  
   rebuildObjectList();
 }
 

@@ -5,10 +5,10 @@ import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, 
 import { activeFX } from './fx.js';
 import { damageMarshmallow } from './marshmallow.js';
 import { checkMarshmallowPop } from './marshmallow-pop.js';
-import { onMarshmallowDefeated } from './manager.js';
+import { onMarshmallowDefeated, session } from './manager.js';
 import { awardPollen } from './economy.js';
 import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
-import { getWeaponDamageBonus, applyCriticalMultiplier } from './upgrades/weapon-modifiers.js';
+import { getWeaponDamageBonus, applyCriticalMultiplier, rollCriticalHit } from './upgrades/weapon-modifiers.js';
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -103,6 +103,7 @@ export function shoot(particleSystem, bossHUD) {
   
   if (result.hit) {
     let damage = 0;
+    const isCritical = rollCriticalHit();
     setPupilLook(gameState.currentMarshmallow, result.point);
     
     if (weapon === 0) {
@@ -110,7 +111,14 @@ export function shoot(particleSystem, bossHUD) {
       addHoleToEnemy(gameState.currentMarshmallow, result.point, direction);
       particleSystem.createHoleSpray(result.point, direction);
       damage = (BASE_DAMAGE_HOLE + getWeaponDamageBonus()) * getDamageMultiplier();
-      damage = applyCriticalMultiplier(damage);
+      if (isCritical) damage *= 2;
+      
+      // Visual effects
+      if (session.weaponModels) session.weaponModels.animateRecoil(0.2, 0.2);
+      if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+      if (session.tracerSystem) {
+        session.tracerSystem.createTracer(origin, result.point, 0xffffff);
+      }
       
       // Apply recoil
       ws.skewerReady = false;
@@ -125,7 +133,11 @@ export function shoot(particleSystem, bossHUD) {
       addSpattererDamage(gameState.currentMarshmallow, result.point, distance);
       particleSystem.createBloodSplatter(result.point, direction);
       damage = Math.floor((BASE_DAMAGE_SPATTERER + getWeaponDamageBonus()) * rangeFactor * getDamageMultiplier());
-      damage = applyCriticalMultiplier(damage);
+      if (isCritical) damage *= 2;
+      
+      // Visual effects
+      if (session.weaponModels) session.weaponModels.animateRecoil(0.15, 0.15);
+      if (session.weaponModels) session.weaponModels.createMuzzleFlash();
       
       ws.spattererCooldown = 1.0;
       
@@ -133,7 +145,12 @@ export function shoot(particleSystem, bossHUD) {
       // Melter - Laser beam (continuous on hold)
       addLaserDamage(gameState.currentMarshmallow, result.point);
       damage = (0.5 + getWeaponDamageBonus() * 0.1) * getDamageMultiplier(); // Small damage per frame
-      damage = applyCriticalMultiplier(damage);
+      if (isCritical) damage *= 2;
+      
+      // Visual effects
+      if (session.tracerSystem) {
+        session.tracerSystem.createTracer(origin, result.point, 0xff6600);
+      }
       
       ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
       if (ws.melterHeat >= MELTER_MAX_HEAT) {
@@ -143,6 +160,11 @@ export function shoot(particleSystem, bossHUD) {
     
     if (damage > 0) {
       awardPollen(damage);
+      
+      // Show damage text
+      if (session.floatingTextSystem) {
+        session.floatingTextSystem.createDamageText(result.point, damage, isCritical);
+      }
       
       // Check for pop before applying damage
       const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
@@ -198,9 +220,19 @@ export function releaseCleaver(particleSystem, bossHUD) {
     addCleaverDamage(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createBloodSplatter(result.point, direction);
     
+    const isCritical = rollCriticalHit();
     let damage = (BASE_DAMAGE_CLEAVER + getWeaponDamageBonus()) * getDamageMultiplier();
-    damage = applyCriticalMultiplier(damage);
+    if (isCritical) damage *= 2;
     awardPollen(damage);
+    
+    // Show damage text
+    if (session.floatingTextSystem) {
+      session.floatingTextSystem.createDamageText(result.point, damage, isCritical);
+    }
+    
+    // Visual effects
+    if (session.weaponModels) session.weaponModels.animateRecoil(0.3, 0.3);
+    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     
     // Check for pop before applying damage  
     const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);

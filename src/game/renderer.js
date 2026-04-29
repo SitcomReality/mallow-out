@@ -6,6 +6,8 @@ import { settings, worldState } from '../state.js';
 import { gameState } from './state.js';
 import { PostProcessor } from '../render/post-process.js';
 import { ParticleRenderer } from '../effects/particle-renderer.js';
+import { TracerSystem } from '../effects/tracer-line.js';
+import { ProjectileRenderer } from '../effects/projectile-renderer.js';
 
 export function createRenderer(container) {
   const { renderer, scene, camera, quad } = createEngine(container);
@@ -14,13 +16,19 @@ export function createRenderer(container) {
 
   const uniforms = material.uniforms;
   
-  // Create a separate scene and perspective camera for 3D effects (particles)
+  // Create a separate scene and perspective camera for 3D effects (particles, tracers, projectiles)
   const particleScene = new THREE.Scene();
   const particleCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   
   // Create particle renderer
   const particleRenderer = new ParticleRenderer();
   particleScene.add(particleRenderer.mesh);
+  
+  // Create tracer system
+  const tracerSystem = new TracerSystem(particleScene);
+  
+  // Create projectile renderer
+  const projectileRenderer = new ProjectileRenderer(particleScene);
   
   // Create post-processor
   const postProcessor = new PostProcessor(renderer);
@@ -29,7 +37,7 @@ export function createRenderer(container) {
   
   let lastScale = -1;
 
-  function render(time, particleSystem) {
+  function render(time, particleSystem, floatingTextSystem) {
     // Dynamic resolution application
     if (settings.renderScale !== lastScale) {
       const w = Math.floor(window.innerWidth * settings.renderScale);
@@ -55,9 +63,12 @@ export function createRenderer(container) {
       particleRenderer.update(particleSystem.getParticles(), particleCamera);
     }
     
+    // Update projectiles
+    projectileRenderer.update(gameState.projectiles);
+    
     // Render with post-processing, passing both the raymarching scene and particle scene
     postProcessor.render(scene, camera, particleScene, particleCamera);
   }
 
-  return { render, uniforms, renderer, postProcessor };
+  return { render, uniforms, renderer, postProcessor, tracerSystem, projectileRenderer };
 }

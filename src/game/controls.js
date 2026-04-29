@@ -3,7 +3,11 @@ import { gameState } from './state.js';
 
 const keys = {};
 
+import * as THREE from 'three';
+
 export function initControls(container) {
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  
   // Pointer lock
   container.addEventListener('click', () => {
     container.requestPointerLock();
@@ -38,7 +42,7 @@ export function initControls(container) {
     keys[e.key.toLowerCase()] = false;
   });
 
-  return { keys };
+  return { keys, camera };
 }
 
 export function updateControls(delta) {
