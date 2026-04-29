@@ -43,13 +43,14 @@ export function updateMarshmallowMovement(marshmallow, delta) {
       // Get perpendicular direction (cross with up vector)
       const perpendicular = new THREE.Vector3().crossVectors(toPlayer, new THREE.Vector3(0, 1, 0)).normalize();
       
-      // Randomly pick clockwise or counter-clockwise
-      if (Math.random() < 0.5) perpendicular.multiplyScalar(-1);
+      // Maintain rotation direction (clockwise/counter-clockwise) to avoid erratic flips
+      if (!mov.rotationSign) mov.rotationSign = Math.random() < 0.5 ? 1 : -1;
+      perpendicular.multiplyScalar(mov.rotationSign);
       
       // Add slight radial component to maintain distance
       if (Math.abs(distDiff) > 1.0) {
-        const radialBias = distDiff > 0 ? -0.3 : 0.3; // Move in/out to correct distance
-        newDir.copy(perpendicular).multiplyScalar(1 - Math.abs(radialBias));
+        const radialBias = distDiff > 0 ? -0.4 : 0.4; // Move in/out to correct distance
+        newDir.copy(perpendicular).multiplyScalar(0.7);
         newDir.addScaledVector(toPlayer, radialBias);
       } else {
         newDir.copy(perpendicular);
@@ -98,7 +99,10 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     marshmallow.marshmallow.position.z += mov.currentDirection.z * moveSpeed;
     
     // Face movement direction
-    const angle = Math.atan2(mov.currentDirection.x, -mov.currentDirection.z);
+    // Our marshmallow is a cylinder on its side (rot.z = PI/2), so local Y-cap is the "face" vector.
+    // Initially local Y points to world (-1, 0, 0). To align it with currentDirection (dirX, dirZ),
+    // we rotate around the Y-axis by atan2(dirZ, -dirX).
+    const angle = Math.atan2(mov.currentDirection.z, -mov.currentDirection.x);
     marshmallow.marshmallow.rotation.y = angle;
   }
   
