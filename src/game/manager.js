@@ -17,6 +17,7 @@ export const session = {
   upgradeScreen: null,
   pauseMenu: null,
   particleSystem: null,
+  mobileControls: null,
   renderFn: null
 };
 
@@ -98,6 +99,7 @@ export function quitToMenu() {
   if (session.bossHUD) session.bossHUD.hide();
   if (session.upgradeScreen) session.upgradeScreen.hide();
   if (session.pauseMenu) session.pauseMenu.hide();
+  if (session.mobileControls) session.mobileControls.hide();
   
   gameState.currentMarshmallow = null;
   gameState.meltingMarshmallows = [];

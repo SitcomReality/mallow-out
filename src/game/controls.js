@@ -60,6 +60,19 @@ export function updateControls(delta) {
     gameState.player.position.x += forwardX * speed;
     gameState.player.position.z += forwardZ * speed;
   }
+  
+  // Joystick handling for mobile aiming
+  if (gameState.joystickDelta) {
+    const turnSpeed = 2.0; // radians per second
+    gameState.player.yaw += gameState.joystickDelta.x * turnSpeed * delta;
+    gameState.player.pitch += gameState.joystickDelta.y * turnSpeed * delta;
+    
+    // Clamp vertical rotation
+    gameState.player.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, gameState.player.pitch));
+    
+    gameState.player.rotation.y = gameState.player.yaw;
+    gameState.player.rotation.x = gameState.player.pitch;
+  }
   if (keys['s']) {
     gameState.player.position.x -= forwardX * speed;
     gameState.player.position.z -= forwardZ * speed;

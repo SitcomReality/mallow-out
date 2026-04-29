@@ -14,6 +14,7 @@ ${lighting}
 void main() {
   // Use vUv (0 to 1) and map to -1 to 1 for resolution-independent ray generation
   vec2 uv2 = vUv * 2.0 - 1.0;
+  uv2.x *= uResolution.x / uResolution.y;
   vec3 rd = normalize(uCamFwd + uCamRight * uv2.x + uCamUp * uv2.y);
   vec3 ro = uCamPos;
   LightEnv env = getLightEnv(uDayTime);

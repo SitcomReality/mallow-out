@@ -21,7 +21,7 @@
 }
 
 .game-title {
-  font-size: clamp(48px, 12vw, 96px);
+  font-size: clamp(36px, 12vw, 96px);
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -2px;

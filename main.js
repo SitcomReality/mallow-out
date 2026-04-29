@@ -18,6 +18,7 @@ import { ParticleSystem } from './src/effects/particles.js';
 import { session, startWave, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
 import { runGameLoop } from './src/game/loop.js';
 import { shoot, releaseCleaver } from './src/game/combat.js';
+import { createMobileControls } from './src/ui/mobile-controls.js';
 
 // Setup Main Menu
 document.getElementById('newGame').addEventListener('click', () => {
@@ -85,6 +86,9 @@ function startGame() {
   
   // Initialize Controls
   initControls(container);
+  
+  session.mobileControls = createMobileControls();
+  session.mobileControls.show();
   
   // Keyboard Bindings
   document.addEventListener('keydown', (e) => {
