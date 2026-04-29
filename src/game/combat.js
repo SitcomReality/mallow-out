@@ -139,12 +139,36 @@ export function shoot(particleSystem, bossHUD) {
     if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffffff);
     ws.skewerReady = false;
     player.recoilTime = 0;
-    player.recoilAmount = SKEWER_RECOIL_PITCH;
+    player.recoilPitchAmount = SKEWER_RECOIL_PITCH;
+    player.recoilYawAmount = (Math.random() * 0.2 - 0.1) * SKEWER_RECOIL_PITCH;
+    player.recoilKickDuration = SKEWER_RECOIL_DURATION;
+    player.recoilRecoveryDuration = SKEWER_RECOIL_RECOVERY;
+    player.recoilReturnOffset = (Math.random() * 0.2 - 0.1) * SKEWER_RECOIL_PITCH;
+  } else if (weapon === 1) {
+    player.recoilTime = 0;
+    player.recoilPitchAmount = GLOBBER_RECOIL_PITCH;
+    player.recoilYawAmount = (Math.random() * 0.04 - 0.02);
+    player.recoilKickDuration = GENERIC_RECOIL_DURATION;
+    player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY;
+    player.recoilReturnOffset = 0;
   } else if (weapon === 2) {
     if (session.weaponModels) session.weaponModels.animateRecoil(0.15, 0.15);
     if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     ws.spattererCooldown = 1.0;
+    player.recoilTime = 0;
+    player.recoilPitchAmount = SPATTERER_RECOIL_PITCH;
+    player.recoilYawAmount = (Math.random() * 0.08 - 0.04);
+    player.recoilKickDuration = GENERIC_RECOIL_DURATION;
+    player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY;
+    player.recoilReturnOffset = 0;
   } else if (weapon === 4 && shouldTraceMelter) {
+    // Small jitter for melter
+    player.recoilTime = 0;
+    player.recoilPitchAmount = MELTER_RECOIL_PITCH;
+    player.recoilYawAmount = (Math.random() * 0.02 - 0.01);
+    player.recoilKickDuration = 0.05;
+    player.recoilRecoveryDuration = 0.05;
+    player.recoilReturnOffset = 0;
     if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xff6600);
   }
 
@@ -240,6 +264,13 @@ export function releaseCleaver(particleSystem, bossHUD) {
   // Visual effects (always trigger on release if charged)
   if (session.weaponModels) session.weaponModels.animateRecoil(0.3, 0.3);
   if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+
+  player.recoilTime = 0;
+  player.recoilPitchAmount = CLEAVER_RECOIL_PITCH;
+  player.recoilYawAmount = (Math.random() * 0.1 - 0.05);
+  player.recoilKickDuration = GENERIC_RECOIL_DURATION * 1.5;
+  player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY * 1.5;
+  player.recoilReturnOffset = 0;
 
   if (result.hit && gameState.currentMarshmallow) {
     setPupilLook(gameState.currentMarshmallow, result.point);

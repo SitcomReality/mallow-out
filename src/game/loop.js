@@ -89,32 +89,45 @@ export function runGameLoop(time) {
     // Weapon state updates
     const ws = gameState.weaponStates;
     
-    // Skewer recoil recovery
-    if (!ws.skewerReady) {
+    // Generalized recoil system
+    const player = gameState.player;
+    if (player.recoilPitchAmount !== 0 || player.recoilYawAmount !== 0) {
       const petalFireRateMult = getFireRateMultiplier();
       const upgradeFireRateMult = getWeaponFireRateMultiplier();
-      const totalMult = petalFireRateMult * upgradeFireRateMult;
+      const totalMult = (gameState.currentWeapon === 0) ? (petalFireRateMult * upgradeFireRateMult) : 1.0;
       
-      // We scale delta by totalMult to speed up the sequence
-      gameState.player.recoilTime += delta / totalMult;
+      const kickDur = player.recoilKickDuration || 0.1;
+      const recDur = player.recoilRecoveryDuration || 0.2;
       
-      if (gameState.player.recoilTime < SKEWER_RECOIL_DURATION) {
-        // Phase 1: Rapid kick upwards
-        const kickDelta = (gameState.player.recoilAmount * (delta / totalMult)) / SKEWER_RECOIL_DURATION;
-        gameState.player.pitch -= kickDelta;
-      } else if (gameState.player.recoilTime < SKEWER_RECOIL_DURATION + SKEWER_RECOIL_RECOVERY) {
-        // Phase 2: Slower recovery back to center
-        const recoveryDelta = (gameState.player.recoilAmount * (delta / totalMult)) / SKEWER_RECOIL_RECOVERY;
-        gameState.player.pitch += recoveryDelta;
+      player.recoilTime += delta / totalMult;
+      
+      if (player.recoilTime < kickDur) {
+        // Phase 1: Kick
+        const frameT = (delta / totalMult) / kickDur;
+        player.pitch += player.recoilPitchAmount * frameT;
+        player.yaw += player.recoilYawAmount * frameT;
+      } else if (player.recoilTime < kickDur + recDur) {
+        // Phase 2: Recovery
+        const frameT = (delta / totalMult) / recDur;
+        
+        // Recover kick amount minus the desired permanent offset
+        const pRec = (player.recoilPitchAmount - (player.recoilReturnOffset || 0)) * frameT;
+        const yRec = player.recoilYawAmount * frameT;
+        
+        player.pitch -= pRec;
+        player.yaw -= yRec;
       } else {
-        // Sequence finished
-        ws.skewerReady = true;
-        gameState.player.recoilAmount = 0;
+        // End of recoil sequence
+        if (gameState.currentWeapon === 0) ws.skewerReady = true;
+        player.recoilPitchAmount = 0;
+        player.recoilYawAmount = 0;
+        player.recoilReturnOffset = 0;
       }
       
-      // Sync rotation and clamp to prevent looking past poles
-      gameState.player.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, gameState.player.pitch));
-      gameState.player.rotation.x = gameState.player.pitch;
+      // Sync and clamp
+      player.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, player.pitch));
+      player.rotation.x = player.pitch;
+      player.rotation.y = player.yaw;
     }
     
     const petalFireRateMult = getFireRateMultiplier();

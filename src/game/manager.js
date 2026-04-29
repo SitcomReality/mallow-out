@@ -127,6 +127,10 @@ export function quitToMenu() {
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
   gameState.waveTimer.stop();
+  gameState.player.recoilTime = 0;
+  gameState.player.recoilPitchAmount = 0;
+  gameState.player.recoilYawAmount = 0;
+  gameState.player.recoilReturnOffset = 0;
   gameState.weaponStates = {
     skewerReady: true,
     globberCooldown: 0,
