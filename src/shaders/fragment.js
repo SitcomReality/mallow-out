@@ -28,7 +28,7 @@ void main() {
     if (float(i) >= uMaxSteps) break;
     hitP = ro + rd * t;
     vec4 res = map(hitP);
-    if (res.x < EPSILON * max(1.0, t)) {
+    if (res.x < EPSILON * t) {
       hitCol = res.yzw;
       hit = true;
       break;
