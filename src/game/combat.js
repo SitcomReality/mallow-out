@@ -206,7 +206,6 @@ export function releaseCleaver(particleSystem, bossHUD) {
   
   // Only fire if sufficiently charged
   if (ws.cleaverCharge < CLEAVER_CHARGE_TIME) {
-    ws.cleaverCharge = 0;
     return;
   }
   

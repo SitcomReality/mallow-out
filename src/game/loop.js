@@ -105,6 +105,9 @@ export function runGameLoop(time) {
     // Cleaver charging
     if (ws.cleaverCharging) {
       ws.cleaverCharge = Math.min(CLEAVER_CHARGE_TIME, ws.cleaverCharge + delta);
+    } else {
+      // Deplete at the same speed if not charging
+      ws.cleaverCharge = Math.max(0, ws.cleaverCharge - delta);
     }
     
     // Melter heat management
