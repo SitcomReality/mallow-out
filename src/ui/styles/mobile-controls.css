@@ -1,0 +1,56 @@
+.mobile-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  display: none;
+}
+
+.joystick-zone {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 50%;
+  pointer-events: auto;
+}
+
+.mobile-actions {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  pointer-events: auto;
+}
+
+.mobile-shoot-btn {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: var(--jam-red);
+  border: 6px solid var(--mallow-white);
+  box-shadow: 0 10px 30px rgba(255, 77, 109, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-shoot-btn:active {
+  transform: scale(0.9);
+  background: var(--mallow-pink-deep);
+}
+
+.nipple .back {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border: 4px solid var(--mallow-white) !important;
+  backdrop-filter: blur(5px);
+}
+
+.nipple .front {
+  background: var(--mallow-white) !important;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+}
