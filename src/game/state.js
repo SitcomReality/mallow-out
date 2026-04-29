@@ -58,4 +58,5 @@ export const gameState = {
   petalTriggersThisWave: [], // Track which petals triggered for wave summary
   guaranteedFloaty: false, // Lucky Clover effect flag
   nextKillBonus: false, // Sweet Tooth effect flag
+  waveEndReason: null, // 'TIME_OUT' or 'MALLOW_POP'
 };

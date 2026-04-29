@@ -40,6 +40,16 @@
   text-transform: uppercase;
 }
 
+.wave-end-reason {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--jam-red);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
 .upgrade-subtitle, .petal-hint {
   font-size: 18px;
   text-align: center;

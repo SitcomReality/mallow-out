@@ -42,6 +42,7 @@ export function checkMarshmallowPop(marshmallow, particleSystem) {
   if (distToPlayer < POP_KILL_DISTANCE) {
     // Player dies - end wave immediately
     console.log('[Pop] Player was too close to popping marshmallow! Wave ended.');
+    gameState.waveEndReason = 'MALLOW_POP';
     gameState.waveTimer.remaining = 0;
   }
   

@@ -51,6 +51,11 @@ export function runGameLoop(time) {
       if (gameState.waveTimer.isComplete()) {
         gameState.waveInProgress = false;
         gameState.waveTimer.stop();
+        
+        if (!gameState.waveEndReason) {
+          gameState.waveEndReason = 'TIME_OUT';
+        }
+        
         if (session.waveSummary) {
           session.waveSummary.show();
           document.exitPointerLock();

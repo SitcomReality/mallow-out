@@ -37,6 +37,7 @@ export function startWave() {
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
   gameState.petalTriggersThisWave = []; // Reset petal triggers for new wave
+  gameState.waveEndReason = null;
   resetWaveStats();
   
   // Apply wave duration upgrade

@@ -9,6 +9,9 @@ export function createWaveSummary(onContinue) {
   
   function show() {
     const stats = gameState.currentWaveStats;
+    const reasonText = gameState.waveEndReason === 'MALLOW_POP' 
+      ? '💥 Caught in a Mallow-splosion!' 
+      : '⏰ Time Ran Out!';
     
     // Build petal triggers section
     let petalTriggersHTML = '';
@@ -57,6 +60,7 @@ export function createWaveSummary(onContinue) {
     
     container.innerHTML = `
       <div class="wave-summary-content">
+        <div class="wave-end-reason">${reasonText}</div>
         <h2 class="wave-summary-title">Wave ${gameState.currentWave} Complete!</h2>
         
         <div class="wave-stats">
