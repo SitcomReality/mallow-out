@@ -7,7 +7,7 @@ import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.js';
 import { damageMarshmallow } from './marshmallow.js';
-import { checkMarshmallowPop } from './marshmallow-pop.js';
+import { updateMarshmallowPop } from './marshmallow-pop.js';
 import { awardPollen } from './economy.js';
 import { updatePetalEffects, getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
 import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultiplier, rollCriticalHit } from './upgrades/weapon-modifiers.js';
@@ -169,10 +169,7 @@ export function runGameLoop(time) {
           damage = applyCriticalMultiplier(damage);
           awardPollen(damage);
           
-          // Check for pop before applying damage
-          const popped = checkMarshmallowPop(gameState.currentMarshmallow, session.particleSystem);
-          
-          const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, session.particleSystem);
+          const defeated = damageMarshmallow(gameState.currentMarshmallow, damage, session.particleSystem);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
           
           if (defeated) {
@@ -206,8 +203,16 @@ export function runGameLoop(time) {
       updateControls(delta);
       
       // Update current marshmallow movement
-      if (gameState.currentMarshmallow && gameState.currentMarshmallow.movement) {
-        updateMarshmallowMovement(gameState.currentMarshmallow, delta);
+      if (gameState.currentMarshmallow) {
+        if (gameState.currentMarshmallow.movement) {
+          updateMarshmallowMovement(gameState.currentMarshmallow, delta);
+        }
+        
+        // Update explosion countdown logic
+        const exploded = updateMarshmallowPop(gameState.currentMarshmallow, delta, session.particleSystem);
+        if (exploded && session.bossHUD) {
+          session.bossHUD.hide();
+        }
       }
     }
     

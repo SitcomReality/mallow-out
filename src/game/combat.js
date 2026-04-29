@@ -189,10 +189,7 @@ export function shoot(particleSystem, bossHUD) {
         session.floatingTextSystem.createDamageText(result.point, damage, isCritical);
       }
       
-      // Check for pop before applying damage
-      const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
-      
-      const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
+      const defeated = damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
       if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
       
       if (defeated) {
@@ -256,10 +253,7 @@ export function releaseCleaver(particleSystem, bossHUD) {
       session.floatingTextSystem.createDamageText(result.point, damage, isCritical);
     }
     
-    // Check for pop before applying damage  
-    const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
-    
-    const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
+    const defeated = damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
     if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
     
     if (defeated) {
