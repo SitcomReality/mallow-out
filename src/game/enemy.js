@@ -214,7 +214,7 @@ export function addSpattererDamage(enemy, hitPoint, distance) {
 }
 
 export function addCleaverDamage(enemy, hitPoint, rayDirection) {
-  const penetrationDepth = 0.6;
+  const penetrationDepth = 0.15; // Shallower penetration creates a cleaner diamond profile at the surface
   const cubePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(penetrationDepth));
   
   const up = new THREE.Vector3(0, 1, 0);
@@ -230,7 +230,10 @@ export function addCleaverDamage(enemy, hitPoint, rayDirection) {
   
   const mRot = new THREE.Euler(enemy.marshmallow.rotation.x, enemy.marshmallow.rotation.y, enemy.marshmallow.rotation.z);
   const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
-  const localNormal = rayDirection.clone().applyQuaternion(mQuatInv);
+  
+  // Use surface normal for repair direction so the wound retreats from the cylinder instead of digging deeper
+  const worldNormal = calculateSurfaceNormal(enemy, hitPoint);
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
 
   const cleaver = {
     id: nextId++,
