@@ -8,6 +8,7 @@ import { session, spawnNextMarshmallow, onMarshmallowDefeated } from './manager.
 import { damageMarshmallow } from './marshmallow.js';
 import { awardPollen } from './economy.js';
 import { updatePetalEffects, getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
+import { getWeaponFireRateMultiplier, getWeaponDamageBonus, applyCriticalMultiplier } from './upgrades/weapon-modifiers.js';
 import { 
   SKEWER_RECOIL_DURATION, 
   SKEWER_RECOIL_RECOVERY,
@@ -87,10 +88,12 @@ export function runGameLoop(time) {
       }
     }
     
-    // Spatterer cooldown (affected by fire rate boost)
+    // Spatterer cooldown (affected by fire rate boost and upgrades)
     if (ws.spattererCooldown > 0) {
-      const fireRateMult = getFireRateMultiplier();
-      ws.spattererCooldown = Math.max(0, ws.spattererCooldown - delta / fireRateMult);
+      const petalFireRateMult = getFireRateMultiplier();
+      const upgradeFireRateMult = getWeaponFireRateMultiplier();
+      const totalMult = petalFireRateMult * upgradeFireRateMult;
+      ws.spattererCooldown = Math.max(0, ws.spattererCooldown - delta / totalMult);
     }
     
     // Cleaver charging
@@ -126,7 +129,8 @@ export function runGameLoop(time) {
           const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
           session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
-          const damage = (BASE_DAMAGE_CHUNK + gameState.upgrades.damage) * getDamageMultiplier();
+          let damage = (BASE_DAMAGE_CHUNK + getWeaponDamageBonus()) * getDamageMultiplier();
+          damage = applyCriticalMultiplier(damage);
           awardPollen(damage);
           const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);

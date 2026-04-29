@@ -1,5 +1,6 @@
 import { gameState } from './state.js';
 import { STARTING_WAVE, DEFAULT_WAVE_DURATION, TIME_BONUS_PER_KILL } from './wave-constants.js';
+import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
 import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { clearAllFX } from './fx.js';
@@ -35,7 +36,12 @@ export function startWave() {
   gameState.marshmallowsDestroyedThisWave = 0;
   gameState.petalTriggersThisWave = []; // Reset petal triggers for new wave
   resetWaveStats();
-  gameState.waveTimer.start(DEFAULT_WAVE_DURATION);
+  
+  // Apply wave duration upgrade
+  const durationBonus = getUpgradeEffect('wave_duration', gameState.upgrades.wave_duration || 0);
+  const waveDuration = DEFAULT_WAVE_DURATION + durationBonus;
+  
+  gameState.waveTimer.start(waveDuration);
   gameState.waveInProgress = true;
   
   rebuildObjectList();
@@ -119,10 +125,12 @@ export function quitToMenu() {
   };
   gameState.upgrades = {
     damage: 0,
-    fireRate: 0,
-    moveSpeed: 0,
-    health: 0,
-    splash: 0,
+    fire_rate: 0,
+    crit_chance: 0,
+    pollen_multiplier: 0,
+    wave_duration: 0,
+    caramel_bonus: 0,
+    move_speed: 0,
   };
   
   if (session.particleSystem) session.particleSystem.clear();

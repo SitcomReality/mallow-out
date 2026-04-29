@@ -6,6 +6,7 @@ import { damageMarshmallow } from './marshmallow.js';
 import { onMarshmallowDefeated } from './manager.js';
 import { awardPollen } from './economy.js';
 import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
+import { getWeaponDamageBonus, applyCriticalMultiplier } from './upgrades/weapon-modifiers.js';
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -101,7 +102,8 @@ export function shoot(particleSystem, bossHUD) {
       // Skewer - Hole punch with recoil
       addHoleToEnemy(gameState.currentMarshmallow, result.point, direction);
       particleSystem.createHoleSpray(result.point, direction);
-      damage = (BASE_DAMAGE_HOLE + gameState.upgrades.damage) * getDamageMultiplier();
+      damage = (BASE_DAMAGE_HOLE + getWeaponDamageBonus()) * getDamageMultiplier();
+      damage = applyCriticalMultiplier(damage);
       
       // Apply recoil
       ws.skewerReady = false;
@@ -115,14 +117,16 @@ export function shoot(particleSystem, bossHUD) {
       
       addSpattererDamage(gameState.currentMarshmallow, result.point, distance);
       particleSystem.createBloodSplatter(result.point, direction);
-      damage = Math.floor((BASE_DAMAGE_SPATTERER + gameState.upgrades.damage) * rangeFactor * getDamageMultiplier());
+      damage = Math.floor((BASE_DAMAGE_SPATTERER + getWeaponDamageBonus()) * rangeFactor * getDamageMultiplier());
+      damage = applyCriticalMultiplier(damage);
       
       ws.spattererCooldown = 1.0;
       
     } else if (weapon === 4) {
       // Melter - Laser beam (continuous on hold)
       addLaserDamage(gameState.currentMarshmallow, result.point);
-      damage = 0.5 * getDamageMultiplier(); // Small damage per frame
+      damage = (0.5 + getWeaponDamageBonus() * 0.1) * getDamageMultiplier(); // Small damage per frame
+      damage = applyCriticalMultiplier(damage);
       
       ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
       if (ws.melterHeat >= MELTER_MAX_HEAT) {
@@ -183,7 +187,8 @@ export function releaseCleaver(particleSystem, bossHUD) {
     addCleaverDamage(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createBloodSplatter(result.point, direction);
     
-    const damage = (BASE_DAMAGE_CLEAVER + gameState.upgrades.damage) * getDamageMultiplier();
+    let damage = (BASE_DAMAGE_CLEAVER + getWeaponDamageBonus()) * getDamageMultiplier();
+    damage = applyCriticalMultiplier(damage);
     awardPollen(damage);
     const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
     if (bossHUD) bossHUD.update(gameState.currentMarshmallow);

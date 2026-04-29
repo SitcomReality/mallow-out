@@ -65,16 +65,8 @@ function startGame() {
   session.petalHUD = createPetalHUD();
   session.petalHUD.show();
   
-  session.upgradeScreen = createUpgradeScreen((upgradeId) => {
-    // Apply selected upgrade
-    if (gameState.upgrades.hasOwnProperty(upgradeId)) {
-        gameState.upgrades[upgradeId]++;
-    } else if (upgradeId === 'fire_rate') {
-        gameState.upgrades.fireRate++;
-    } else if (upgradeId === 'move_speed') {
-        gameState.upgrades.moveSpeed++;
-    }
-    
+  session.upgradeScreen = createUpgradeScreen(() => {
+    // Continue to next wave (upgrades are purchased in the shop UI)
     gameState.currentWave++;
     startWave();
   });

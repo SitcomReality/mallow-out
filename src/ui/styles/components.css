@@ -68,13 +68,49 @@
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   text-align: center;
   box-shadow: 0 8px 0 #dee2e6;
+  position: relative;
 }
 
-.upgrade-card:hover {
+.upgrade-card:hover:not(.disabled) {
   transform: translateY(-8px);
   border-color: var(--mallow-pink);
   background: white;
   box-shadow: 0 12px 24px rgba(0,0,0,0.05), 0 12px 0 var(--mallow-pink-deep);
+}
+
+.upgrade-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+.upgrade-level {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--marsh-deep);
+  background: rgba(183, 228, 199, 0.3);
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin: 8px 0;
+}
+
+.upgrade-effect {
+  font-size: 13px;
+  color: var(--mallow-pink-deep);
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.upgrade-cost {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--caramel-amber);
 }
 
 .currency-item {

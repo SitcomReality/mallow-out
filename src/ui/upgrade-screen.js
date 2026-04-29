@@ -1,64 +1,54 @@
 import { UPGRADES_PER_SCREEN } from '../game/wave-constants.js';
-
-const availableUpgrades = [
-  {
-    id: 'damage',
-    icon: '💥',
-    name: 'More Damage',
-    description: 'Deal +1 damage per hit'
-  },
-  {
-    id: 'fire_rate',
-    icon: '⚡',
-    name: 'Rapid Fire',
-    description: 'Reduce cooldown between shots'
-  },
-  {
-    id: 'move_speed',
-    icon: '👟',
-    name: 'Quick Feet',
-    description: 'Move 20% faster'
-  },
-  {
-    id: 'health',
-    icon: '❤️',
-    name: 'Vitality',
-    description: 'Increase max health (future)'
-  },
-  {
-    id: 'splash',
-    icon: '🌊',
-    name: 'Splash Damage',
-    description: 'Attacks create larger splashes'
-  }
-];
+import { gameState } from '../game/state.js';
+import { ALL_UPGRADES } from '../game/upgrades/upgrade-types.js';
+import { getUpgradeCost, getUpgradeEffect, isMaxLevel } from '../game/upgrades/upgrade-calculator.js';
 
 export function createUpgradeScreen(onContinue) {
   const screen = document.getElementById('upgradeScreen');
   
   function show(wave) {
-    // Select random upgrades
+    // Filter out maxed upgrades, select random options
+    const availableUpgrades = ALL_UPGRADES.filter(upgrade => 
+      !isMaxLevel(upgrade.id, gameState.upgrades[upgrade.id] || 0)
+    );
+    
     const shuffled = [...availableUpgrades].sort(() => Math.random() - 0.5);
-    const options = shuffled.slice(0, UPGRADES_PER_SCREEN);
+    const options = shuffled.slice(0, Math.min(UPGRADES_PER_SCREEN, shuffled.length));
     
     let selectedUpgrade = null;
     
-    const optionsHTML = options.map(upgrade => `
-      <div class="upgrade-card" data-id="${upgrade.id}">
-        <div class="upgrade-card-icon">${upgrade.icon}</div>
-        <h3 class="upgrade-card-name">${upgrade.name}</h3>
-        <p class="upgrade-card-desc">${upgrade.description}</p>
-      </div>
-    `).join('');
+    const optionsHTML = options.map(upgrade => {
+      const currentLevel = gameState.upgrades[upgrade.id] || 0;
+      const cost = getUpgradeCost(upgrade.id, currentLevel);
+      const canAfford = gameState.currencies.caramel >= cost;
+      const effect = getUpgradeEffect(upgrade.id, currentLevel + 1);
+      
+      return `
+        <div class="upgrade-card ${canAfford ? '' : 'disabled'}" data-id="${upgrade.id}" data-cost="${cost}">
+          <div class="upgrade-card-icon">${upgrade.icon}</div>
+          <h3 class="upgrade-card-name">${upgrade.name}</h3>
+          <div class="upgrade-level">Level ${currentLevel}</div>
+          <p class="upgrade-card-desc">${upgrade.description}</p>
+          <div class="upgrade-effect">${upgrade.shortDesc}</div>
+          <div class="upgrade-cost">
+            <span class="currency-icon">🍯</span>
+            <span>${cost}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
     
     screen.innerHTML = `
       <div class="upgrade-content">
-        <h2 class="upgrade-title">Wave ${wave} Complete!</h2>
-        <p class="upgrade-subtitle">Choose an upgrade</p>
+        <h2 class="upgrade-title">Permanent Upgrades</h2>
+        <p class="upgrade-subtitle">
+          <span class="currency-icon">🍯</span> 
+          ${gameState.currencies.caramel} Caramel Available
+        </p>
         <div class="upgrade-options">
           ${optionsHTML}
         </div>
-        <button class="continue-btn" disabled>Select an upgrade to continue</button>
+        <button class="continue-btn" id="upgradeSkip">Skip & Continue to Wave ${wave + 1}</button>
       </div>
     `;
     
@@ -66,26 +56,33 @@ export function createUpgradeScreen(onContinue) {
     
     // Add click handlers
     const cards = screen.querySelectorAll('.upgrade-card');
-    const continueBtn = screen.querySelector('.continue-btn');
     
     cards.forEach(card => {
       card.addEventListener('click', () => {
-        // Deselect all
-        cards.forEach(c => c.style.borderColor = 'var(--marsh-water)');
-        // Select this one
-        card.style.borderColor = 'var(--marshmallow-white)';
-        selectedUpgrade = card.dataset.id;
-        continueBtn.disabled = false;
-        continueBtn.textContent = 'Continue to Next Wave';
+        const upgradeId = card.dataset.id;
+        const cost = parseInt(card.dataset.cost);
+        
+        if (card.classList.contains('disabled')) return;
+        if (gameState.currencies.caramel < cost) return;
+        
+        // Purchase upgrade
+        gameState.currencies.caramel -= cost;
+        if (!gameState.upgrades[upgradeId]) gameState.upgrades[upgradeId] = 0;
+        gameState.upgrades[upgradeId]++;
+        
+        // Refresh display
+        show(wave);
       });
     });
     
-    continueBtn.addEventListener('click', () => {
-      if (selectedUpgrade) {
-        hide();
-        onContinue(selectedUpgrade);
-      }
+    document.getElementById('upgradeSkip').addEventListener('click', () => {
+      hide();
+      onContinue(null);
     });
+  }
+  
+  function hide() {
+    screen.classList.remove('active');
   }
   
   function hide() {
