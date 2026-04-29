@@ -95,15 +95,26 @@ export function runGameLoop(time) {
       const upgradeFireRateMult = getWeaponFireRateMultiplier();
       const totalMult = petalFireRateMult * upgradeFireRateMult;
       
-      // We scale delta by totalMult to speed up the recovery and recoil
+      // We scale delta by totalMult to speed up the sequence
       gameState.player.recoilTime += delta / totalMult;
+      
       if (gameState.player.recoilTime < SKEWER_RECOIL_DURATION) {
-        const t = gameState.player.recoilTime / SKEWER_RECOIL_DURATION;
-        gameState.player.pitch -= gameState.player.recoilAmount * (1 - t) * (delta / totalMult) / SKEWER_RECOIL_DURATION;
-      } else if (gameState.player.recoilTime >= SKEWER_RECOIL_DURATION + SKEWER_RECOIL_RECOVERY) {
+        // Phase 1: Rapid kick upwards
+        const kickDelta = (gameState.player.recoilAmount * (delta / totalMult)) / SKEWER_RECOIL_DURATION;
+        gameState.player.pitch -= kickDelta;
+      } else if (gameState.player.recoilTime < SKEWER_RECOIL_DURATION + SKEWER_RECOIL_RECOVERY) {
+        // Phase 2: Slower recovery back to center
+        const recoveryDelta = (gameState.player.recoilAmount * (delta / totalMult)) / SKEWER_RECOIL_RECOVERY;
+        gameState.player.pitch += recoveryDelta;
+      } else {
+        // Sequence finished
         ws.skewerReady = true;
         gameState.player.recoilAmount = 0;
       }
+      
+      // Sync rotation and clamp to prevent looking past poles
+      gameState.player.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, gameState.player.pitch));
+      gameState.player.rotation.x = gameState.player.pitch;
     }
     
     const petalFireRateMult = getFireRateMultiplier();
