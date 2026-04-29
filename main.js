@@ -15,7 +15,9 @@ import { createPauseMenu } from './src/ui/pause-menu.js';
 import { createPetalShop } from './src/ui/petal-shop.js';
 import { createPetalHUD } from './src/ui/petal-hud.js';
 import { ParticleSystem } from './src/effects/particles.js';
-import { session, startWave, quitToMenu, togglePause, switchWeapon } from './src/game/manager.js';
+import { session, startWave, quitToMenu, togglePause } from './src/game/manager.js';
+import { createWeaponSelection } from './src/ui/weapon-selection.js';
+import { offerWeaponChoices, selectWeapon } from './src/game/weapon-selection.js';
 import { runGameLoop } from './src/game/loop.js';
 import { shoot, releaseCleaver } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
@@ -68,6 +70,13 @@ function startGame() {
   session.upgradeScreen = createUpgradeScreen(() => {
     // Continue to next wave (upgrades are purchased in the shop UI)
     gameState.currentWave++;
+    offerWeaponChoices();
+    session.weaponSelection.show();
+  });
+
+  session.weaponSelection = createWeaponSelection((weaponIndex) => {
+    selectWeapon(weaponIndex);
+    if (session.hud) session.hud.setActiveWeapon(weaponIndex);
     startWave();
   });
   
@@ -86,14 +95,6 @@ function startGame() {
   document.addEventListener('keydown', (e) => {
     if (!session.isPlaying) return;
     if (e.key === 'Escape') togglePause();
-    
-    if (!session.isPaused) {
-      if (e.key === '1') switchWeapon(0);
-      if (e.key === '2') switchWeapon(1);
-      if (e.key === '3') switchWeapon(2);
-      if (e.key === '4') switchWeapon(3);
-      if (e.key === '5') switchWeapon(4);
-    }
   });
   
   document.addEventListener('keyup', (e) => {
@@ -132,6 +133,7 @@ function startGame() {
   }, 1000/30); // 30 FPS for continuous beam
   
   // Begin the adventure
-  startWave();
+  offerWeaponChoices();
+  session.weaponSelection.show();
   requestAnimationFrame(runGameLoop);
 }

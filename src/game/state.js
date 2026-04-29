@@ -16,6 +16,8 @@ export const gameState = {
   objects: [],
   projectiles: [], // for globber projectiles
   currentWeapon: 0,
+  selectedWeaponForWave: null,
+  weaponChoicesOffered: [null, null],
   currentWave: STARTING_WAVE,
   waveTimer: new WaveTimer(),
   marshmallowsSpawnedThisWave: 0,

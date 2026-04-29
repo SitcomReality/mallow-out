@@ -16,6 +16,7 @@ export const session = {
   hud: null,
   bossHUD: null,
   upgradeScreen: null,
+  weaponSelection: null,
   pauseMenu: null,
   particleSystem: null,
   mobileControls: null,
@@ -79,11 +80,6 @@ export function onMarshmallowDefeated() {
   // Next marshmallow spawns after check in loop
 }
 
-export function switchWeapon(index) {
-  gameState.currentWeapon = index;
-  if (session.hud) session.hud.setActiveWeapon(index);
-}
-
 export function togglePause() {
   session.isPaused = !session.isPaused;
   if (session.isPaused) {
@@ -104,6 +100,7 @@ export function quitToMenu() {
   if (session.hud) session.hud.hide();
   if (session.bossHUD) session.bossHUD.hide();
   if (session.upgradeScreen) session.upgradeScreen.hide();
+  if (session.weaponSelection) session.weaponSelection.hide();
   if (session.pauseMenu) session.pauseMenu.hide();
   if (session.mobileControls) session.mobileControls.hide();
   
@@ -112,6 +109,7 @@ export function quitToMenu() {
   gameState.objects = [];
   gameState.projectiles = [];
   gameState.currentWave = STARTING_WAVE;
+  gameState.selectedWeaponForWave = null;
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
   gameState.waveTimer.stop();

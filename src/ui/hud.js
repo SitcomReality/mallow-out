@@ -19,25 +19,20 @@ export function createHUD() {
     </div>
     
     <div class="weapon-bar">
-      <div class="weapon-slot active" data-weapon="0" title="Skewer - High recoil">
+      <div class="weapon-slot active" data-weapon="0" title="Skewer">
         <span>🗡️</span>
-        <div class="key-hint">1</div>
       </div>
-      <div class="weapon-slot" data-weapon="1" title="Globber - Slow projectile">
+      <div class="weapon-slot" data-weapon="1" title="Globber" style="display:none;">
         <span>🟣</span>
-        <div class="key-hint">2</div>
       </div>
-      <div class="weapon-slot" data-weapon="2" title="Spatterer - Close range">
+      <div class="weapon-slot" data-weapon="2" title="Spatterer" style="display:none;">
         <span>💥</span>
-        <div class="key-hint">3</div>
       </div>
-      <div class="weapon-slot" data-weapon="3" title="Cleaver - Requires charging">
+      <div class="weapon-slot" data-weapon="3" title="Cleaver" style="display:none;">
         <span>🪓</span>
-        <div class="key-hint">4</div>
       </div>
-      <div class="weapon-slot" data-weapon="4" title="Melter - Overheats">
+      <div class="weapon-slot" data-weapon="4" title="Melter" style="display:none;">
         <span>🔥</span>
-        <div class="key-hint">5</div>
       </div>
     </div>
   `;
@@ -51,7 +46,13 @@ export function createHUD() {
     },
     setActiveWeapon(index) {
       hud.querySelectorAll('.weapon-slot').forEach((slot, i) => {
-        slot.classList.toggle('active', i === index);
+        if (i === index) {
+          slot.classList.add('active');
+          slot.style.display = 'flex';
+        } else {
+          slot.classList.remove('active');
+          slot.style.display = 'none';
+        }
       });
     },
     update() {
