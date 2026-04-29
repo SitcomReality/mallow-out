@@ -201,7 +201,7 @@ export function runGameLoop(time) {
     // Update weapon status indicators
     if (session.weaponStatus) {
       const ws = gameState.weaponStates;
-      if (gameState.currentWeapon === 3 && ws.cleaverCharging) {
+      if (gameState.currentWeapon === 3 && (ws.cleaverCharging || ws.cleaverCharge > 0)) {
         session.weaponStatus.updateCleaverCharge(ws.cleaverCharge, CLEAVER_CHARGE_TIME);
       } else if (gameState.currentWeapon === 4 && (ws.melterHeat > 0 || ws.melterOverheated)) {
         session.weaponStatus.updateMelterHeat(ws.melterHeat, 3.0, ws.melterOverheated);

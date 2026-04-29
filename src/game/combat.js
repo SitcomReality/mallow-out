@@ -99,10 +99,7 @@ export function shoot(particleSystem, bossHUD) {
   
   // Weapon 3 (Cleaver) - Charging mechanic
   if (weapon === 3) {
-    if (!ws.cleaverCharging) {
-      ws.cleaverCharging = true;
-      ws.cleaverCharge = 0;
-    }
+    ws.cleaverCharging = true;
     return; // Continue charging
   }
   
