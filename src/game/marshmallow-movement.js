@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
+import { MIN_APPROACH_DISTANCE } from './marshmallow-type-constants.js';
 
 /**
  * Updates marshmallow movement based on its type and behavior
@@ -19,6 +20,22 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const bobOffset = Math.sin(mov.bobPhase) * mov.bobAmplitude;
   marshmallow.marshmallow.position.y = mov.baseY + bobOffset;
   
+  // Calculate relative player info
+  const playerPos = gameState.player.position;
+  const toPlayer = new THREE.Vector3().subVectors(playerPos, pos);
+  const distToPlayer = toPlayer.length();
+  toPlayer.normalize();
+
+  // Handle immediate proximity avoidance (Panic retreat)
+  const tooClose = distToPlayer < MIN_APPROACH_DISTANCE;
+  const isFriendly = mov.pattern === 'approaching';
+
+  if (tooClose && !isFriendly && mov.pattern !== 'stationary') {
+    // If we're not friendly and too close, force retreat regardless of timer
+    const retreatDir = toPlayer.clone().multiplyScalar(-1);
+    mov.targetDirection.copy(retreatDir).normalize();
+  }
+
   // Update movement timer
   mov.moveTimer += delta;
   
@@ -26,12 +43,6 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   if (mov.moveTimer > mov.changeDirectionInterval) {
     mov.moveTimer = 0;
     mov.changeDirectionInterval = 2.0 + Math.random() * 3.0;
-    
-    // Calculate desired direction based on behavior
-    const playerPos = gameState.player.position;
-    const toPlayer = new THREE.Vector3().subVectors(playerPos, pos);
-    const distToPlayer = toPlayer.length();
-    toPlayer.normalize();
     
     let newDir = new THREE.Vector3();
     
@@ -69,10 +80,15 @@ export function updateMarshmallowMovement(marshmallow, delta) {
       newDir.normalize();
       
     } else if (mov.pattern === 'approaching') {
-      // Friendly type - move toward player
-      newDir.copy(toPlayer);
-      newDir.x += (Math.random() - 0.5) * 0.3;
-      newDir.z += (Math.random() - 0.5) * 0.3;
+      // Friendly type - move toward player only if outside minimum distance
+      if (distToPlayer > MIN_APPROACH_DISTANCE) {
+        newDir.copy(toPlayer);
+        newDir.x += (Math.random() - 0.5) * 0.3;
+        newDir.z += (Math.random() - 0.5) * 0.3;
+      } else {
+        // Already at closest range, just stop
+        newDir.set(0, 0, 0);
+      }
       newDir.normalize();
       
     } else if (mov.pattern === 'frantic') {
@@ -94,7 +110,13 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   
   // Apply movement if not stationary
   if (mov.pattern !== 'stationary') {
-    const moveSpeed = mov.speed * delta;
+    let moveSpeed = mov.speed * delta;
+    
+    // Stop friendly marshmallows if they are at or within minimum range
+    if (isFriendly && distToPlayer <= MIN_APPROACH_DISTANCE) {
+      moveSpeed = 0;
+    }
+
     marshmallow.marshmallow.position.x += mov.currentDirection.x * moveSpeed;
     marshmallow.marshmallow.position.z += mov.currentDirection.z * moveSpeed;
     
