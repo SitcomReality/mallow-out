@@ -6,6 +6,7 @@ import { getUpgradeCost, getUpgradeEffect, isMaxLevel } from '../game/upgrades/u
 export function createUpgradeScreen(onContinue) {
   const screen = document.getElementById('upgradeScreen');
   let currentOptions = []; // Persist options across purchases in a single wave
+  let purchasedThisWave = new Set();
   
   function show(wave) {
     // If we're entering the shop for the first time this wave, pick 3 random upgrades
@@ -22,21 +23,23 @@ export function createUpgradeScreen(onContinue) {
       const currentLevel = gameState.upgrades[upgrade.id] || 0;
       const cost = getUpgradeCost(upgrade.id, currentLevel);
       const maxed = isMaxLevel(upgrade.id, currentLevel);
-      const canAfford = !maxed && gameState.currencies.caramel >= cost;
+      const alreadyPurchased = purchasedThisWave.has(upgrade.id);
+      const canAfford = !maxed && !alreadyPurchased && gameState.currencies.caramel >= cost;
       
       return `
-        <div class="upgrade-card ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''}" data-id="${upgrade.id}" data-cost="${cost}">
+        <div class="upgrade-card ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${alreadyPurchased ? 'purchased' : ''}" data-id="${upgrade.id}" data-cost="${cost}">
           <div class="upgrade-card-icon">${upgrade.icon}</div>
           <h3 class="upgrade-card-name">${upgrade.name}</h3>
-          <div class="upgrade-level">${maxed ? 'MAX LEVEL' : 'Level ' + currentLevel}</div>
+          <div class="upgrade-level">${maxed ? 'MAX LEVEL' : alreadyPurchased ? 'PURCHASED' : 'Level ' + currentLevel}</div>
           <p class="upgrade-card-desc">${upgrade.description}</p>
           <div class="upgrade-effect">${upgrade.shortDesc}</div>
-          ${!maxed ? `
+          ${(!maxed && !alreadyPurchased) ? `
             <div class="upgrade-cost">
               <span class="currency-icon">🍯</span>
               <span>${cost}</span>
             </div>
           ` : ''}
+          ${alreadyPurchased ? '<div class="upgrade-purchased-badge">✓ Bought</div>' : ''}
         </div>
       `;
     }).join('');
@@ -66,12 +69,13 @@ export function createUpgradeScreen(onContinue) {
         const currentLevel = gameState.upgrades[upgradeId] || 0;
         const cost = getUpgradeCost(upgradeId, currentLevel);
         
-        if (card.classList.contains('disabled') || card.classList.contains('maxed')) return;
+        if (card.classList.contains('disabled') || card.classList.contains('maxed') || card.classList.contains('purchased')) return;
         if (gameState.currencies.caramel < cost) return;
         
         // Purchase upgrade
         gameState.currencies.caramel -= cost;
         gameState.upgrades[upgradeId] = currentLevel + 1;
+        purchasedThisWave.add(upgradeId);
         
         // Re-render the same options
         show(wave);
@@ -81,6 +85,7 @@ export function createUpgradeScreen(onContinue) {
     document.getElementById('upgradeSkip').addEventListener('click', () => {
       // Clear options for next wave's shop visit
       currentOptions = [];
+      purchasedThisWave.clear();
       hide();
       onContinue(null);
     });

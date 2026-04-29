@@ -84,6 +84,22 @@
   filter: grayscale(0.5);
 }
 
+.upgrade-card.purchased {
+  border-color: var(--marsh-green);
+  background: rgba(183, 228, 199, 0.1);
+  box-shadow: none;
+  cursor: default;
+  filter: none;
+  opacity: 1;
+}
+
+.upgrade-purchased-badge {
+  margin-top: 12px;
+  color: var(--marsh-green);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .upgrade-level {
   font-size: 12px;
   font-weight: 700;
