@@ -1,0 +1,192 @@
+.wave-summary-overlay, #upgradeScreen, #pauseMenu {
+  position: fixed;
+  inset: 0;
+  background: rgba(183, 228, 199, 0.85); /* Marsh Mint Overlay */
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.wave-summary-overlay.active, #upgradeScreen.active, #pauseMenu.active {
+  display: flex;
+}
+
+.upgrade-content, .wave-summary-content, .pause-content {
+  background: var(--mallow-white);
+  border-radius: 48px;
+  padding: 48px;
+  max-width: 640px;
+  width: 90%;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
+  border: 8px solid var(--marsh-mint);
+  position: relative;
+  overflow: hidden;
+}
+
+.upgrade-title, .wave-summary-title, .pause-title {
+  font-size: 42px;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 16px;
+  color: var(--marsh-deep);
+  text-transform: uppercase;
+}
+
+.upgrade-subtitle, .petal-hint {
+  font-size: 18px;
+  text-align: center;
+  color: var(--mallow-pink-deep);
+  margin: 0 0 40px;
+  font-weight: 700;
+}
+
+.upgrade-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.wave-stats {
+  background: rgba(183, 228, 199, 0.3);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.currency-earned {
+  margin: 24px 0;
+}
+
+.currency-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(183, 228, 199, 0.4);
+  border-radius: 100px;
+  margin-bottom: 12px;
+}
+
+.currency-row .currency-label {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.currency-row .currency-amount {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.petal-inventory {
+  margin-bottom: 24px;
+  background: rgba(183, 228, 199, 0.3);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+.petal-slots {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.petal-slot {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--mallow-white);
+}
+
+.petal-slot.filled {
+  background: var(--mallow-white);
+  box-shadow: var(--ui-glow);
+}
+
+.petal-triggers-section {
+  margin: 20px 0;
+  background: rgba(183, 228, 199, 0.3);
+  border-radius: 24px;
+  padding: 20px;
+}
+
+.petal-trigger {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 100px;
+  margin-bottom: 8px;
+}
+
+.petal-trigger.vapor {
+  background: rgba(251, 133, 0, 0.1);
+  border: 1px solid var(--caramel-amber);
+}
+
+.petal-name {
+  flex: 1;
+  font-weight: 700;
+}
+
+.petal-effect {
+  color: var(--caramel-amber);
+  font-weight: 900;
+}
+
+/* Settings/Pause specific */
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(183, 228, 199, 0.2);
+  border-radius: 100px;
+  margin-bottom: 8px;
+}
+
+.pause-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.pause-btn {
+  flex: 1;
+  padding: 16px;
+  border-radius: 100px;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 3px solid var(--marsh-deep);
+}
+
+.pause-btn:not(.secondary) {
+  background: var(--marsh-deep);
+  color: white;
+}
+
+.pause-btn.secondary {
+  background: white;
+  color: var(--marsh-deep);
+}

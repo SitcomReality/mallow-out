@@ -1,0 +1,89 @@
+.big-btn {
+  appearance: none;
+  border: none;
+  padding: 20px 60px;
+  font-size: 28px;
+  font-weight: 900;
+  border-radius: 100px;
+  background: var(--mallow-pink);
+  color: white;
+  box-shadow: 
+    0 8px 0px var(--mallow-pink-deep),
+    0 15px 30px rgba(251, 111, 146, 0.3);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.big-btn:hover {
+  transform: scale(1.05) translateY(-5px);
+  background: var(--mallow-white);
+  color: var(--mallow-pink-deep);
+  box-shadow: 
+    0 8px 0px var(--mallow-pink),
+    0 20px 40px rgba(251, 111, 146, 0.4);
+}
+
+.big-btn:active { 
+  transform: scale(0.95) translateY(4px);
+  box-shadow: 0 4px 0px var(--mallow-pink-deep);
+}
+
+.continue-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  background: var(--mallow-pink);
+  color: white;
+  border-radius: 100px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 0 var(--mallow-pink-deep);
+}
+
+.continue-btn:hover:not(:disabled) {
+  background: var(--mallow-white);
+  color: var(--mallow-pink-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 var(--mallow-pink);
+}
+
+.continue-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.upgrade-card {
+  background: #f8f9fa;
+  border: 4px solid #e9ecef;
+  border-radius: 32px;
+  padding: 24px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+  box-shadow: 0 8px 0 #dee2e6;
+}
+
+.upgrade-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--mallow-pink);
+  background: white;
+  box-shadow: 0 12px 24px rgba(0,0,0,0.05), 0 12px 0 var(--mallow-pink-deep);
+}
+
+.currency-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--mallow-white);
+  border-radius: 100px;
+  padding: 8px 20px 8px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 3px solid var(--marsh-mint);
+}
