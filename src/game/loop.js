@@ -20,6 +20,7 @@ import {
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
 import { updateMarshmallowMovement } from './marshmallow-movement.js';
+import { updateFX } from './fx.js';
 
 import * as THREE from 'three';
 
@@ -36,25 +37,28 @@ export function runGameLoop(time) {
   const delta = (time - lastTime) * 0.001;
   lastTime = time;
   
-  if (!session.isPaused && gameState.waveInProgress) {
-    // Update wave timer
-    if (gameState.waveTimer.active) {
-      gameState.waveTimer.update(delta);
-    }
-    
-    // Wave transition check - timer expired
-    if (gameState.waveTimer.isComplete()) {
-      gameState.waveInProgress = false;
-      gameState.waveTimer.stop();
-      if (session.waveSummary) {
-        session.waveSummary.show();
-        document.exitPointerLock();
+  if (!session.isPaused) {
+    // Wave-specific gameplay logic
+    if (gameState.waveInProgress) {
+      // Update wave timer
+      if (gameState.waveTimer.active) {
+        gameState.waveTimer.update(delta);
       }
-    }
-    
-    // Spawn next marshmallow if needed
-    if (!gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
-      spawnNextMarshmallow();
+      
+      // Wave transition check - timer expired
+      if (gameState.waveTimer.isComplete()) {
+        gameState.waveInProgress = false;
+        gameState.waveTimer.stop();
+        if (session.waveSummary) {
+          session.waveSummary.show();
+          document.exitPointerLock();
+        }
+      }
+      
+      // Spawn next marshmallow if needed
+      if (!gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
+        spawnNextMarshmallow();
+      }
     }
 
     // Dynamic resolution scaling based on framerate
@@ -167,18 +171,23 @@ export function runGameLoop(time) {
       if (idx > -1) gameState.projectiles.splice(idx, 1);
     }
 
-    // Logic updates
-    updateControls(delta);
-    
-    // Update current marshmallow movement
-    if (gameState.currentMarshmallow && gameState.currentMarshmallow.movement) {
-      updateMarshmallowMovement(gameState.currentMarshmallow, delta);
+    // Logic updates (some only during active wave)
+    if (gameState.waveInProgress) {
+      updateControls(delta);
+      
+      // Update current marshmallow movement
+      if (gameState.currentMarshmallow && gameState.currentMarshmallow.movement) {
+        updateMarshmallowMovement(gameState.currentMarshmallow, delta);
+      }
     }
     
+    // Global systems that should continue processing (melting, cleanup, particles, and FX)
+    // This prevents performance death between waves by allowing objects to clear themselves out.
     session.particleSystem.update(delta);
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
     updatePetalEffects(time * 0.001);
+    updateFX(time * 0.001);
     rebuildObjectList();
     
     // Update HUD

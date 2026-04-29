@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { gameState } from './state.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, addLaserDamage } from './enemy.js';
+import { activeFX } from './fx.js';
 import { damageMarshmallow } from './marshmallow.js';
 import { checkMarshmallowPop } from './marshmallow-pop.js';
 import { onMarshmallowDefeated } from './manager.js';
@@ -36,6 +37,11 @@ export function rebuildObjectList() {
   for (const melting of gameState.meltingMarshmallows) {
     gameState.objects.push(melting.marshmallow);
     gameState.objects.push(...melting.holes);
+  }
+
+  // Add active visual effects to the raymarching scene
+  if (activeFX && activeFX.length > 0) {
+    gameState.objects.push(...activeFX);
   }
 }
 
