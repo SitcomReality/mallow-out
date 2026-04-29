@@ -78,10 +78,18 @@ export function shoot(particleSystem, bossHUD) {
     -Math.cos(player.yaw) * Math.cos(player.pitch)
   ).normalize();
   
+  // Calculate a visual start point (weapon tip) for projectiles and tracers
+  const right = new THREE.Vector3(Math.cos(player.yaw), 0, Math.sin(player.yaw));
+  const up = new THREE.Vector3(0, 1, 0); // Simplified up
+  const visualOrigin = origin.clone()
+    .add(right.multiplyScalar(0.3))
+    .add(up.multiplyScalar(-0.2))
+    .add(direction.clone().multiplyScalar(0.5));
+  
   // Weapon 1 (Globber) - Create projectile instead of instant hit
   if (weapon === 1) {
     gameState.projectiles.push({
-      position: origin.clone(),
+      position: visualOrigin.clone(),
       velocity: direction.clone().multiplyScalar(GLOBBER_PROJECTILE_SPEED),
       size: GLOBBER_PROJECTILE_SIZE,
       lifetime: 5.0,
@@ -117,7 +125,7 @@ export function shoot(particleSystem, bossHUD) {
       if (session.weaponModels) session.weaponModels.animateRecoil(0.2, 0.2);
       if (session.weaponModels) session.weaponModels.createMuzzleFlash();
       if (session.tracerSystem) {
-        session.tracerSystem.createTracer(origin, result.point, 0xffffff);
+        session.tracerSystem.createTracer(visualOrigin, result.point, 0xffffff);
       }
       
       // Apply recoil
@@ -149,7 +157,7 @@ export function shoot(particleSystem, bossHUD) {
       
       // Visual effects
       if (session.tracerSystem) {
-        session.tracerSystem.createTracer(origin, result.point, 0xff6600);
+        session.tracerSystem.createTracer(visualOrigin, result.point, 0xff6600);
       }
       
       ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);

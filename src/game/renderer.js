@@ -19,6 +19,7 @@ export function createRenderer(container) {
   // Create a separate scene and perspective camera for 3D effects (particles, tracers, projectiles)
   const particleScene = new THREE.Scene();
   const particleCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  particleScene.add(particleCamera);
   
   // Create particle renderer
   const particleRenderer = new ParticleRenderer();
@@ -70,5 +71,5 @@ export function createRenderer(container) {
     postProcessor.render(scene, camera, particleScene, particleCamera);
   }
 
-  return { render, uniforms, renderer, postProcessor, tracerSystem, projectileRenderer };
+  return { render, uniforms, renderer, postProcessor, tracerSystem, projectileRenderer, particleCamera, particleScene };
 }

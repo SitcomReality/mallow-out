@@ -74,6 +74,7 @@ export class PostProcessor {
     // Render effects on top if provided
     if (effectScene && effectCamera) {
       this.renderer.autoClear = false;
+      this.renderer.clearDepth();
       this.renderer.render(effectScene, effectCamera);
     }
     
