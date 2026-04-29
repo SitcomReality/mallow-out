@@ -106,29 +106,40 @@ export function shoot(particleSystem, bossHUD) {
   const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
   const result = castRay(origin, direction, distFunc);
   
+  // Determine visual endpoint for tracers/effects
+  const effectEnd = result.hit ? result.point : origin.clone().add(direction.clone().multiplyScalar(60));
+
+  // Handle weapon firing visual feedback (recoil, muzzle flash, tracers) regardless of hit
+  if (weapon === 0) {
+    if (session.weaponModels) session.weaponModels.animateRecoil(0.2, 0.2);
+    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+    if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffffff);
+    ws.skewerReady = false;
+    player.recoilTime = 0;
+    player.recoilAmount = SKEWER_RECOIL_PITCH;
+  } else if (weapon === 2) {
+    if (session.weaponModels) session.weaponModels.animateRecoil(0.15, 0.15);
+    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+    ws.spattererCooldown = 1.0;
+  } else if (weapon === 4) {
+    if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xff6600);
+    ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
+    if (ws.melterHeat >= MELTER_MAX_HEAT) {
+      ws.melterOverheated = true;
+    }
+  }
+
   if (result.hit) {
     let damage = 0;
     const isCritical = rollCriticalHit();
     setPupilLook(gameState.currentMarshmallow, result.point);
     
     if (weapon === 0) {
-      // Skewer - Hole punch with recoil
+      // Skewer - Hole punch
       addHoleToEnemy(gameState.currentMarshmallow, result.point, direction);
       particleSystem.createHoleSpray(result.point, direction);
       damage = (BASE_DAMAGE_HOLE + getWeaponDamageBonus()) * getDamageMultiplier();
       if (isCritical) damage *= 2;
-      
-      // Visual effects
-      if (session.weaponModels) session.weaponModels.animateRecoil(0.2, 0.2);
-      if (session.weaponModels) session.weaponModels.createMuzzleFlash();
-      if (session.tracerSystem) {
-        session.tracerSystem.createTracer(visualOrigin, result.point, 0xffffff);
-      }
-      
-      // Apply recoil
-      ws.skewerReady = false;
-      player.recoilTime = 0;
-      player.recoilAmount = SKEWER_RECOIL_PITCH;
       
     } else if (weapon === 2) {
       // Spatterer - Shotgun with range penalty
@@ -140,27 +151,11 @@ export function shoot(particleSystem, bossHUD) {
       damage = Math.floor((BASE_DAMAGE_SPATTERER + getWeaponDamageBonus()) * rangeFactor * getDamageMultiplier());
       if (isCritical) damage *= 2;
       
-      // Visual effects
-      if (session.weaponModels) session.weaponModels.animateRecoil(0.15, 0.15);
-      if (session.weaponModels) session.weaponModels.createMuzzleFlash();
-      
-      ws.spattererCooldown = 1.0;
-      
     } else if (weapon === 4) {
       // Melter - Laser beam (continuous on hold)
       addLaserDamage(gameState.currentMarshmallow, result.point);
       damage = (0.5 + getWeaponDamageBonus() * 0.1) * getDamageMultiplier(); // Small damage per frame
       if (isCritical) damage *= 2;
-      
-      // Visual effects
-      if (session.tracerSystem) {
-        session.tracerSystem.createTracer(visualOrigin, result.point, 0xff6600);
-      }
-      
-      ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
-      if (ws.melterHeat >= MELTER_MAX_HEAT) {
-        ws.melterOverheated = true;
-      }
     }
     
     if (damage > 0) {
@@ -219,6 +214,10 @@ export function releaseCleaver(particleSystem, bossHUD) {
   const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
   const result = castRay(origin, direction, distFunc);
   
+  // Visual effects (always trigger on release if charged)
+  if (session.weaponModels) session.weaponModels.animateRecoil(0.3, 0.3);
+  if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+
   if (result.hit && gameState.currentMarshmallow) {
     setPupilLook(gameState.currentMarshmallow, result.point);
     addCleaverDamage(gameState.currentMarshmallow, result.point, direction);
@@ -233,10 +232,6 @@ export function releaseCleaver(particleSystem, bossHUD) {
     if (session.floatingTextSystem) {
       session.floatingTextSystem.createDamageText(result.point, damage, isCritical);
     }
-    
-    // Visual effects
-    if (session.weaponModels) session.weaponModels.animateRecoil(0.3, 0.3);
-    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     
     // Check for pop before applying damage  
     const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
