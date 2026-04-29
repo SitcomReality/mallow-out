@@ -29,9 +29,14 @@ export function awardCaramel() {
   gameState.currentWaveStats.caramelEarned += caramel;
 }
 
+import { saveGame } from './persistence.js';
+
 export function finalizeWaveEarnings() {
   gameState.currencies.pollen += gameState.currentWaveStats.pollenEarned;
   gameState.currencies.caramel += gameState.currentWaveStats.caramelEarned;
+  
+  // Persist progress whenever earnings are finalized (end of wave)
+  saveGame();
 }
 
 export function resetWaveStats() {

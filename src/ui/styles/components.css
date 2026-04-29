@@ -30,6 +30,32 @@
   box-shadow: 0 4px 0px var(--mallow-pink-deep);
 }
 
+.secondary-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--mallow-pink-deep);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 10px 20px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  text-decoration: underline;
+  margin-top: 10px;
+}
+
+.secondary-btn:hover {
+  opacity: 1;
+}
+
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .continue-btn {
   width: 100%;
   padding: 14px;

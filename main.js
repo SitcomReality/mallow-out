@@ -25,14 +25,45 @@ import { shoot, releaseCleaver } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
 import { WeaponModels } from './src/game/weapons/weapon-models.js';
 import { createWeaponStatus } from './src/ui/weapon-status.js';
+import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
 
 // Setup Main Menu
-document.getElementById('newGame').addEventListener('click', () => {
+const mainBtn = document.getElementById('mainBtn');
+const resetBtn = document.getElementById('resetGame');
+
+function updateMenuUI() {
+  if (hasSaveGame()) {
+    mainBtn.textContent = 'Continue';
+    resetBtn.style.display = 'block';
+  } else {
+    mainBtn.textContent = 'New Game';
+    resetBtn.style.display = 'none';
+  }
+}
+
+mainBtn.addEventListener('click', () => {
+  if (hasSaveGame()) {
+    loadGame();
+  }
+  enterGame();
+});
+
+resetBtn.addEventListener('click', () => {
+  if (confirm("Are you sure you want to start a new game? This will erase all your progress, upgrades, and petals!")) {
+    clearSaveGame();
+    // Refresh to clear state or just call enterGame after wiping
+    window.location.reload(); 
+  }
+});
+
+function enterGame() {
   document.getElementById('menu').style.display = 'none';
   document.getElementById('gameContainer').style.display = 'block';
   document.getElementById('crosshair').style.display = 'block';
   startGame();
-});
+}
+
+updateMenuUI();
 
 /**
  * Initializes all systems and starts the game session.
