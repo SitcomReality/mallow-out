@@ -136,7 +136,12 @@ export function shoot(particleSystem, bossHUD) {
     
     if (damage > 0) {
       awardPollen(damage);
-      const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
+      
+      // Check for pop before applying damage
+      const { checkMarshmallowPop } = await import('./marshmallow-pop.js');
+      const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
+      
+      const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
       if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
       
       if (defeated) {
@@ -190,7 +195,12 @@ export function releaseCleaver(particleSystem, bossHUD) {
     let damage = (BASE_DAMAGE_CLEAVER + getWeaponDamageBonus()) * getDamageMultiplier();
     damage = applyCriticalMultiplier(damage);
     awardPollen(damage);
-    const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
+    
+    // Check for pop before applying damage  
+    const { checkMarshmallowPop } = await import('./marshmallow-pop.js');
+    const popped = checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
+    
+    const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
     if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
     
     if (defeated) {

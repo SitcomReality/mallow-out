@@ -8,10 +8,11 @@ export function createBossHUD() {
     }
     
     const healthPercent = (marshmallow.currentHealth / marshmallow.maxHealth) * 100;
+    const typeName = marshmallow.type ? marshmallow.type.name : 'Marshmallow';
     
     hud.innerHTML = `
       <div class="boss-info">
-        <h2 class="boss-name">Marshmallow #${marshmallow.spawnIndex + 1}</h2>
+        <h2 class="boss-name">${typeName} #${marshmallow.spawnIndex + 1}</h2>
         <p class="boss-wave">Wave ${marshmallow.wave}</p>
       </div>
       <div class="boss-health-bar">

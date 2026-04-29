@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_SPAWN_RADIUS, ENEMY_HEIGHT } from './constants.js';
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
+import { selectMarshmallowType } from './marshmallow-spawn.js';
+import { BASE_MOVEMENT_SPEED, BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
 
 let nextId = 1;
 
@@ -11,8 +13,20 @@ export function createMarshmallow(wave, spawnIndex) {
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   
-  // Marshmallow color (white/pink)
-  const color = new THREE.Color().setHSL(0.95, 0.3 + Math.random() * 0.2, 0.9);
+  // Select marshmallow type
+  const type = selectMarshmallowType();
+  
+  // Apply type's color variation
+  const hue = type.color.hue + (Math.random() - 0.5) * 0.05;
+  const sat = type.color.satMin + Math.random() * (type.color.satMax - type.color.satMin);
+  const light = type.color.lightMin + Math.random() * (type.color.lightMax - type.color.lightMin);
+  const color = new THREE.Color().setHSL(hue, sat, light);
+  
+  // Apply size variation
+  const sizeMultiplier = type.sizeMultiplier.min + Math.random() * (type.sizeMultiplier.max - type.sizeMultiplier.min);
+  const heightMultiplier = type.heightMultiplier ? 
+    (type.heightMultiplier.min + Math.random() * (type.heightMultiplier.max - type.heightMultiplier.min)) : 
+    1.0;
   
   const marshmallowId = nextId++;
   
@@ -23,8 +37,8 @@ export function createMarshmallow(wave, spawnIndex) {
     position: { x, y: ENEMY_HEIGHT, z },
     rotation: { x: 0, y: 0, z: Math.PI / 2 },
     scale: { 
-      x: ENEMY_CYLINDER_RADIUS, 
-      y: ENEMY_CYLINDER_HEIGHT, 
+      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier, 
+      y: ENEMY_CYLINDER_HEIGHT * heightMultiplier, 
       z: 0 
     },
     color: '#' + color.getHexString(),
@@ -33,6 +47,12 @@ export function createMarshmallow(wave, spawnIndex) {
     parentId: null,
     expression: EXPRESSION_DEFAULT,
   };
+  
+  // Movement parameters
+  const speedMultiplier = type.speedMultiplier.min + Math.random() * (type.speedMultiplier.max - type.speedMultiplier.min);
+  const bobAmplitude = type.bobAmplitude ? 
+    (type.bobAmplitude.min + Math.random() * (type.bobAmplitude.max - type.bobAmplitude.min)) :
+    BASE_BOB_AMPLITUDE;
   
   const entity = {
     marshmallow,
@@ -43,12 +63,27 @@ export function createMarshmallow(wave, spawnIndex) {
     wave: wave,
     spawnIndex: spawnIndex,
     id: marshmallowId,
+    type: type,
+    movement: {
+      pattern: type.movementPattern,
+      speed: BASE_MOVEMENT_SPEED * speedMultiplier,
+      bobPhase: Math.random() * Math.PI * 2,
+      bobAmplitude: bobAmplitude,
+      baseY: ENEMY_HEIGHT,
+      currentDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
+      targetDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
+      moveTimer: 0,
+      changeDirectionInterval: 2.0 + Math.random() * 3.0,
+      boundTimer: 0,
+      boundInterval: 3.0 + Math.random() * 4.0,
+      spawnDistance: distance,
+    },
   };
   
   return entity;
 }
 
-export function damageMarshmallow(marshmallow, damage) {
+export function damageMarshmallow(marshmallow, damage, particleSystem = null) {
   marshmallow.currentHealth = Math.max(0, marshmallow.currentHealth - damage);
   
   if (marshmallow.currentHealth <= 0) {

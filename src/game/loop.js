@@ -18,6 +18,7 @@ import {
 } from './constants.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
+import { updateMarshmallowMovement } from './marshmallow-movement.js';
 
 import * as THREE from 'three';
 
@@ -132,7 +133,12 @@ export function runGameLoop(time) {
           let damage = (BASE_DAMAGE_CHUNK + getWeaponDamageBonus()) * getDamageMultiplier();
           damage = applyCriticalMultiplier(damage);
           awardPollen(damage);
-          const defeated = damageMarshmallow(gameState.currentMarshmallow, damage);
+          
+          // Check for pop before applying damage
+          const { checkMarshmallowPop } = require('./marshmallow-pop.js');
+          const popped = checkMarshmallowPop(gameState.currentMarshmallow, session.particleSystem);
+          
+          const defeated = popped || damageMarshmallow(gameState.currentMarshmallow, damage, session.particleSystem);
           if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
           
           if (defeated) {
@@ -163,6 +169,12 @@ export function runGameLoop(time) {
 
     // Logic updates
     updateControls(delta);
+    
+    // Update current marshmallow movement
+    if (gameState.currentMarshmallow && gameState.currentMarshmallow.movement) {
+      updateMarshmallowMovement(gameState.currentMarshmallow, delta);
+    }
+    
     session.particleSystem.update(delta);
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
