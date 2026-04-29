@@ -36,7 +36,7 @@ export function runGameLoop(time) {
   const delta = (time - lastTime) * 0.001;
   lastTime = time;
   
-  if (!session.isPaused) {
+  if (!session.isPaused && gameState.waveInProgress) {
     // Update wave timer
     if (gameState.waveTimer.active) {
       gameState.waveTimer.update(delta);
@@ -53,7 +53,7 @@ export function runGameLoop(time) {
     }
     
     // Spawn next marshmallow if needed
-    if (gameState.waveInProgress && !gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
+    if (!gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
       spawnNextMarshmallow();
     }
 
