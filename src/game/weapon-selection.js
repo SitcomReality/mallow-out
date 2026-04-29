@@ -17,9 +17,13 @@ export function selectWeapon(weaponIndex) {
   // Reset weapon states
   const ws = gameState.weaponStates;
   ws.skewerReady = true;
+  ws.globberCooldown = 0;
   ws.spattererCooldown = 0;
   ws.cleaverCharge = 0;
   ws.cleaverCharging = false;
   ws.melterHeat = 0;
   ws.melterOverheated = false;
+  ws.lastMelterFire = 0;
+  ws.lastMelterTracer = 0;
+  ws.lastMelterDamage = 0;
 }

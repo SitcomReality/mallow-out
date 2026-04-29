@@ -128,11 +128,15 @@ export function quitToMenu() {
   gameState.waveTimer.stop();
   gameState.weaponStates = {
     skewerReady: true,
+    globberCooldown: 0,
     spattererCooldown: 0,
     cleaverCharge: 0,
     cleaverCharging: false,
     melterHeat: 0,
     melterOverheated: false,
+    lastMelterFire: 0,
+    lastMelterTracer: 0,
+    lastMelterDamage: 0
   };
   gameState.upgrades = {
     damage: 0,

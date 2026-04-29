@@ -14,11 +14,12 @@ import {
   BASE_DAMAGE_HOLE, 
   BASE_DAMAGE_SPATTERER,
   BASE_DAMAGE_CLEAVER,
-  BASE_DAMAGE_LASER_PER_SECOND,
+  BASE_DAMAGE_LASER_PER_TICK,
   SKEWER_RECOIL_PITCH,
   SKEWER_RECOIL_DURATION,
   GLOBBER_PROJECTILE_SPEED,
   GLOBBER_PROJECTILE_SIZE,
+  GLOBBER_FIRE_COOLDOWN,
   SPATTERER_MAX_RANGE,
   CLEAVER_CHARGE_TIME,
   MELTER_HEAT_PER_SECOND,
@@ -68,6 +69,7 @@ export function shoot(particleSystem, bossHUD) {
   
   // Check weapon-specific readiness
   if (weapon === 0 && !ws.skewerReady) return;
+  if (weapon === 1 && ws.globberCooldown > 0) return;
   if (weapon === 2 && ws.spattererCooldown > 0) return;
   if (weapon === 4 && ws.melterOverheated) return;
   
@@ -88,6 +90,7 @@ export function shoot(particleSystem, bossHUD) {
   
   // Weapon 1 (Globber) - Create projectile instead of instant hit
   if (weapon === 1) {
+    ws.globberCooldown = GLOBBER_FIRE_COOLDOWN;
     gameState.projectiles.push({
       position: visualOrigin.clone(),
       velocity: direction.clone().multiplyScalar(GLOBBER_PROJECTILE_SPEED),
@@ -103,6 +106,26 @@ export function shoot(particleSystem, bossHUD) {
     return; // Continue charging
   }
   
+  let shouldDamageMelter = false;
+  let shouldTraceMelter = false;
+
+  if (weapon === 4) {
+    const now = performance.now();
+    ws.lastMelterFire = now;
+    ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/30);
+    if (ws.melterHeat >= MELTER_MAX_HEAT) {
+      ws.melterOverheated = true;
+    }
+    
+    shouldTraceMelter = now - (ws.lastMelterTracer || 0) > 100;
+    shouldDamageMelter = now - (ws.lastMelterDamage || 0) > 200;
+    
+    if (!shouldTraceMelter && !shouldDamageMelter) return;
+    
+    if (shouldTraceMelter) ws.lastMelterTracer = now;
+    if (shouldDamageMelter) ws.lastMelterDamage = now;
+  }
+
   const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
   const result = castRay(origin, direction, distFunc);
   
@@ -121,15 +144,15 @@ export function shoot(particleSystem, bossHUD) {
     if (session.weaponModels) session.weaponModels.animateRecoil(0.15, 0.15);
     if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     ws.spattererCooldown = 1.0;
-  } else if (weapon === 4) {
+  } else if (weapon === 4 && shouldTraceMelter) {
     if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xff6600);
-    ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/60);
-    if (ws.melterHeat >= MELTER_MAX_HEAT) {
-      ws.melterOverheated = true;
-    }
   }
 
   if (result.hit) {
+    if (weapon === 4 && !shouldDamageMelter) {
+        return; // Ray hit, but it's not time for a damage tick
+    }
+
     let damage = 0;
     const isCritical = rollCriticalHit();
     setPupilLook(gameState.currentMarshmallow, result.point);
@@ -152,9 +175,9 @@ export function shoot(particleSystem, bossHUD) {
       if (isCritical) damage *= 2;
       
     } else if (weapon === 4) {
-      // Melter - Laser beam (continuous on hold)
+      // Melter - Laser beam (tick based)
       addLaserDamage(gameState.currentMarshmallow, result.point);
-      damage = (0.5 + getWeaponDamageBonus() * 0.1) * getDamageMultiplier(); // Small damage per frame
+      damage = (BASE_DAMAGE_LASER_PER_TICK + getWeaponDamageBonus() * 0.2) * getDamageMultiplier();
       if (isCritical) damage *= 2;
     }
     

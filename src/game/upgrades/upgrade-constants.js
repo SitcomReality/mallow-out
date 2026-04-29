@@ -2,32 +2,32 @@
 
 export const UPGRADE_COSTS = {
   damage: {
-    baseCost: 10,
-    multiplier: 1.5
+    baseCost: 25,
+    multiplier: 1.6
   },
   fire_rate: {
-    baseCost: 15,
-    multiplier: 1.6
-  },
-  crit_chance: {
-    baseCost: 20,
+    baseCost: 30,
     multiplier: 1.7
   },
-  pollen_multiplier: {
-    baseCost: 12,
-    multiplier: 1.5
-  },
-  wave_duration: {
-    baseCost: 25,
+  crit_chance: {
+    baseCost: 40,
     multiplier: 1.8
   },
-  caramel_bonus: {
-    baseCost: 18,
+  pollen_multiplier: {
+    baseCost: 20,
     multiplier: 1.6
   },
+  wave_duration: {
+    baseCost: 50,
+    multiplier: 1.9
+  },
+  caramel_bonus: {
+    baseCost: 35,
+    multiplier: 1.7
+  },
   move_speed: {
-    baseCost: 8,
-    multiplier: 1.4
+    baseCost: 15,
+    multiplier: 1.5
   }
 };
 

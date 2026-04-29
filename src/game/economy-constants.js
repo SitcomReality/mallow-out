@@ -1,5 +1,6 @@
 // Currency reward rates
-export const POLLEN_PER_DAMAGE = 1;
+// Economy balancing for Phase 8
+export const POLLEN_PER_DAMAGE = 2; // Increased to ensure players can afford upgrades with base 12 health
 export const BASE_CARAMEL_PER_KILL = 10;
 
 // Caramel vapor bonus (awarded when petal slot is empty - for phase 3)

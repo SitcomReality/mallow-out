@@ -17,6 +17,7 @@ import {
   MELTER_COOLDOWN_PER_SECOND,
   CLEAVER_CHARGE_TIME,
   BASE_DAMAGE_CHUNK,
+  MELTER_MAX_HEAT,
 } from './constants.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
@@ -85,27 +86,42 @@ export function runGameLoop(time) {
     
     // Skewer recoil recovery
     if (!ws.skewerReady) {
-      gameState.player.recoilTime += delta;
+      const petalFireRateMult = getFireRateMultiplier();
+      const upgradeFireRateMult = getWeaponFireRateMultiplier();
+      const totalMult = petalFireRateMult * upgradeFireRateMult;
+      
+      // We scale delta by totalMult to speed up the recovery and recoil
+      gameState.player.recoilTime += delta / totalMult;
       if (gameState.player.recoilTime < SKEWER_RECOIL_DURATION) {
         const t = gameState.player.recoilTime / SKEWER_RECOIL_DURATION;
-        gameState.player.pitch -= gameState.player.recoilAmount * (1 - t) * delta / SKEWER_RECOIL_DURATION;
+        gameState.player.pitch -= gameState.player.recoilAmount * (1 - t) * (delta / totalMult) / SKEWER_RECOIL_DURATION;
       } else if (gameState.player.recoilTime >= SKEWER_RECOIL_DURATION + SKEWER_RECOIL_RECOVERY) {
         ws.skewerReady = true;
         gameState.player.recoilAmount = 0;
       }
     }
     
+    const petalFireRateMult = getFireRateMultiplier();
+    const upgradeFireRateMult = getWeaponFireRateMultiplier();
+    const totalMult = petalFireRateMult * upgradeFireRateMult;
+
     // Spatterer cooldown (affected by fire rate boost and upgrades)
     if (ws.spattererCooldown > 0) {
-      const petalFireRateMult = getFireRateMultiplier();
-      const upgradeFireRateMult = getWeaponFireRateMultiplier();
-      const totalMult = petalFireRateMult * upgradeFireRateMult;
       ws.spattererCooldown = Math.max(0, ws.spattererCooldown - delta / totalMult);
+    }
+    
+    // Globber cooldown
+    if (ws.globberCooldown > 0) {
+      ws.globberCooldown = Math.max(0, ws.globberCooldown - delta / totalMult);
     }
     
     // Cleaver charging
     if (ws.cleaverCharging) {
-      ws.cleaverCharge = Math.min(CLEAVER_CHARGE_TIME, ws.cleaverCharge + delta);
+      const petalFireRateMult = getFireRateMultiplier();
+      const upgradeFireRateMult = getWeaponFireRateMultiplier();
+      const totalMult = petalFireRateMult * upgradeFireRateMult;
+      
+      ws.cleaverCharge = Math.min(CLEAVER_CHARGE_TIME, ws.cleaverCharge + delta / totalMult);
     } else {
       // Deplete at the same speed if not charging
       ws.cleaverCharge = Math.max(0, ws.cleaverCharge - delta);
@@ -113,12 +129,17 @@ export function runGameLoop(time) {
     
     // Melter heat management
     if (ws.melterOverheated) {
-      ws.melterHeat = Math.max(0, ws.melterHeat - MELTER_COOLDOWN_PER_SECOND * delta);
+      // Severe overheating penalty: 50% slower cooldown!
+      ws.melterHeat = Math.max(0, ws.melterHeat - (MELTER_COOLDOWN_PER_SECOND * 0.5) * delta);
       if (ws.melterHeat <= 0) {
         ws.melterOverheated = false;
       }
-    } else if (gameState.currentWeapon !== 4) {
-      ws.melterHeat = Math.max(0, ws.melterHeat - MELTER_COOLDOWN_PER_SECOND * delta * 0.5);
+    } else {
+      // If not firing melter right now, cool down normally
+      const now = performance.now();
+      if (gameState.currentWeapon !== 4 || (now - (ws.lastMelterFire || 0) > 100)) {
+        ws.melterHeat = Math.max(0, ws.melterHeat - MELTER_COOLDOWN_PER_SECOND * delta);
+      }
     }
     
     // Update projectiles
@@ -206,7 +227,8 @@ export function runGameLoop(time) {
       if (gameState.currentWeapon === 3 && (ws.cleaverCharging || ws.cleaverCharge > 0)) {
         session.weaponStatus.updateCleaverCharge(ws.cleaverCharge, CLEAVER_CHARGE_TIME);
       } else if (gameState.currentWeapon === 4 && (ws.melterHeat > 0 || ws.melterOverheated)) {
-        session.weaponStatus.updateMelterHeat(ws.melterHeat, 3.0, ws.melterOverheated);
+        // Use MELTER_MAX_HEAT which is now configurable via constants
+        session.weaponStatus.updateMelterHeat(ws.melterHeat, MELTER_MAX_HEAT, ws.melterOverheated);
       } else {
         session.weaponStatus.hide();
       }
