@@ -47,6 +47,8 @@ export function createMainMaterial() {
       uAmbientColor: { value: new THREE.Color() },
       uFogColor: { value: new THREE.Color() },
       uFogDensity: { value: 0.04 },
+      uNear: { value: 0.1 },
+      uFar: { value: 1000.0 },
     },
     vertexShader,
     fragmentShader

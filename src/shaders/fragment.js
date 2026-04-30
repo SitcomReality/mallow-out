@@ -97,6 +97,11 @@ void main() {
   
   col = mix(col, env.fogColor, fogAmount);
 
+  // Depth buffer integration: Write Perspective-correct depth
+  float viewZ = t * dot(rd, uCamFwd);
+  float ndcDepth = ((uFar + uNear) / (uFar - uNear)) + (1.0 / viewZ) * ((-2.0 * uFar * uNear) / (uFar - uNear));
+  gl_FragDepth = hit ? (ndcDepth * 0.5 + 0.5) : 1.0;
+
   if (uSelectionInfo.x > 0.5 && uShowOutline > 0.5) {
     float tSel = 0.0;
     float minD = 1e10;

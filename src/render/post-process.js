@@ -71,10 +71,10 @@ export class PostProcessor {
     this.renderer.autoClear = true;
     this.renderer.render(mainScene, mainCamera);
     
-    // 2. Render particle/tracer effects on top (sharing depth)
+    // 2. Render particle/tracer effects on top (sharing depth buffer from raymarching)
     if (effectScene && effectCamera) {
       this.renderer.autoClear = false;
-      this.renderer.clearDepth();
+      // We explicitly do NOT clear depth here so effects test against the raymarching results
       this.renderer.render(effectScene, effectCamera);
     }
 

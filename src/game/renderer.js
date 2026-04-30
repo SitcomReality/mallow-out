@@ -57,6 +57,10 @@ export function createRenderer(container) {
 
     updateUniforms(uniforms, time);
     
+    // Sync near/far uniforms for depth buffer integration
+    uniforms.uNear.value = particleCamera.near;
+    uniforms.uFar.value = particleCamera.far;
+
     // Sync particle camera with player state
     particleCamera.position.copy(gameState.player.position);
     // Negate yaw because Three.js camera rotation Y is counter-clockwise (positive turns left),

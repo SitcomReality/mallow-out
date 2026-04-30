@@ -20,6 +20,8 @@ uniform vec3 uSunColor;
 uniform vec3 uAmbientColor;
 uniform vec3 uFogColor;
 uniform float uFogDensity;
+uniform float uNear;
+uniform float uFar;
 uniform float uFlatLighting;
 uniform float uCelShading;
 uniform float uShadowsEnabled;
