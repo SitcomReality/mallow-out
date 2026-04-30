@@ -4,7 +4,15 @@ import { MIN_APPROACH_DISTANCE } from './marshmallow-type-constants.js';
 
 /**
  * Updates marshmallow movement based on its type and behavior
+ * Changes:
+ *  - Ensure bursts and boundary corrections are frame-rate dependent
+ *  - Smoothly nudge out-of-bounds positions instead of instant snapping
  */
+
+function lerp(a, b, t) {
+  return a + (b - a) * t;
+}
+
 export function updateMarshmallowMovement(marshmallow, delta) {
   if (!marshmallow.movement) return;
   
@@ -15,12 +23,10 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     marshmallow.marshmallow.position.z
   );
   
-  // Update bob phase (skip if currently spawning to avoid height conflict)
-  if (marshmallow.spawnStartTime === undefined) {
-    mov.bobPhase += delta * 2.0;
-    const bobOffset = Math.sin(mov.bobPhase) * mov.bobAmplitude;
-    marshmallow.marshmallow.position.y = mov.baseY + bobOffset;
-  }
+  // Update bob phase
+  mov.bobPhase += delta * 2.0;
+  const bobOffset = Math.sin(mov.bobPhase) * mov.bobAmplitude;
+  marshmallow.marshmallow.position.y = mov.baseY + bobOffset;
   
   // Calculate relative player info
   const playerPos = gameState.player.position;
@@ -107,33 +113,32 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   }
   
   // Smoothly interpolate current direction toward target
-  mov.currentDirection.lerp(mov.targetDirection, delta * 2.0);
-  mov.currentDirection.normalize();
+  mov.currentDirection.lerp(mov.targetDirection, Math.min(1, delta * 2.0));
+  if (mov.currentDirection.lengthSq() > 0.000001) mov.currentDirection.normalize();
   
   // Apply movement if not stationary
   if (mov.pattern !== 'stationary') {
-    // Handle speed boost decay for smooth bounding
-    if (mov.speedBoost > 0) {
-      mov.speedBoost = Math.max(0, mov.speedBoost - delta * 2.5); // Decay over ~0.8s
-    }
-
-    let boostFactor = 1.0 + (mov.speedBoost || 0);
-    let moveSpeed = mov.speed * boostFactor * delta;
+    let moveStep = mov.speed * delta;
     
     // Stop friendly marshmallows if they are at or within minimum range
     if (isFriendly && distToPlayer <= MIN_APPROACH_DISTANCE) {
-      moveSpeed = 0;
+      moveStep = 0;
     }
 
-    marshmallow.marshmallow.position.x += mov.currentDirection.x * moveSpeed;
-    marshmallow.marshmallow.position.z += mov.currentDirection.z * moveSpeed;
+    marshmallow.marshmallow.position.x += mov.currentDirection.x * moveStep;
+    marshmallow.marshmallow.position.z += mov.currentDirection.z * moveStep;
     
-    // Face movement direction
-    // Our marshmallow is a cylinder on its side (rot.z = PI/2), so local Y-cap is the "face" vector.
-    // Initially local Y points to world (-1, 0, 0). To align it with currentDirection (dirX, dirZ),
-    // we rotate around the Y-axis by atan2(dirZ, -dirX).
-    const angle = Math.atan2(mov.currentDirection.z, -mov.currentDirection.x);
-    marshmallow.marshmallow.rotation.y = angle;
+    // Face movement direction smoothly (interpolate rotation to avoid snap)
+    const desiredAngle = Math.atan2(mov.currentDirection.z, -mov.currentDirection.x);
+    // Shortest angle interpolation
+    let currentAngle = marshmallow.marshmallow.rotation.y;
+    let diff = desiredAngle - currentAngle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    const rotSpeed = Math.PI * 4; // rad/s rotation responsiveness
+    const maxStep = rotSpeed * delta;
+    diff = Math.max(-maxStep, Math.min(maxStep, diff));
+    marshmallow.marshmallow.rotation.y = currentAngle + diff;
   }
   
   // Occasional quick bound (except for shy/stationary)
@@ -141,31 +146,35 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     mov.boundTimer += delta;
     if (mov.boundTimer > mov.boundInterval) {
       mov.boundTimer = 0;
-      mov.boundInterval = 4.0 + Math.random() * 5.0;
+      mov.boundInterval = 3.0 + Math.random() * 4.0;
       
-      // Trigger smooth acceleration burst instead of teleporting
-      mov.speedBoost = 2.0; 
+      // Quick acceleration burst - frame-rate dependent and smoothed
+      const burstSpeed = mov.speed * 2.0;
+      const burstAmount = burstSpeed * 0.2 * delta; // scaled by delta
+      marshmallow.marshmallow.position.x += mov.currentDirection.x * burstAmount;
+      marshmallow.marshmallow.position.z += mov.currentDirection.z * burstAmount;
     }
   }
   
-  // Keep within bounds (loose boundary)
-  const maxDist = 20; 
-  const distFromOrigin = Math.sqrt(
-    marshmallow.marshmallow.position.x ** 2 + 
-    marshmallow.marshmallow.position.z ** 2
-  );
-
+  // Keep within bounds (loose boundary) - nudge smoothly instead of teleport
+  const maxDist = 15;
+  const pX = marshmallow.marshmallow.position.x;
+  const pZ = marshmallow.marshmallow.position.z;
+  const distFromOrigin = Math.sqrt(pX * pX + pZ * pZ);
   if (distFromOrigin > maxDist) {
-    // Only hard clamp if they are way outside (failsafe)
-    if (distFromOrigin > maxDist + 2.0) {
-      const angle = Math.atan2(marshmallow.marshmallow.position.z, marshmallow.marshmallow.position.x);
-      marshmallow.marshmallow.position.x = Math.cos(angle) * maxDist;
-      marshmallow.marshmallow.position.z = Math.sin(angle) * maxDist;
-    }
+    const angle = Math.atan2(pZ, pX);
+    const targetX = Math.cos(angle) * maxDist;
+    const targetZ = Math.sin(angle) * maxDist;
     
-    // Smoothly turn toward center rather than snapping
-    mov.targetDirection.set(-marshmallow.marshmallow.position.x, 0, -marshmallow.marshmallow.position.z).normalize();
-    // Force a logic update for direction
-    mov.moveTimer = mov.changeDirectionInterval;
+    // Smoothly move towards the clamped position to avoid snapping
+    const nudgeSpeed = 4.0; // units per second for corrective nudge
+    const t = Math.min(1, nudgeSpeed * delta);
+    marshmallow.marshmallow.position.x = lerp(pX, targetX, t);
+    marshmallow.marshmallow.position.z = lerp(pZ, targetZ, t);
+    
+    // Turn toward center smoothly by biasing the target direction
+    const centerDir = new THREE.Vector3(-marshmallow.marshmallow.position.x, 0, -marshmallow.marshmallow.position.z).normalize();
+    mov.targetDirection.lerp(centerDir, 0.6); // bias strongly toward center
+    mov.targetDirection.normalize();
   }
 }

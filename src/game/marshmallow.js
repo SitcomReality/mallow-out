@@ -75,8 +75,7 @@ export function createMarshmallow(wave, spawnIndex) {
       moveTimer: 0,
       changeDirectionInterval: 2.0 + Math.random() * 3.0,
       boundTimer: 0,
-      boundInterval: 4.0 + Math.random() * 4.0,
-      speedBoost: 0,
+      boundInterval: 3.0 + Math.random() * 4.0,
       spawnDistance: distance,
     },
   };
