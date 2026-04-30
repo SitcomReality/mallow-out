@@ -109,6 +109,15 @@ export function shoot(particleSystem, bossHUD) {
       lifetime: 5.0,
       maxLifetime: 5.0,
     });
+    
+    if (session.weaponModels) session.weaponModels.animateRecoil(0.4, 0.3, 0.1);
+    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+    player.recoilTime = 0;
+    player.recoilPitchAmount = GLOBBER_RECOIL_PITCH;
+    player.recoilYawAmount = (Math.random() * 0.04 - 0.02);
+    player.recoilKickDuration = GENERIC_RECOIL_DURATION;
+    player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY;
+    player.recoilReturnOffset = 0;
     return;
   }
   
@@ -146,7 +155,7 @@ export function shoot(particleSystem, bossHUD) {
 
   // Handle weapon firing visual feedback (recoil, muzzle flash, tracers) regardless of hit
   if (weapon === 0) {
-    if (session.weaponModels) session.weaponModels.animateRecoil(0.2, 0.2);
+    if (session.weaponModels) session.weaponModels.animateRecoil(0.6, 0.4, 0.2);
     if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffffff);
     ws.skewerReady = false;
@@ -156,15 +165,8 @@ export function shoot(particleSystem, bossHUD) {
     player.recoilKickDuration = SKEWER_RECOIL_DURATION;
     player.recoilRecoveryDuration = SKEWER_RECOIL_RECOVERY;
     player.recoilReturnOffset = (Math.random() * 0.2 - 0.1) * SKEWER_RECOIL_PITCH;
-  } else if (weapon === 1) {
-    player.recoilTime = 0;
-    player.recoilPitchAmount = GLOBBER_RECOIL_PITCH;
-    player.recoilYawAmount = (Math.random() * 0.04 - 0.02);
-    player.recoilKickDuration = GENERIC_RECOIL_DURATION;
-    player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY;
-    player.recoilReturnOffset = 0;
   } else if (weapon === 2) {
-    if (session.weaponModels) session.weaponModels.animateRecoil(0.15, 0.15);
+    if (session.weaponModels) session.weaponModels.animateRecoil(0.5, 0.35, 0.15);
     if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     ws.spattererCooldown = 1.0;
     player.recoilTime = 0;
@@ -174,13 +176,6 @@ export function shoot(particleSystem, bossHUD) {
     player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY;
     player.recoilReturnOffset = 0;
   } else if (weapon === 4 && shouldTraceMelter) {
-    // Small jitter for melter
-    player.recoilTime = 0;
-    player.recoilPitchAmount = MELTER_RECOIL_PITCH;
-    player.recoilYawAmount = (Math.random() * 0.02 - 0.01);
-    player.recoilKickDuration = 0.05;
-    player.recoilRecoveryDuration = 0.05;
-    player.recoilReturnOffset = 0;
     if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xff6600);
   }
 
@@ -274,7 +269,7 @@ export function releaseCleaver(particleSystem, bossHUD) {
   const result = castRay(origin, direction, distFunc);
   
   // Visual effects (always trigger on release if charged)
-  if (session.weaponModels) session.weaponModels.animateRecoil(0.3, 0.3);
+  if (session.weaponModels) session.weaponModels.animateRecoil(0.8, 0.5, 0.3);
   if (session.weaponModels) session.weaponModels.createMuzzleFlash();
 
   player.recoilTime = 0;
