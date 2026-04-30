@@ -2,6 +2,7 @@ import { gameState } from '../state.js';
 import { getPetalById } from './petal-types.js';
 import { applyPetalEffect } from './petal-effects.js';
 import { PETAL_SLOTS, CARAMEL_VAPOR_MIN_PERCENT, CARAMEL_VAPOR_MAX_PERCENT } from './petal-constants.js';
+import { session } from '../manager.js';
 
 export function triggerRandomPetal() {
   // Randomly select one of the 5 slots
@@ -37,5 +38,9 @@ export function triggerRandomPetal() {
       slot: slotIndex
     });
     console.log(`[Petal] Empty slot ${slotIndex} - awarded ${vaporBonus} caramel vapor`);
+  }
+  
+  if (session.petalHUD && session.petalHUD.animateTrigger) {
+    session.petalHUD.animateTrigger(slotIndex);
   }
 }
