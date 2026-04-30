@@ -93,8 +93,6 @@ function setPupilLook(marshmallow, hitPoint) {
  * Handles weapon firing logic, raycasting, and damaging enemies.
  */
 export function shoot(particleSystem, bossHUD) {
-  if (!gameState.currentMarshmallow) return;
-  
   const weapon = gameState.currentWeapon;
   const player = gameState.player;
   const ws = gameState.weaponStates;
@@ -168,8 +166,7 @@ export function shoot(particleSystem, bossHUD) {
     if (shouldDamageMelter) ws.lastMelterDamage = now;
   }
 
-  const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
-  const result = castRay(origin, direction, distFunc);
+  const result = castRay(origin, direction, getSceneDistanceAt);
   
   // Determine visual endpoint for tracers/effects
   const effectEnd = result.hit ? result.point : origin.clone().add(direction.clone().multiplyScalar(60));
@@ -201,10 +198,6 @@ export function shoot(particleSystem, bossHUD) {
   }
 
   if (result.hit) {
-    if (weapon === 4 && !shouldDamageMelter) {
-        return; // Ray hit, but it's not time for a damage tick
-    }
-
     let hitBubble = null;
     let hitMarshmallow = false;
     
@@ -238,6 +231,10 @@ export function shoot(particleSystem, bossHUD) {
         session.floatingTextSystem.createInfoText(result.point, "POP!", 'info');
       }
       return; // Stop processing, we hit a bubble
+    }
+
+    if (weapon === 4 && !shouldDamageMelter) {
+        return; // Ray hit, but it's not time for a damage tick
     }
 
     if (!hitMarshmallow || !gameState.currentMarshmallow) return;
