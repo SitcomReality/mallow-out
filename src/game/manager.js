@@ -30,6 +30,7 @@ export function startWave() {
   gameState.meltingMarshmallows = [];
   gameState.objects = [];
   gameState.projectiles = [];
+  gameState.bubbles = [];
   
   if (session.particleSystem) session.particleSystem.clear();
   clearAllFX();
@@ -122,6 +123,7 @@ export function quitToMenu() {
   gameState.meltingMarshmallows = [];
   gameState.objects = [];
   gameState.projectiles = [];
+  gameState.bubbles = [];
   gameState.currentWave = STARTING_WAVE;
   gameState.selectedWeaponForWave = null;
   gameState.marshmallowsSpawnedThisWave = 0;

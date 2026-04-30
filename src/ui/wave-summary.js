@@ -72,6 +72,12 @@ export function createWaveSummary(onContinue) {
             <span class="stat-label">Total Damage Dealt:</span>
             <span class="stat-value">${Math.floor(stats.damageDealt)}</span>
           </div>
+          ${stats.bubblesPopped > 0 ? `
+          <div class="stat-row">
+            <span class="stat-label">Bubbles Popped:</span>
+            <span class="stat-value">${stats.bubblesPopped}</span>
+          </div>
+          ` : ''}
         </div>
         
         ${petalTriggersHTML}

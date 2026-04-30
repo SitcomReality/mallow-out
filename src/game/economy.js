@@ -13,20 +13,20 @@ export function awardPollen(damage) {
   gameState.currentWaveStats.damageDealt += damage;
 }
 
-export function awardCaramel() {
-  let caramel = BASE_CARAMEL_PER_KILL;
+export function awardCaramel(multiplier = 1.0) {
+  let caramel = BASE_CARAMEL_PER_KILL * multiplier;
   
   // Apply upgrade bonus
   const upgradeBonus = getUpgradeEffect('caramel_bonus', gameState.upgrades.caramel_bonus || 0);
-  caramel = Math.floor(caramel * (1 + upgradeBonus));
+  caramel = caramel * (1 + upgradeBonus);
   
-  // Apply next kill bonus if active
-  if (gameState.nextKillBonus) {
+  // Apply next kill bonus if active (only apply for full kills, multiplier >= 1)
+  if (gameState.nextKillBonus && multiplier >= 1.0) {
     caramel *= 2;
     gameState.nextKillBonus = false;
   }
   
-  gameState.currentWaveStats.caramelEarned += caramel;
+  gameState.currentWaveStats.caramelEarned += Math.floor(caramel);
 }
 
 import { saveGame } from './persistence.js';
@@ -43,4 +43,5 @@ export function resetWaveStats() {
   gameState.currentWaveStats.pollenEarned = 0;
   gameState.currentWaveStats.caramelEarned = 0;
   gameState.currentWaveStats.damageDealt = 0;
+  gameState.currentWaveStats.bubblesPopped = 0;
 }

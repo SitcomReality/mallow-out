@@ -27,6 +27,9 @@ import {
 } from './combat-constants.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
 import { addLaserDamage, addChunkToEnemy } from './enemy.js';
+import { updateBubbles } from './bubble.js';
+import { getSceneDistanceAt } from './combat.js';
+import { getBubbleDistanceAt, popBubble } from './bubble.js';
 import { updateMarshmallowMovement } from './marshmallow-movement.js';
 import { updateFX } from './fx.js';
 
@@ -185,13 +188,41 @@ export function runGameLoop(time) {
       proj.position.z += proj.velocity.z * delta;
       proj.lifetime -= delta;
       
-      // Check collision with current marshmallow
-      if (gameState.currentMarshmallow) {
-        const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
-        const dist = distFunc(proj.position);
+      // Check collision with scene (marshmallow + bubbles)
+      const dist = getSceneDistanceAt(proj.position);
+      
+      if (dist < proj.size) {
+        let hitBubble = null;
+        let hitMarshmallow = false;
         
-        if (dist < proj.size) {
-          // Hit!
+        let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, proj.position) : 1e10;
+        
+        let closestBubble = null;
+        let minBubbleDist = 1e10;
+        for (const bubble of gameState.bubbles) {
+          if (bubble.state !== 'popping') {
+            const d = getBubbleDistanceAt(bubble, proj.position);
+            if (d < minBubbleDist) {
+              minBubbleDist = d;
+              closestBubble = bubble;
+            }
+          }
+        }
+
+        if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
+          hitBubble = closestBubble;
+        } else if (distToMarshmallow < proj.size + 0.1) {
+          hitMarshmallow = true;
+        }
+
+        if (hitBubble) {
+          popBubble(hitBubble, proj.position);
+          rebuildObjectList();
+          if (session.floatingTextSystem) session.floatingTextSystem.createInfoText(proj.position, "POP!", 'info');
+          toRemove.push(proj);
+          continue; // Move to next projectile
+        } else if (hitMarshmallow && gameState.currentMarshmallow) {
+          // Hit marshmallow!
           const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
           session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
           
@@ -268,6 +299,7 @@ export function runGameLoop(time) {
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
     updatePetalEffects(time * 0.001);
+    updateBubbles(delta, time * 0.001);
     updateFX(time * 0.001);
     rebuildObjectList();
     

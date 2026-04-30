@@ -9,6 +9,7 @@ import { onMarshmallowDefeated, session } from './manager.js';
 import { awardPollen } from './economy.js';
 import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
 import { getWeaponDamageBonus, applyCriticalMultiplier, rollCriticalHit } from './upgrades/weapon-modifiers.js';
+import { getBubbleDistanceAt, popBubble } from './bubble.js';
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -55,6 +56,26 @@ export function rebuildObjectList() {
   if (activeFX && activeFX.length > 0) {
     gameState.objects.push(...activeFX);
   }
+  
+  // Add bubbles
+  for (const bubble of gameState.bubbles) {
+    gameState.objects.push(bubble.group);
+    gameState.objects.push(bubble.skin);
+    gameState.objects.push(bubble.voidObj);
+  }
+}
+
+export function getSceneDistanceAt(p) {
+  let dist = 1e10;
+  if (gameState.currentMarshmallow) {
+    dist = Math.min(dist, getEnemyDistanceAt(gameState.currentMarshmallow, p));
+  }
+  for (const bubble of gameState.bubbles) {
+    if (bubble.state !== 'popping') {
+      dist = Math.min(dist, getBubbleDistanceAt(bubble, p));
+    }
+  }
+  return dist;
 }
 
 function setPupilLook(marshmallow, hitPoint) {
@@ -184,6 +205,43 @@ export function shoot(particleSystem, bossHUD) {
         return; // Ray hit, but it's not time for a damage tick
     }
 
+    let hitBubble = null;
+    let hitMarshmallow = false;
+    
+    let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, result.point) : 1e10;
+    
+    let closestBubble = null;
+    let minBubbleDist = 1e10;
+    for (const bubble of gameState.bubbles) {
+      if (bubble.state !== 'popping') {
+        const d = getBubbleDistanceAt(bubble, result.point);
+        if (d < minBubbleDist) {
+          minBubbleDist = d;
+          closestBubble = bubble;
+        }
+      }
+    }
+
+    // Determine what was actually hit
+    if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
+      hitBubble = closestBubble;
+    } else if (distToMarshmallow < 0.1) {
+      hitMarshmallow = true;
+    }
+
+    if (hitBubble) {
+      popBubble(hitBubble, result.point);
+      rebuildObjectList();
+      
+      // Floating text for bubble pop
+      if (session.floatingTextSystem) {
+        session.floatingTextSystem.createInfoText(result.point, "POP!", 'info');
+      }
+      return; // Stop processing, we hit a bubble
+    }
+
+    if (!hitMarshmallow || !gameState.currentMarshmallow) return;
+
     let damage = 0;
     const isCritical = rollCriticalHit();
     setPupilLook(gameState.currentMarshmallow, result.point);
@@ -265,8 +323,7 @@ export function releaseCleaver(particleSystem, bossHUD) {
     -Math.cos(player.yaw) * Math.cos(player.pitch)
   ).normalize();
   
-  const distFunc = (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p);
-  const result = castRay(origin, direction, distFunc);
+  const result = castRay(origin, direction, getSceneDistanceAt);
   
   // Visual effects (always trigger on release if charged)
   if (session.weaponModels) session.weaponModels.animateRecoil(0.8, 0.5, 0.3);
@@ -279,7 +336,39 @@ export function releaseCleaver(particleSystem, bossHUD) {
   player.recoilRecoveryDuration = GENERIC_RECOIL_RECOVERY * 1.5;
   player.recoilReturnOffset = 0;
 
-  if (result.hit && gameState.currentMarshmallow) {
+  if (result.hit) {
+    let hitBubble = null;
+    let hitMarshmallow = false;
+    
+    let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, result.point) : 1e10;
+    
+    let closestBubble = null;
+    let minBubbleDist = 1e10;
+    for (const bubble of gameState.bubbles) {
+      if (bubble.state !== 'popping') {
+        const d = getBubbleDistanceAt(bubble, result.point);
+        if (d < minBubbleDist) {
+          minBubbleDist = d;
+          closestBubble = bubble;
+        }
+      }
+    }
+
+    if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
+      hitBubble = closestBubble;
+    } else if (distToMarshmallow < 0.1) {
+      hitMarshmallow = true;
+    }
+
+    if (hitBubble) {
+      popBubble(hitBubble, result.point);
+      rebuildObjectList();
+      if (session.floatingTextSystem) session.floatingTextSystem.createInfoText(result.point, "POP!", 'info');
+      return;
+    }
+
+    if (!hitMarshmallow || !gameState.currentMarshmallow) return;
+
     setPupilLook(gameState.currentMarshmallow, result.point);
     addCleaverDamage(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createBloodSplatter(result.point, direction);
