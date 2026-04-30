@@ -7,7 +7,7 @@ import { damageMarshmallow } from '../marshmallow.js';
 import { checkMarshmallowPop } from '../marshmallow-pop.js';
 import { awardPollen } from '../economy.js';
 import { session, onMarshmallowDefeated } from '../manager.js';
-import { getWeaponDamageBonus, applyCriticalMultiplier } from './weapon-modifiers.js';
+import { getWeaponDamageBonus, applyCriticalMultiplier } from '../upgrades/weapon-modifiers.js';
 import { getDamageMultiplier } from '../petals/petal-effects.js';
 import { BASE_DAMAGE_CHUNK } from '../combat-constants.js';
 
