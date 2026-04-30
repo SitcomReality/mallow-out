@@ -107,6 +107,7 @@ export function shoot(particleSystem, bossHUD) {
       velocity: direction.clone().multiplyScalar(GLOBBER_PROJECTILE_SPEED),
       size: GLOBBER_PROJECTILE_SIZE,
       lifetime: 5.0,
+      maxLifetime: 5.0,
     });
     return;
   }

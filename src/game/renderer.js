@@ -81,7 +81,7 @@ export function createRenderer(container) {
     }
     
     // Update projectiles
-    projectileRenderer.update(gameState.projectiles);
+    projectileRenderer.update(gameState.projectiles, particleCamera);
     
     // Render with post-processing, passing raymarching, effects, and viewmodel scenes
     postProcessor.render(scene, camera, particleScene, particleCamera, viewmodelScene, particleCamera);
