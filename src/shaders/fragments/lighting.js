@@ -1,6 +1,4 @@
 export const lighting = `
-uniform vec3 uFloorColor;
-uniform float uFloorTextured;
 uniform vec3 uSkyColor;
 uniform vec3 uSkyColor2;
 uniform float uSkyTextured;
@@ -15,19 +13,6 @@ vec3 calcNormal(vec3 p, float currentDist) {
 }
 
 vec3 getMaterialColor(vec3 colorData, vec3 p) {
-  // Check for floor sentinel value (colorData.x == -1.0)
-  if (colorData.x < -0.5) {
-    vec3 col = uFloorColor;
-    if (uFloorTextured > 0.5) {
-      float pattern = noise(p.xz * 0.8) * 0.6 + fbm(p.xz * 2.0) * 0.4;
-      col = mix(col * 0.6, col * 1.4, pattern);
-      float grid = smoothstep(0.0, 0.02, abs(fract(p.x * 0.5 + 0.5) - 0.5)) * 
-                   smoothstep(0.0, 0.02, abs(fract(p.z * 0.5 + 0.5) - 0.5));
-      col = mix(col * 1.2, col, grid);
-    }
-    return col;
-  }
-  
   return colorData;
 }
 

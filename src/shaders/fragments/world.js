@@ -1,5 +1,7 @@
 export const world = `
 uniform float uFloorEnabled;
+uniform vec3 uFloorColor;
+uniform float uFloorTextured;
 
 struct Object {
   float type;      // 0=sphere, 1=box, 2=cylinder, 3=torus
@@ -13,6 +15,19 @@ struct Object {
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
   return p.y + 4.0;
+}
+
+vec3 getFloorColorAt(vec3 p) {
+  vec3 col = uFloorColor;
+  // Only calculate expensive floor texture if close to the floor plane (y = -4.0)
+  if (uFloorTextured > 0.5 && p.y < -3.0) {
+    float pattern = noise(p.xz * 0.8) * 0.6 + fbm(p.xz * 2.0) * 0.4;
+    col = mix(col * 0.6, col * 1.4, pattern);
+    float grid = smoothstep(0.0, 0.02, abs(fract(p.x * 0.5 + 0.5) - 0.5)) * 
+                 smoothstep(0.0, 0.02, abs(fract(p.z * 0.5 + 0.5) - 0.5));
+    col = mix(col * 1.2, col, grid);
+  }
+  return col;
 }
 
 uniform sampler2D uFontTex;
@@ -93,8 +108,6 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
     if (blend > 0.01) {
       float h = clamp(0.5 + 0.5 * (res.x - d) / blend, 0.0, 1.0);
       vec3 finalCol = mix(res.yzw, col, h);
-      if (res.yzw.x < -0.5 && h < 0.5) finalCol = res.yzw;
-      if (col.x < -0.5 && h >= 0.5) finalCol = col;
       return vec4(mix(res.x, d, h) - blend * h * (1.0 - h), finalCol);
     } else {
       return (d < res.x) ? vec4(d, col) : res;
@@ -118,7 +131,8 @@ vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
 
 vec4 map(vec3 p) {
   float fD = sdFloor(p);
-  vec4 worldRes = vec4(fD, -1.0, -1.0, -1.0);
+  vec3 fCol = getFloorColorAt(p);
+  vec4 worldRes = vec4(fD, fCol);
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
   bool worldFirst = false;
