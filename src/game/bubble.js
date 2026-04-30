@@ -111,6 +111,15 @@ export function updateBubbles(delta, currentTime) {
       bubble.voidObj.noiseScale = BUBBLE_POP_NOISE_SCALE;
       
       bubble.voidObj.noiseOffset.y += delta * 2.0;
+
+      // Animate smoothing/blend to zero over the pop so the bubble shell becomes sharp before removal
+      if (typeof BUBBLE_INITIAL_BLEND !== 'undefined') {
+        // Interpolate from current blend (or initial) down to 0
+        const startBlend = bubble.group.blendRadius !== undefined ? bubble.group.blendRadius : BUBBLE_INITIAL_BLEND;
+        bubble.group.blendRadius = startBlend * (1.0 - t);
+      } else {
+        bubble.group.blendRadius = 0;
+      }
       
       if (t >= 1.0) {
         toRemove.push(bubble);
