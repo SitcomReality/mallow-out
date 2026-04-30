@@ -8,6 +8,8 @@ import {
 } from './bubble-constants.js';
 import { awardCaramel } from './economy.js';
 import { gameState } from './state.js';
+import { triggerRandomPetal } from './petals/petal-trigger.js';
+import { session } from './manager.js';
 
 let nextBubbleId = 20000;
 
@@ -160,6 +162,9 @@ export function popBubble(bubble, hitPoint) {
   
   awardCaramel(0.5);
   gameState.currentWaveStats.bubblesPopped = (gameState.currentWaveStats.bubblesPopped || 0) + 1;
+  
+  triggerRandomPetal();
+  if (session.petalHUD) session.petalHUD.update();
 }
 
 export function getBubbleDistanceAt(bubble, p) {

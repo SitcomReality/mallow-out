@@ -51,13 +51,9 @@ export const gameState = {
     lastMelterDamage: 0
   },
   upgrades: {
-    damage: 0,
-    fire_rate: 0,
-    crit_chance: 0,
     pollen_multiplier: 0,
     wave_duration: 0,
     caramel_bonus: 0,
-    move_speed: 0,
   },
   waveInProgress: false,
   equippedPetals: [null, null, null, null, null], // 5 petal slots

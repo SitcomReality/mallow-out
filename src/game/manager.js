@@ -6,7 +6,6 @@ import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { clearAllFX } from './fx.js';
 import { awardCaramel, resetWaveStats } from './economy.js';
-import { triggerRandomPetal } from './petals/petal-trigger.js';
 import * as THREE from 'three';
 
 /**
@@ -87,12 +86,6 @@ export function onMarshmallowDefeated() {
   gameState.waveTimer.addTimeBonus(TIME_BONUS_PER_KILL);
   awardCaramel();
   
-  // Trigger random petal on marshmallow death
-  triggerRandomPetal();
-  
-  // Update petal HUD after trigger
-  if (session.petalHUD) session.petalHUD.update();
-  
   // Marshmallow will be moved to melting state by combat system
   // Next marshmallow spawns after check in loop
 }
@@ -150,13 +143,9 @@ export function quitToMenu() {
     lastMelterDamage: 0
   };
   gameState.upgrades = {
-    damage: 0,
-    fire_rate: 0,
-    crit_chance: 0,
     pollen_multiplier: 0,
     wave_duration: 0,
     caramel_bonus: 0,
-    move_speed: 0,
   };
   
   if (session.particleSystem) session.particleSystem.clear();

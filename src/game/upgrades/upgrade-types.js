@@ -1,37 +1,9 @@
 // Upgrade type definitions with categories and properties
 export const UPGRADE_CATEGORIES = {
-  WEAPON: 'weapon',
   ECONOMY: 'economy',
-  MARSHMALLOW: 'marshmallow'
 };
 
 export const UPGRADE_TYPES = {
-  // Weapon Upgrades (apply to all weapons)
-  DAMAGE: {
-    id: 'damage',
-    category: UPGRADE_CATEGORIES.WEAPON,
-    name: 'Damage Boost',
-    icon: '💥',
-    description: 'Increase damage dealt by all weapons',
-    shortDesc: '+1 damage per level'
-  },
-  FIRE_RATE: {
-    id: 'fire_rate',
-    category: UPGRADE_CATEGORIES.WEAPON,
-    name: 'Fire Rate',
-    icon: '⚡',
-    description: 'Reduce cooldown between shots',
-    shortDesc: '10% faster per level'
-  },
-  CRIT_CHANCE: {
-    id: 'crit_chance',
-    category: UPGRADE_CATEGORIES.WEAPON,
-    name: 'Critical Chance',
-    icon: '🎯',
-    description: 'Chance to deal double damage',
-    shortDesc: '+5% crit chance per level'
-  },
-  
   // Economy Upgrades
   POLLEN_MULTIPLIER: {
     id: 'pollen_multiplier',
@@ -56,16 +28,6 @@ export const UPGRADE_TYPES = {
     icon: '🍯',
     description: 'Increase caramel earned from kills',
     shortDesc: '+20% caramel per level'
-  },
-  
-  // Marshmallow Upgrades
-  MOVE_SPEED: {
-    id: 'move_speed',
-    category: UPGRADE_CATEGORIES.MARSHMALLOW,
-    name: 'Quick Feet',
-    icon: '👟',
-    description: 'Move faster around the marsh',
-    shortDesc: '+20% speed per level'
   }
 };
 

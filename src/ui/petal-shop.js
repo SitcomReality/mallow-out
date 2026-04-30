@@ -50,7 +50,7 @@ export function createPetalShop(onContinue) {
           <div class="petal-slots">
             ${currentPetalsHTML}
           </div>
-          <p class="petal-hint">Each marshmallow death triggers a random slot. Empty slots grant Caramel Vapor!</p>
+          <p class="petal-hint">Each popped bubble triggers a random slot. Empty slots grant Caramel Vapor!</p>
         </div>
         
         <div class="upgrade-options">
