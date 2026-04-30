@@ -15,10 +15,12 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     marshmallow.marshmallow.position.z
   );
   
-  // Update bob phase
-  mov.bobPhase += delta * 2.0;
-  const bobOffset = Math.sin(mov.bobPhase) * mov.bobAmplitude;
-  marshmallow.marshmallow.position.y = mov.baseY + bobOffset;
+  // Update bob phase (skip if currently spawning to avoid height conflict)
+  if (marshmallow.spawnStartTime === undefined) {
+    mov.bobPhase += delta * 2.0;
+    const bobOffset = Math.sin(mov.bobPhase) * mov.bobAmplitude;
+    marshmallow.marshmallow.position.y = mov.baseY + bobOffset;
+  }
   
   // Calculate relative player info
   const playerPos = gameState.player.position;
@@ -110,7 +112,13 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   
   // Apply movement if not stationary
   if (mov.pattern !== 'stationary') {
-    let moveSpeed = mov.speed * delta;
+    // Handle speed boost decay for smooth bounding
+    if (mov.speedBoost > 0) {
+      mov.speedBoost = Math.max(0, mov.speedBoost - delta * 2.5); // Decay over ~0.8s
+    }
+
+    let boostFactor = 1.0 + (mov.speedBoost || 0);
+    let moveSpeed = mov.speed * boostFactor * delta;
     
     // Stop friendly marshmallows if they are at or within minimum range
     if (isFriendly && distToPlayer <= MIN_APPROACH_DISTANCE) {
@@ -133,27 +141,31 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     mov.boundTimer += delta;
     if (mov.boundTimer > mov.boundInterval) {
       mov.boundTimer = 0;
-      mov.boundInterval = 3.0 + Math.random() * 4.0;
+      mov.boundInterval = 4.0 + Math.random() * 5.0;
       
-      // Quick acceleration burst
-      const burstSpeed = mov.speed * 2.0;
-      marshmallow.marshmallow.position.x += mov.currentDirection.x * burstSpeed * 0.2;
-      marshmallow.marshmallow.position.z += mov.currentDirection.z * burstSpeed * 0.2;
+      // Trigger smooth acceleration burst instead of teleporting
+      mov.speedBoost = 2.0; 
     }
   }
   
   // Keep within bounds (loose boundary)
-  const maxDist = 15;
+  const maxDist = 20; 
   const distFromOrigin = Math.sqrt(
     marshmallow.marshmallow.position.x ** 2 + 
     marshmallow.marshmallow.position.z ** 2
   );
+
   if (distFromOrigin > maxDist) {
-    const angle = Math.atan2(marshmallow.marshmallow.position.z, marshmallow.marshmallow.position.x);
-    marshmallow.marshmallow.position.x = Math.cos(angle) * maxDist;
-    marshmallow.marshmallow.position.z = Math.sin(angle) * maxDist;
+    // Only hard clamp if they are way outside (failsafe)
+    if (distFromOrigin > maxDist + 2.0) {
+      const angle = Math.atan2(marshmallow.marshmallow.position.z, marshmallow.marshmallow.position.x);
+      marshmallow.marshmallow.position.x = Math.cos(angle) * maxDist;
+      marshmallow.marshmallow.position.z = Math.sin(angle) * maxDist;
+    }
     
-    // Turn toward center
+    // Smoothly turn toward center rather than snapping
     mov.targetDirection.set(-marshmallow.marshmallow.position.x, 0, -marshmallow.marshmallow.position.z).normalize();
+    // Force a logic update for direction
+    mov.moveTimer = mov.changeDirectionInterval;
   }
 }
