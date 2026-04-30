@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { STARTING_WAVE } from './wave-constants.js';
 import { WaveTimer } from './wave-timer.js';
+import { settings, worldState } from '../state.js'; // Re-export global settings/worldState for in-game modules
 
 export const gameState = {
   player: {
@@ -66,3 +67,6 @@ export const gameState = {
   nextKillBonus: false, // Sweet Tooth effect flag
   waveEndReason: null, // 'TIME_OUT' or 'MALLOW_POP'
 };
+
+// Re-export shared runtime config for convenience to avoid incorrect relative imports elsewhere
+export { settings, worldState };
