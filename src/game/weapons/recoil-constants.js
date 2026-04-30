@@ -5,6 +5,7 @@ export const SKEWER_RECOIL_RECOVERY = 0.2; // seconds
 export const GLOBBER_RECOIL_PITCH = 0.01;
 export const SPATTERER_RECOIL_PITCH = 0.02;
 export const CLEAVER_RECOIL_PITCH = 0.04;
+export const MELTER_RECOIL_PITCH = 0.00; // Melter should not induce vertical pitch recoil
 
 export const GENERIC_RECOIL_DURATION = 0.05;
 export const GENERIC_RECOIL_RECOVERY = 0.15;
