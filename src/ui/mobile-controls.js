@@ -1,7 +1,7 @@
 import nipplejs from 'nipplejs';
 import { gameState } from '../game/state.js';
 import { session } from '../game/manager.js';
-import { shoot, releaseCleaver } from '../game/combat.js';
+import { shoot, releaseCleaver, stopShooting } from '../game/combat.js';
 
 export function createMobileControls() {
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -39,6 +39,7 @@ export function createMobileControls() {
   shootBtn.addEventListener('pointerup', (e) => {
     e.preventDefault();
     shootBtn.isPressed = false;
+    stopShooting();
     if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
       releaseCleaver(session.particleSystem, session.bossHUD);
     }

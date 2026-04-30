@@ -1,4 +1,5 @@
 import { gameState } from './state.js';
+import { stopShooting } from './combat.js';
 import { STARTING_WAVE, DEFAULT_WAVE_DURATION, TIME_BONUS_PER_KILL } from './wave-constants.js';
 import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
 import { createMarshmallow } from './marshmallow.js';
@@ -25,6 +26,7 @@ export const session = {
 };
 
 export function startWave() {
+  stopShooting();
   // Clear any existing entities and effects from previous rounds for a clean restart
   gameState.currentMarshmallow = null;
   gameState.meltingMarshmallows = [];
@@ -98,6 +100,7 @@ export function onMarshmallowDefeated() {
 export function togglePause() {
   session.isPaused = !session.isPaused;
   if (session.isPaused) {
+    stopShooting();
     session.pauseMenu.show();
     document.exitPointerLock();
   } else {
@@ -106,6 +109,7 @@ export function togglePause() {
 }
 
 export function quitToMenu() {
+  stopShooting();
   session.isPlaying = false;
   session.isPaused = false;
   document.getElementById('menu').style.display = 'flex';

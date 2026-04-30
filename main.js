@@ -21,7 +21,7 @@ import { session, startWave, quitToMenu, togglePause } from './src/game/manager.
 import { createWeaponSelection } from './src/ui/weapon-selection.js';
 import { offerWeaponChoices, selectWeapon } from './src/game/weapon-selection.js';
 import { runGameLoop } from './src/game/loop.js';
-import { shoot, releaseCleaver } from './src/game/combat.js';
+import { shoot, releaseCleaver, stopShooting } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
 import { WeaponModels } from './src/game/weapons/weapon-models.js';
 import { createWeaponStatus } from './src/ui/weapon-status.js';
@@ -160,6 +160,7 @@ function startGame() {
   
   container.addEventListener('mouseup', () => {
     mouseDown = false;
+    stopShooting();
     if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
       releaseCleaver(session.particleSystem, session.bossHUD);
     }

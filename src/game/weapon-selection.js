@@ -1,4 +1,5 @@
 import { gameState } from './state.js';
+import { stopShooting } from './combat.js';
 
 export function offerWeaponChoices() {
   const allIndices = [0, 1, 2, 3, 4];
@@ -11,6 +12,7 @@ export function offerWeaponChoices() {
 }
 
 export function selectWeapon(weaponIndex) {
+  stopShooting();
   gameState.selectedWeaponForWave = weaponIndex;
   gameState.currentWeapon = weaponIndex;
   
