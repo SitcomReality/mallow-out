@@ -1,4 +1,4 @@
-import { creatorState, envState, settings } from './state.js';
+import { settings } from './state.js';
 
 
 export function lerp(a, b, t) {
