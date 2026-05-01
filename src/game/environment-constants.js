@@ -5,7 +5,7 @@ export const ENV_COLORS = {
     ambient: 0x4b0082,  // Indigo ambient shadows
     sky: 0xffa07a,      // Light salmon horizon (rarely seen)
     sky2: 0x8a2be2,     // Blue violet zenith
-    fog: 0xda70d6,      // Vibrant Orchid fog
+    fog: 0x87ceeb,      // Vibrant Orchid fog
   },
   night: {
     sun: 0x00ffff,      // Cyan moon glow
