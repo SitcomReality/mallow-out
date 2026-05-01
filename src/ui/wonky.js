@@ -122,23 +122,22 @@ export function applyWonkyUI() {
       box-shadow: none !important;
       position: relative;
       z-index: 1;
+      box-sizing: border-box !important;
     }
     .wonky-svg {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
       pointer-events: none;
       z-index: -1;
+      overflow: visible !important;
     }
   `;
   document.head.appendChild(style);
 
   const observer = new ResizeObserver(entries => {
     for (let entry of entries) {
-      if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-        updateWonkyElement(entry.target, entry.contentRect.width, entry.contentRect.height);
+      const el = entry.target;
+      if (el.offsetWidth > 0 && el.offsetHeight > 0) {
+        updateWonkyElement(el, el.offsetWidth, el.offsetHeight);
       }
     }
   });
@@ -179,7 +178,6 @@ function updateWonkyElement(el, width, height) {
   if (width === 0 || height === 0) return;
   
   const seed = el.dataset.seed || el.id || el.className || 'wonky';
-  
   const paths = generateWonkyRectPaths(width, height, seed);
   
   let svg = el.querySelector(':scope > .wonky-svg');
@@ -192,6 +190,14 @@ function updateWonkyElement(el, width, height) {
   const fill = el.dataset.fill || '#ffffff';
   const stroke = el.dataset.stroke || '#000000';
   const strokeWidth = el.dataset.strokeWidth || '4';
+  
+  // Use a buffer to ensure overshoot and wobble aren't clipped by the element bounds
+  const buffer = 12; 
+  svg.setAttribute("viewBox", `-${buffer} -${buffer} ${width + buffer * 2} ${height + buffer * 2}`);
+  svg.style.top = `-${buffer}px`;
+  svg.style.left = `-${buffer}px`;
+  svg.style.width = `${width + buffer * 2}px`;
+  svg.style.height = `${height + buffer * 2}px`;
   
   svg.innerHTML = `
     <g shape-rendering="crispEdges">
