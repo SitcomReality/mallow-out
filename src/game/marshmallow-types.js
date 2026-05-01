@@ -3,7 +3,7 @@ export const MARSHMALLOW_TYPES = {
     id: 'standard',
     name: 'Standard Marshmallow',
     rarity: 'common',
-    color: { hue: 0.95, satMin: 0.3, satMax: 0.5, lightMin: 0.85, lightMax: 0.95 },
+    color: { hue: 0.0, satMin: 0.8, satMax: 1.0, lightMin: 0.7, lightMax: 0.9 }, // Vibrant Pinks/Reds
     sizeMultiplier: { min: 0.9, max: 1.1 },
     speedMultiplier: { min: 0.8, max: 1.2 },
     movementPattern: 'wandering',
@@ -15,7 +15,7 @@ export const MARSHMALLOW_TYPES = {
     id: 'frantic',
     name: 'Frantic Marshmallow',
     rarity: 'common',
-    color: { hue: 0.08, satMin: 0.4, satMax: 0.6, lightMin: 0.8, lightMax: 0.9 },
+    color: { hue: 0.1, satMin: 0.8, satMax: 1.0, lightMin: 0.6, lightMax: 0.8 }, // Electric Orange
     sizeMultiplier: { min: 0.8, max: 0.95 },
     speedMultiplier: { min: 1.5, max: 2.0 },
     movementPattern: 'frantic',
@@ -27,7 +27,7 @@ export const MARSHMALLOW_TYPES = {
     id: 'shy',
     name: 'Shy Marshmallow',
     rarity: 'uncommon',
-    color: { hue: 0.55, satMin: 0.3, satMax: 0.5, lightMin: 0.85, lightMax: 0.95 },
+    color: { hue: 0.6, satMin: 0.8, satMax: 1.0, lightMin: 0.7, lightMax: 0.9 }, // Neon Cyan
     sizeMultiplier: { min: 0.85, max: 1.0 },
     speedMultiplier: { min: 1.0, max: 1.3 },
     movementPattern: 'fleeing',
@@ -39,7 +39,7 @@ export const MARSHMALLOW_TYPES = {
     id: 'long',
     name: 'Long Marshmallow',
     rarity: 'uncommon',
-    color: { hue: 0.15, satMin: 0.25, satMax: 0.4, lightMin: 0.9, lightMax: 0.98 },
+    color: { hue: 0.8, satMin: 0.8, satMax: 1.0, lightMin: 0.6, lightMax: 0.8 }, // Royal Purple
     sizeMultiplier: { min: 0.7, max: 0.85 },
     heightMultiplier: { min: 1.5, max: 1.8 },
     speedMultiplier: { min: 0.7, max: 0.9 },
@@ -52,7 +52,7 @@ export const MARSHMALLOW_TYPES = {
     id: 'floaty',
     name: 'Floaty Marshmallow',
     rarity: 'rare',
-    color: { hue: 0.15, satMin: 0.6, satMax: 0.8, lightMin: 0.85, lightMax: 0.95 },
+    color: { hue: 0.15, satMin: 0.9, satMax: 1.0, lightMin: 0.5, lightMax: 0.7 }, // Golden Yellow
     sizeMultiplier: { min: 1.1, max: 1.3 },
     speedMultiplier: { min: 0.5, max: 0.7 },
     bobAmplitude: { min: 0.8, max: 1.2 },
@@ -65,7 +65,7 @@ export const MARSHMALLOW_TYPES = {
     id: 'friendly',
     name: 'Friendly Marshmallow',
     rarity: 'rare',
-    color: { hue: 0.33, satMin: 0.4, satMax: 0.6, lightMin: 0.8, lightMax: 0.9 },
+    color: { hue: 0.3, satMin: 0.8, satMax: 1.0, lightMin: 0.6, lightMax: 0.8 }, // Radioactive Green
     sizeMultiplier: { min: 0.95, max: 1.15 },
     speedMultiplier: { min: 0.3, max: 0.6 },
     movementPattern: 'approaching',

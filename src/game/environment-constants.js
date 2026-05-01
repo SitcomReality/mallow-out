@@ -1,20 +1,20 @@
 export const ENV_COLORS = {
-  // Marsh palette
+  // Fantastical Marsh palette
   day: {
-    sun: 0xffffee,      // Slightly warm sun
-    ambient: 0x334d40,  // Dark murky green ambient
-    sky: 0x7a9b8e,      // Misty green-gray horizon
-    sky2: 0x4a6a5c,     // Darker swamp zenith
-    fog: 0x6a8a7a,      // Dense marsh fog
+    sun: 0xfff0f5,      // Lavender-tinted sun
+    ambient: 0x4b0082,  // Indigo ambient shadows
+    sky: 0xffa07a,      // Light salmon horizon (rarely seen)
+    sky2: 0x8a2be2,     // Blue violet zenith
+    fog: 0xda70d6,      // Vibrant Orchid fog
   },
   night: {
-    sun: 0x1a261e,      // Dim green-tinted moonlight
-    ambient: 0x080f0d,  // Deep swamp shadows
-    sky: 0x050a08,      // Midnight green horizon
-    sky2: 0x020504,     // Black-green zenith
-    fog: 0x080d0a,      // Oppressive night mist
+    sun: 0x00ffff,      // Cyan moon glow
+    ambient: 0x191970,  // Midnight blue ambient
+    sky: 0x483d8b,      // Dark slate blue horizon
+    sky2: 0x000000,     // Deepest black
+    fog: 0x4b0082,      // Electric Indigo night mist
   },
-  floor: 0x5a7a6a,      // Murky ground color
+  floor: 0x00fa9a,      // Medium Spring Green (Glow-in-the-dark moss)
 };
 
 export const ENV_SETTINGS = {

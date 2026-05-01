@@ -1,4 +1,4 @@
-export const BUBBLE_COLOR = '#88ccff';
+export const BUBBLE_COLOR = '#00ffff'; // Electric Cyan
 export const BUBBLE_OUTER_RADIUS = 2;
 export const BUBBLE_INNER_RADIUS = 1.95;
 export const BUBBLE_SPAWN_Y = -10;

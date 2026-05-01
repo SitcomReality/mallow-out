@@ -10,8 +10,8 @@ export const BLOOD_PARTICLE_DRAG = 0.92;
 
 // Colors (Strawberry Jam)
 export const BLOOD_COLOR_R = 1.0;
-export const BLOOD_COLOR_G = 0.2;
-export const BLOOD_COLOR_B = 0.4;
+export const BLOOD_COLOR_G = 0.0;
+export const BLOOD_COLOR_B = 1.0; // Max Saturation Neon Magenta Jam
 
 // Hole spray particles
 export const HOLE_SPRAY_PARTICLE_COUNT = 8;
