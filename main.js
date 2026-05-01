@@ -26,6 +26,8 @@ import { createMobileControls } from './src/ui/mobile-controls.js';
 import { WeaponModels } from './src/game/weapons/weapon-models.js';
 import { createWeaponStatus } from './src/ui/weapon-status.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
+import { applyWonkyUI } from './src/ui/wonky.js';
+applyWonkyUI();
 
 // Setup Main Menu
 const mainBtn = document.getElementById('mainBtn');

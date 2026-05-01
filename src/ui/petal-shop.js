@@ -16,7 +16,7 @@ export function createPetalShop(onContinue) {
     const offersHTML = offers.map(petal => {
       const canAfford = gameState.currencies.pollen >= petal.cost;
       return `
-        <div class="upgrade-card petal-offer ${canAfford ? '' : 'disabled'}" data-petal="${petal.id}">
+        <div class="upgrade-card petal-offer wonky ${canAfford ? '' : 'disabled'}" data-fill="#f8f9fa" data-stroke="#e9ecef" data-stroke-width="4" data-petal="${petal.id}">
           <div class="upgrade-card-icon">${petal.icon}</div>
           <h3 class="upgrade-card-name">${petal.name}</h3>
           <p class="upgrade-card-desc">${petal.description}</p>
@@ -31,21 +31,21 @@ export function createPetalShop(onContinue) {
     const currentPetalsHTML = gameState.equippedPetals.map((petalId, idx) => {
       if (petalId) {
         const petal = ALL_PETALS.find(p => p.id === petalId);
-        return `<div class="petal-slot filled" title="${petal?.name || ''}">${petal?.icon || '?'}</div>`;
+        return `<div class="petal-slot filled wonky" data-fill="var(--mallow-white)" data-stroke="var(--mallow-white)" data-stroke-width="2" title="${petal?.name || ''}">${petal?.icon || '?'}</div>`;
       } else {
-        return `<div class="petal-slot empty" title="Empty - will grant Caramel Vapor">💨</div>`;
+        return `<div class="petal-slot empty wonky" data-fill="rgba(255, 255, 255, 0.5)" data-stroke="var(--mallow-white)" data-stroke-width="2" title="Empty - will grant Caramel Vapor">💨</div>`;
       }
     }).join('');
     
     container.innerHTML = `
-      <div class="upgrade-content">
+      <div class="upgrade-content wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="8">
         <h2 class="upgrade-title">Petal Shop</h2>
         <p class="upgrade-subtitle">
           <span class="currency-icon">🌼</span> 
           ${gameState.currencies.pollen} Pollen Available
         </p>
         
-        <div class="petal-inventory">
+        <div class="petal-inventory wonky" data-fill="rgba(183, 228, 199, 0.3)" data-stroke="transparent" data-stroke-width="0">
           <h3>Your Petals</h3>
           <div class="petal-slots">
             ${currentPetalsHTML}
@@ -57,7 +57,7 @@ export function createPetalShop(onContinue) {
           ${offersHTML}
         </div>
         
-        <button class="continue-btn" id="petalShopContinue">Continue</button>
+        <button class="continue-btn wonky" data-fill="var(--mallow-pink)" data-stroke="var(--mallow-pink-deep)" data-stroke-width="4" id="petalShopContinue">Continue</button>
       </div>
     `;
     

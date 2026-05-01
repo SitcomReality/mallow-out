@@ -6,7 +6,8 @@ html, body {
   background: linear-gradient(180deg, #d8f3dc 0%, #b7e4c7 100%);
   color: var(--marsh-deep);
   font-family: 'Comic Neue', cursive;
-  -webkit-font-smoothing: antialiased;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
   overflow: hidden;
 }
 

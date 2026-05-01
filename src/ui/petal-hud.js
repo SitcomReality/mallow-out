@@ -11,7 +11,7 @@ export function createPetalHUD() {
   const NS = 'http://www.w3.org/2000/svg';
   
   container.innerHTML = `
-    <div class="petal-display">
+    <div class="petal-display wonky" data-fill="var(--ui-bg)" data-stroke="var(--mallow-white)" data-stroke-width="4">
       <div class="petal-label">Petals</div>
       <svg id="petalStar" width="${c*2}" height="${c*2}" viewBox="0 0 ${c*2} ${c*2}"></svg>
     </div>
@@ -49,6 +49,7 @@ export function createPetalHUD() {
     svg.append(labels[i]);
   }
   
+  svg.setAttribute("shape-rendering", "crispEdges");
   svg.append(el('polygon', { class: 'core', points: pts.map(p => p.join(',')).join(' ') }));
   
   function update() {

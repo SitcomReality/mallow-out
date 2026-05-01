@@ -19,15 +19,11 @@
 }
 
 .upgrade-content, .wave-summary-content, .pause-content {
-  background: var(--mallow-white);
-  border-radius: 48px;
   padding: 48px;
   max-width: 640px;
   width: 90%;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.1);
-  border: 8px solid var(--marsh-mint);
   position: relative;
-  margin: auto; /* Center vertically within the scrolling container */
+  margin: auto;
   flex-shrink: 0;
 }
 
@@ -109,8 +105,6 @@
 }
 
 .wave-stats {
-  background: rgba(183, 228, 199, 0.3);
-  border-radius: 24px;
   padding: 24px;
   margin-bottom: 24px;
 }
@@ -132,8 +126,6 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: rgba(183, 228, 199, 0.4);
-  border-radius: 100px;
   margin-bottom: 12px;
 }
 
@@ -150,8 +142,6 @@
 
 .petal-inventory {
   margin-bottom: 24px;
-  background: rgba(183, 228, 199, 0.3);
-  border-radius: 24px;
   padding: 24px;
 }
 
@@ -165,24 +155,17 @@
 .petal-slot {
   width: 56px;
   height: 56px;
-  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 28px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 2px solid var(--mallow-white);
 }
 
 .petal-slot.filled {
-  background: var(--mallow-white);
-  box-shadow: var(--ui-glow);
 }
 
 .petal-triggers-section {
   margin: 20px 0;
-  background: rgba(183, 228, 199, 0.3);
-  border-radius: 24px;
   padding: 20px;
 }
 
@@ -191,14 +174,10 @@
   align-items: center;
   gap: 12px;
   padding: 10px 16px;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 100px;
   margin-bottom: 8px;
 }
 
 .petal-trigger.vapor {
-  background: rgba(251, 133, 0, 0.1);
-  border: 1px solid var(--caramel-amber);
 }
 
 .petal-name {
@@ -217,8 +196,6 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 20px;
-  background: rgba(183, 228, 199, 0.2);
-  border-radius: 100px;
   margin-bottom: 8px;
 }
 
@@ -231,20 +208,16 @@
 .pause-btn {
   flex: 1;
   padding: 16px;
-  border-radius: 100px;
   font-weight: 900;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
-  border: 3px solid var(--marsh-deep);
 }
 
 .pause-btn:not(.secondary) {
-  background: var(--marsh-deep);
   color: white;
 }
 
 .pause-btn.secondary {
-  background: white;
   color: var(--marsh-deep);
 }

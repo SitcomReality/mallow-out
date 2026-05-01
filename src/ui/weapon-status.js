@@ -36,22 +36,16 @@ export function createWeaponStatus() {
     const animation = isReady ? 'mallow-ready-pulse 0.4s infinite alternate ease-in-out' : 'none';
     
     container.innerHTML = `
-      <div style="
-        background: ${isReady ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)'};
+      <div class="wonky" data-fill="${isReady ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)'}" data-stroke="white" data-stroke-width="4" style="
         backdrop-filter: blur(10px);
-        border: 4px solid white;
-        border-radius: 100px;
         padding: 8px 20px;
         min-width: 200px;
         animation: ${animation};
-        box-shadow: ${isReady ? '0 0 20px rgba(255,255,255,0.5)' : 'none'};
       ">
         <div style="text-align: center; color: white; font-size: 12px; font-weight: 900; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
           ${isReady ? 'READY!' : 'CHARGING'}
         </div>
-        <div style="
-          background: rgba(0,0,0,0.3);
-          border-radius: 100px;
+        <div class="wonky" data-fill="rgba(0,0,0,0.3)" data-stroke="transparent" data-stroke-width="0" style="
           height: 12px;
           overflow: hidden;
         ">
@@ -60,7 +54,6 @@ export function createWeaponStatus() {
             height: 100%;
             width: ${percent}%;
             transition: width 0.1s;
-            border-radius: 100px;
           "></div>
         </div>
       </div>
@@ -84,11 +77,8 @@ export function createWeaponStatus() {
     }
 
     container.innerHTML = `
-      <div style="
-        background: rgba(255, 255, 255, 0.2);
+      <div class="wonky" data-fill="rgba(255, 255, 255, 0.2)" data-stroke="white" data-stroke-width="3" style="
         backdrop-filter: blur(10px);
-        border: 3px solid white;
-        border-radius: 100px;
         padding: 8px 20px;
         min-width: 200px;
         animation: ${animation};
@@ -96,9 +86,7 @@ export function createWeaponStatus() {
         <div style="text-align: center; color: white; font-size: 12px; font-weight: 900; margin-bottom: 4px;">
           ${overheated ? 'OVERHEATED!' : 'HEAT'}
         </div>
-        <div style="
-          background: rgba(0,0,0,0.3);
-          border-radius: 100px;
+        <div class="wonky" data-fill="rgba(0,0,0,0.3)" data-stroke="transparent" data-stroke-width="0" style="
           height: 12px;
           overflow: hidden;
         ">
@@ -107,7 +95,6 @@ export function createWeaponStatus() {
             height: 100%;
             width: ${percent}%;
             transition: width 0.1s;
-            border-radius: 100px;
           "></div>
         </div>
       </div>

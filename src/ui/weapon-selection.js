@@ -11,7 +11,7 @@ export function createWeaponSelection(onSelect) {
     const optionsHTML = gameState.weaponChoicesOffered.map(weaponIndex => {
       const weapon = WEAPONS[weaponIndex];
       return `
-        <div class="upgrade-card weapon-option" data-weapon="${weaponIndex}" style="flex: 1; max-width: 280px;">
+        <div class="upgrade-card weapon-option wonky" data-fill="#f8f9fa" data-stroke="#e9ecef" data-stroke-width="4" data-weapon="${weaponIndex}" style="flex: 1; max-width: 280px;">
           <div class="upgrade-card-icon" style="font-size: 48px; margin-bottom: 12px;">${weapon.icon}</div>
           <h3 class="upgrade-card-name">${weapon.name}</h3>
           <p class="upgrade-card-desc">${weapon.description}</p>
@@ -21,7 +21,7 @@ export function createWeaponSelection(onSelect) {
     }).join('');
     
     container.innerHTML = `
-      <div class="upgrade-content" style="text-align: center;">
+      <div class="upgrade-content wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="8" style="text-align: center;">
         <h2 class="upgrade-title">Choose Your Weapon</h2>
         <p class="upgrade-subtitle">Select a weapon for Wave ${gameState.currentWave}</p>
         <div class="upgrade-options" style="display: flex; justify-content: center; gap: 24px; margin-bottom: 0; flex-wrap: wrap;">

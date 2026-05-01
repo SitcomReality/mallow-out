@@ -14,7 +14,7 @@ export function createMobileControls() {
   container.innerHTML = `
     <div id="joystickZone" class="joystick-zone"></div>
     <div class="mobile-actions">
-      <button id="mobileShootBtn" class="mobile-shoot-btn">
+      <button id="mobileShootBtn" class="mobile-shoot-btn wonky" data-fill="var(--jam-red)" data-stroke="var(--mallow-white)" data-stroke-width="6">
         <span class="shoot-icon">🎯</span>
       </button>
     </div>
