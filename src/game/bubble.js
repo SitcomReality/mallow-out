@@ -103,25 +103,19 @@ export function updateBubbles(delta, currentTime) {
       bubble.voidObj.position.y = bubble.localHitDir.y * currentOffset;
       bubble.voidObj.position.z = bubble.localHitDir.z * currentOffset;
       
-      const finalRadius = BUBBLE_OUTER_RADIUS + maxOffset * 2.5; 
+      // Scale the void sphere significantly larger to ensure complete erasure of the outer shell
+      const finalRadius = BUBBLE_OUTER_RADIUS * 4.0; 
       const currentRadius = BUBBLE_INNER_RADIUS + (finalRadius - BUBBLE_INNER_RADIUS) * t;
-      bubble.voidObj.scale.x = currentRadius;
-      bubble.voidObj.scale.y = currentRadius;
-      bubble.voidObj.scale.z = currentRadius;
+      bubble.voidObj.scale.x = bubble.voidObj.scale.y = bubble.voidObj.scale.z = currentRadius;
       
       bubble.voidObj.noiseAmount = BUBBLE_POP_NOISE_AMOUNT * t;
       bubble.voidObj.noiseScale = BUBBLE_POP_NOISE_SCALE;
       
       bubble.voidObj.noiseOffset.y += delta * 2.0;
 
-      // Animate smoothing/blend to zero over the pop so the bubble shell becomes sharp before removal
-      if (typeof BUBBLE_INITIAL_BLEND !== 'undefined') {
-        // Interpolate from current blend (or initial) down to 0
-        const startBlend = bubble.group.blendRadius !== undefined ? bubble.group.blendRadius : BUBBLE_INITIAL_BLEND;
-        bubble.group.blendRadius = startBlend * (1.0 - t);
-      } else {
-        bubble.group.blendRadius = 0;
-      }
+      // Animate smoothing/blend to zero over the entire pop duration
+      const startBlend = bubble.popStartBlend !== undefined ? bubble.popStartBlend : BUBBLE_INITIAL_BLEND;
+      bubble.group.blendRadius = startBlend * (1.0 - t);
       
       if (t >= 1.0) {
         toRemove.push(bubble);
@@ -146,6 +140,7 @@ export function popBubble(bubble, hitPoint) {
   
   bubble.state = 'popping';
   bubble.popTimer = 0;
+  bubble.popStartBlend = bubble.group.blendRadius;
   
   const bubbleCenter = new THREE.Vector3(bubble.group.position.x, bubble.group.position.y, bubble.group.position.z);
   let localHitDir = hitPoint.clone().sub(bubbleCenter);
