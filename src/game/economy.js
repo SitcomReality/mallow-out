@@ -1,7 +1,10 @@
 import { gameState } from './state.js';
-import { POLLEN_PER_DAMAGE, BASE_CARAMEL_PER_KILL } from './economy-constants.js';
 import { getPollenMultiplier } from './petals/petal-effects.js';
 import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
+
+// Currency reward rates
+const POLLEN_PER_DAMAGE = 2;
+const BASE_CARAMEL_PER_KILL = 10;
 
 export function awardPollen(damage) {
   const petalMultiplier = getPollenMultiplier();

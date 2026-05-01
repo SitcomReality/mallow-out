@@ -1,4 +1,4 @@
-import { settings } from '../state.js';
+import { settings } from '../game/state.js';
 
 export function createPauseMenu(onResume, onQuit) {
   const menu = document.getElementById('pauseMenu');
