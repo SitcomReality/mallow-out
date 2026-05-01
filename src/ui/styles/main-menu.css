@@ -15,31 +15,22 @@
   content: '';
   position: absolute;
   inset: 0;
-  /* Remove soft gradients; keep a very subtle banded fill */
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(0,0,0,0.02),
-      rgba(0,0,0,0.02) 3px,
-      transparent 3px,
-      transparent 6px
-    );
-  animation: none;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 70%);
+  animation: pulse 6s ease-in-out infinite;
   pointer-events: none;
 }
 
 .game-title {
-  font-size: clamp(36px, 12vw, 96px);
-  font-weight: 900;
+  font-size: clamp(24px, 8vw, 48px);
+  font-weight: 400;
   text-transform: uppercase;
-  letter-spacing: -2px;
-  color: var(--mallow-white);
+  letter-spacing: 2px;
+  color: #000000;
   text-shadow: 
-    4px 4px 0px var(--mallow-pink),
-    -2px -2px 0px var(--marsh-mint),
-    0 10px 30px rgba(0,0,0,0.1);
+    4px 4px 0px #ff69b4,
+    -2px -2px 0px #00ff7f;
   margin: 0;
-  line-height: 0.9;
+  line-height: 1.2;
   text-align: center;
 }
 

@@ -36,21 +36,20 @@ export function createWeaponStatus() {
     const animation = isReady ? 'mallow-ready-pulse 0.4s infinite alternate ease-in-out' : 'none';
     
     container.innerHTML = `
-      <div class="wonky" data-fill="${isReady ? 'rgba(255, 255, 255, 0.4)' : 'rgba(255, 255, 255, 0.2)'}" data-stroke="white" data-stroke-width="4" style="
-        backdrop-filter: blur(10px);
+      <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" style="
         padding: 8px 20px;
         min-width: 200px;
         animation: ${animation};
       ">
-        <div style="text-align: center; color: white; font-size: 12px; font-weight: 900; margin-bottom: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+        <div style="text-align: center; color: #000000; font-size: 8px; font-weight: 400; margin-bottom: 4px;">
           ${isReady ? 'READY!' : 'CHARGING'}
         </div>
-        <div class="wonky" data-fill="rgba(0,0,0,0.3)" data-stroke="transparent" data-stroke-width="0" style="
+        <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" style="
           height: 12px;
           overflow: hidden;
         ">
           <div style="
-            background: ${barColor};
+            background: ${isReady ? '#32cd32' : '#ffd700'};
             height: 100%;
             width: ${percent}%;
             transition: width 0.1s;
@@ -77,16 +76,15 @@ export function createWeaponStatus() {
     }
 
     container.innerHTML = `
-      <div class="wonky" data-fill="rgba(255, 255, 255, 0.2)" data-stroke="white" data-stroke-width="3" style="
-        backdrop-filter: blur(10px);
+      <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" style="
         padding: 8px 20px;
         min-width: 200px;
         animation: ${animation};
       ">
-        <div style="text-align: center; color: white; font-size: 12px; font-weight: 900; margin-bottom: 4px;">
+        <div style="text-align: center; color: #000000; font-size: 8px; font-weight: 400; margin-bottom: 4px;">
           ${overheated ? 'OVERHEATED!' : 'HEAT'}
         </div>
-        <div class="wonky" data-fill="rgba(0,0,0,0.3)" data-stroke="transparent" data-stroke-width="0" style="
+        <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" style="
           height: 12px;
           overflow: hidden;
         ">

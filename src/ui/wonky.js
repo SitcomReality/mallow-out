@@ -178,7 +178,6 @@ export function applyWonkyUI() {
 function updateWonkyElement(el, width, height) {
   if (width === 0 || height === 0) return;
   
-  const pad = 0;
   const seed = el.dataset.seed || el.id || el.className || 'wonky';
   
   const paths = generateWonkyRectPaths(width, height, seed);
@@ -190,12 +189,12 @@ function updateWonkyElement(el, width, height) {
     el.insertBefore(svg, el.firstChild);
   }
   
-  const fill = el.dataset.fill || 'var(--mallow-white)';
-  const stroke = el.dataset.stroke || 'var(--marsh-mint)';
+  const fill = el.dataset.fill || '#ffffff';
+  const stroke = el.dataset.stroke || '#000000';
   const strokeWidth = el.dataset.strokeWidth || '4';
   
   svg.innerHTML = `
-    <g transform="translate(${pad}, ${pad})" shape-rendering="crispEdges">
+    <g shape-rendering="crispEdges">
       <path class="wonky-fill" d="${paths.fillPath}" fill="${fill}" />
       <path class="wonky-stroke" d="${paths.topPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="square" />
       <path class="wonky-stroke" d="${paths.rightPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="square" />

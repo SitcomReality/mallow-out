@@ -11,8 +11,8 @@ export function createPetalHUD() {
   const NS = 'http://www.w3.org/2000/svg';
   
   container.innerHTML = `
-    <div class="petal-display wonky" data-fill="var(--ui-bg)" data-stroke="var(--mallow-white)" data-stroke-width="4">
-      <div class="petal-label">Petals</div>
+    <div class="petal-display wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4">
+      <div class="petal-label" style="font-size: 8px; color: #000000;">Petals</div>
       <svg id="petalStar" width="${c*2}" height="${c*2}" viewBox="0 0 ${c*2} ${c*2}"></svg>
     </div>
   `;

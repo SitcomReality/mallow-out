@@ -34,14 +34,14 @@ export function createWaveSummary(onContinue) {
       const triggersHTML = processedTriggers.map(trigger => {
         if (trigger.bonus) {
           // Vapor bonus or any petal with an immediate bonus
-          return `<div class="petal-trigger wonky ${trigger.isVapor ? 'vapor' : ''}" data-fill="${trigger.isVapor ? 'rgba(251, 133, 0, 0.1)' : 'rgba(255, 255, 255, 0.5)'}" data-stroke="${trigger.isVapor ? 'var(--caramel-amber)' : 'transparent'}" data-stroke-width="${trigger.isVapor ? '2' : '0'}">
+          return `<div class="petal-trigger wonky ${trigger.isVapor ? 'vapor' : ''}" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
             <span class="petal-icon">${trigger.icon}</span>
             <span class="petal-name">${trigger.name}</span>
             <span class="petal-effect">+${trigger.bonus} 🍯</span>
           </div>`;
         } else {
           // Regular petal
-          return `<div class="petal-trigger wonky" data-fill="rgba(255, 255, 255, 0.5)" data-stroke="transparent" data-stroke-width="0">
+          return `<div class="petal-trigger wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
             <span class="petal-icon">${trigger.icon}</span>
             <span class="petal-name">${trigger.name}</span>
           </div>`;
@@ -49,8 +49,8 @@ export function createWaveSummary(onContinue) {
       }).join('');
       
       petalTriggersHTML = `
-        <div class="petal-triggers-section wonky" data-fill="rgba(183, 228, 199, 0.3)" data-stroke="transparent" data-stroke-width="0">
-          <h3>Petals Triggered</h3>
+        <div class="petal-triggers-section wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <h3 style="font-size: 10px; color: #000000;">Petals Triggered</h3>
           <div class="petal-triggers">
             ${triggersHTML}
           </div>
@@ -59,11 +59,11 @@ export function createWaveSummary(onContinue) {
     }
     
     container.innerHTML = `
-      <div class="wave-summary-content wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="8">
+      <div class="wave-summary-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
         <div class="wave-end-reason">${reasonText}</div>
         <h2 class="wave-summary-title">Wave ${gameState.currentWave} Complete!</h2>
         
-        <div class="wave-stats wonky" data-fill="rgba(183, 228, 199, 0.3)" data-stroke="transparent" data-stroke-width="0">
+        <div class="wave-stats wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <div class="stat-row">
             <span class="stat-label">Marshmallows Destroyed:</span>
             <span class="stat-value">${gameState.marshmallowsDestroyedThisWave}</span>
@@ -83,19 +83,19 @@ export function createWaveSummary(onContinue) {
         ${petalTriggersHTML}
         
         <div class="currency-earned">
-          <div class="currency-row pollen wonky" data-fill="rgba(183, 228, 199, 0.4)" data-stroke="transparent" data-stroke-width="0">
+          <div class="currency-row pollen wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
             <span class="currency-icon">🌼</span>
             <span class="currency-label">Pollen Earned:</span>
             <span class="currency-amount" data-currency="pollen">0</span>
           </div>
-          <div class="currency-row caramel wonky" data-fill="rgba(183, 228, 199, 0.4)" data-stroke="transparent" data-stroke-width="0">
+          <div class="currency-row caramel wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
             <span class="currency-icon">🍯</span>
             <span class="currency-label">Caramel Earned:</span>
             <span class="currency-amount" data-currency="caramel">0</span>
           </div>
         </div>
         
-        <button class="continue-btn wonky" data-fill="var(--mallow-pink)" data-stroke="var(--mallow-pink-deep)" data-stroke-width="4" id="summaryContBtn">Continue to Shops</button>
+        <button class="continue-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" id="summaryContBtn">Continue to Shops</button>
       </div>
     `;
     

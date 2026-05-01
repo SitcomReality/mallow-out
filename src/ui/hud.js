@@ -6,32 +6,32 @@ export function createHUD() {
   hud.innerHTML = `
     <div class="hud-top">
       <div class="currency-display">
-        <div class="currency-item wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="3">
+        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
           <span class="currency-icon">🌼</span>
           <span class="currency-value" id="pollenDisplay">0</span>
         </div>
-        <div class="currency-item wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="3">
+        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
           <span class="currency-icon">🍯</span>
           <span class="currency-value" id="caramelDisplay">0</span>
         </div>
       </div>
-      <div class="timer-display wonky" data-fill="var(--jam-red)" data-stroke="white" data-stroke-width="4" id="timerDisplay">30</div>
+      <div class="timer-display wonky" data-fill="#dc143c" data-stroke="#000000" data-stroke-width="4" id="timerDisplay">30</div>
     </div>
     
-    <div class="weapon-bar wonky" data-fill="var(--ui-bg)" data-stroke="var(--mallow-white)" data-stroke-width="4">
-      <div class="weapon-slot active wonky" data-fill="rgba(255, 255, 255, 0.3)" data-stroke="transparent" data-stroke-width="2" data-weapon="0" title="Skewer">
+    <div class="weapon-bar wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4">
+      <div class="weapon-slot active wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" data-weapon="0" title="Skewer">
         <span>🗡️</span>
       </div>
-      <div class="weapon-slot wonky" data-fill="rgba(255, 255, 255, 0.3)" data-stroke="transparent" data-stroke-width="2" data-weapon="1" title="Globber" style="display:none;">
+      <div class="weapon-slot wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" data-weapon="1" title="Globber" style="display:none;">
         <span>🟣</span>
       </div>
-      <div class="weapon-slot wonky" data-fill="rgba(255, 255, 255, 0.3)" data-stroke="transparent" data-stroke-width="2" data-weapon="2" title="Spatterer" style="display:none;">
+      <div class="weapon-slot wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" data-weapon="2" title="Spatterer" style="display:none;">
         <span>💥</span>
       </div>
-      <div class="weapon-slot wonky" data-fill="rgba(255, 255, 255, 0.3)" data-stroke="transparent" data-stroke-width="2" data-weapon="3" title="Cleaver" style="display:none;">
+      <div class="weapon-slot wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" data-weapon="3" title="Cleaver" style="display:none;">
         <span>🪓</span>
       </div>
-      <div class="weapon-slot wonky" data-fill="rgba(255, 255, 255, 0.3)" data-stroke="transparent" data-stroke-width="2" data-weapon="4" title="Melter" style="display:none;">
+      <div class="weapon-slot wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" data-weapon="4" title="Melter" style="display:none;">
         <span>🔥</span>
       </div>
     </div>
@@ -48,13 +48,13 @@ export function createHUD() {
       hud.querySelectorAll('.weapon-slot').forEach((slot, i) => {
         if (i === index) {
           slot.classList.add('active');
-          slot.dataset.fill = 'var(--mallow-white)';
-          slot.dataset.stroke = 'var(--mallow-pink)';
+          slot.dataset.fill = '#ffff00';
+          slot.dataset.stroke = '#000000';
           slot.style.display = 'flex';
         } else {
           slot.classList.remove('active');
-          slot.dataset.fill = 'rgba(255, 255, 255, 0.3)';
-          slot.dataset.stroke = 'transparent';
+          slot.dataset.fill = '#ffffff';
+          slot.dataset.stroke = '#000000';
           slot.style.display = 'none';
         }
         // force wonky update

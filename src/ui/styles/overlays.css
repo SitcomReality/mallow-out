@@ -1,16 +1,13 @@
 .wave-summary-overlay, #upgradeScreen, #pauseMenu {
   position: fixed;
   inset: 0;
-  /* Flat paper-like overlay */
-  background: #fdfdfd;
+  background: #87ceeb;
   display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* center content to avoid wasted space */
+  justify-content: flex-start;
   padding: 20px;
   z-index: 300;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -20,162 +17,159 @@
 }
 
 .upgrade-content, .wave-summary-content, .pause-content {
-  padding: 32px;
-  max-width: 540px;
-  width: 92%;
+  padding: 24px;
+  max-width: 800px;
+  width: 95%;
   position: relative;
   margin: auto;
   flex-shrink: 0;
 }
 
 .upgrade-title, .wave-summary-title, .pause-title {
-  font-size: 42px;
-  font-weight: 900;
+  font-size: 20px;
+  font-weight: 400;
   text-align: center;
   margin: 0 0 16px;
-  color: var(--marsh-deep);
+  color: #000000;
   text-transform: uppercase;
 }
 
 .wave-end-reason {
   text-align: center;
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--jam-red);
+  font-size: 10px;
+  font-weight: 400;
+  color: #dc143c;
   text-transform: uppercase;
   letter-spacing: 2px;
   margin-bottom: 8px;
 }
 
 .upgrade-subtitle, .petal-hint {
-  font-size: 18px;
+  font-size: 10px;
   text-align: center;
-  color: var(--mallow-pink-deep);
-  margin: 0 0 40px;
-  font-weight: 700;
+  color: #000000;
+  margin: 0 0 20px;
+  font-weight: 400;
 }
 
 .upgrade-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 24px;
-  margin-bottom: 40px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 @media (max-width: 600px) {
   .wave-summary-overlay, #upgradeScreen, #pauseMenu {
-    padding: 12px;
+    padding: 10px;
   }
   .upgrade-content, .wave-summary-content, .pause-content {
-    padding: 20px;
-    border-radius: 12px;
-    border-width: 3px;
-    width: 96%;
+    padding: 16px;
+    width: 98%;
   }
   .upgrade-title, .wave-summary-title, .pause-title {
-    font-size: 28px;
+    font-size: 14px;
   }
   .upgrade-subtitle, .petal-hint {
-    font-size: 14px;
-    margin-bottom: 20px;
+    font-size: 8px;
+    margin-bottom: 12px;
   }
   .upgrade-options {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: 1fr;
     gap: 12px;
   }
   .upgrade-card {
-    padding: 16px;
-    border-radius: 16px;
-  }
-  .wave-stats {
-    padding: 16px;
-    font-size: 14px;
-  }
-  .stat-row {
-    font-size: 14px;
-  }
-  .currency-row {
     padding: 12px;
   }
+  .wave-stats {
+    padding: 12px;
+    font-size: 8px;
+  }
+  .stat-row {
+    font-size: 8px;
+  }
+  .currency-row {
+    padding: 8px;
+  }
   .currency-row .currency-label {
-    font-size: 14px;
+    font-size: 8px;
   }
   .currency-row .currency-amount {
-    font-size: 18px;
+    font-size: 10px;
   }
 }
 
 .wave-stats {
-  padding: 24px;
-  margin-bottom: 24px;
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
 .stat-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  font-size: 18px;
-  font-weight: 700;
+  padding: 6px 0;
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .currency-earned {
-  margin: 24px 0;
+  margin: 16px 0;
 }
 
 .currency-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
 }
 
 .currency-row .currency-label {
   flex: 1;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .currency-row .currency-amount {
-  font-size: 24px;
-  font-weight: 900;
+  font-size: 12px;
+  font-weight: 400;
 }
 
 .petal-inventory {
-  margin-bottom: 24px;
-  padding: 24px;
+  margin-bottom: 16px;
+  padding: 16px;
 }
 
 .petal-slots {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .petal-slot {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 24px;
 }
 
 .petal-slot.filled {
 }
 
 .petal-triggers-section {
-  margin: 20px 0;
-  padding: 20px;
+  margin: 12px 0;
+  padding: 12px;
 }
 
 .petal-trigger {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  margin-bottom: 8px;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
 }
 
 .petal-trigger.vapor {
@@ -183,12 +177,14 @@
 
 .petal-name {
   flex: 1;
-  font-weight: 700;
+  font-weight: 400;
+  font-size: 9px;
 }
 
 .petal-effect {
-  color: var(--caramel-amber);
-  font-weight: 900;
+  color: #000000;
+  font-weight: 400;
+  font-size: 9px;
 }
 
 /* Settings/Pause specific */
@@ -196,29 +192,31 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
-  margin-bottom: 8px;
+  padding: 10px 16px;
+  margin-bottom: 6px;
+  font-size: 9px;
 }
 
 .pause-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .pause-btn {
   flex: 1;
-  padding: 16px;
-  font-weight: 900;
+  padding: 12px;
+  font-weight: 400;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-size: 10px;
 }
 
 .pause-btn:not(.secondary) {
-  color: white;
+  color: #000000;
 }
 
 .pause-btn.secondary {
-  color: var(--marsh-deep);
+  color: #000000;
 }

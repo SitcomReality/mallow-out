@@ -27,11 +27,11 @@ export function createUpgradeScreen(onContinue) {
       const canAfford = !maxed && !alreadyPurchased && gameState.currencies.caramel >= cost;
       
       return `
-        <div class="upgrade-card wonky ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${alreadyPurchased ? 'purchased' : ''}" data-fill="#f8f9fa" data-stroke="#e9ecef" data-stroke-width="4" data-id="${upgrade.id}" data-cost="${cost}">
-          <div class="upgrade-card-icon">${upgrade.icon}</div>
-          <h3 class="upgrade-card-name">${upgrade.name}</h3>
-          <div class="upgrade-level wonky" data-fill="rgba(183, 228, 199, 0.3)" data-stroke="transparent" data-stroke-width="0">${maxed ? 'MAX LEVEL' : alreadyPurchased ? 'PURCHASED' : 'Level ' + currentLevel}</div>
-          <p class="upgrade-card-desc">${upgrade.description}</p>
+        <div class="upgrade-card wonky ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${alreadyPurchased ? 'purchased' : ''}" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" data-id="${upgrade.id}" data-cost="${cost}">
+          <div class="upgrade-card-icon" style="font-size: 32px;">${upgrade.icon}</div>
+          <h3 class="upgrade-card-name" style="font-size: 10px; color: #000000; margin: 8px 0;">${upgrade.name}</h3>
+          <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">${maxed ? 'MAX LEVEL' : alreadyPurchased ? 'PURCHASED' : 'Level ' + currentLevel}</div>
+          <p class="upgrade-card-desc" style="font-size: 8px; color: #000000; margin: 8px 0;">${upgrade.description}</p>
           <div class="upgrade-effect">${upgrade.shortDesc}</div>
           ${(!maxed && !alreadyPurchased) ? `
             <div class="upgrade-cost">
@@ -45,7 +45,7 @@ export function createUpgradeScreen(onContinue) {
     }).join('');
     
     screen.innerHTML = `
-      <div class="upgrade-content wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="8">
+      <div class="upgrade-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
         <h2 class="upgrade-title">Permanent Upgrades</h2>
         <p class="upgrade-subtitle">
           <span class="currency-icon">🍯</span> 
@@ -54,7 +54,7 @@ export function createUpgradeScreen(onContinue) {
         <div class="upgrade-options">
           ${optionsHTML}
         </div>
-        <button class="continue-btn wonky" data-fill="var(--mallow-pink)" data-stroke="var(--mallow-pink-deep)" data-stroke-width="4" id="upgradeSkip">Continue to Wave ${wave + 1}</button>
+        <button class="continue-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" id="upgradeSkip">Continue to Wave ${wave + 1}</button>
       </div>
     `;
     

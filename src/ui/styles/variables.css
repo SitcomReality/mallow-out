@@ -1,22 +1,16 @@
 :root {
-  /* High-contrast fridge-art palette */
+  /* High-Contrast Crayon Palette */
   --mallow-white: #ffffff;
-
-  /* Primary accent colors (bolder, more distinct) */
-  --mallow-pink: #ff66aa;        /* hot pink */
-  --mallow-pink-deep: #cc0066;   /* deep magenta */
-  --jam-red: #e60023;            /* punchy red */
-  --pollen-gold: #ffb800;        /* bright yellow-gold */
-  --caramel-amber: #ff7b00;      /* vivid orange */
-
-  /* Supporting greens */
-  --marsh-mint: #66dd99;         /* bright mint */
-  --marsh-green: #009944;        /* deep leaf green */
-  --marsh-deep: #111111;         /* use as generic dark/black */
-
-  /* UI surfaces: mostly flat white with strong black lines */
-  --ui-bg: #ffffff;
+  --mallow-pink: #ff69b4;
+  --mallow-pink-deep: #ff1493;
+  --jam-red: #dc143c;
+  --pollen-gold: #ffd700;
+  --caramel-amber: #ff8c00;
+  --marsh-mint: #00ff7f;
+  --marsh-green: #32cd32;
+  --marsh-deep: #000000;
+  --ui-bg: rgba(255, 255, 255, 0.95);
   --ui-border: #000000;
-  --ui-shadow: 0 6px 0 #000000;
-  --ui-glow: 0 0 0 transparent;
+  --ui-shadow: none;
+  --ui-glow: none;
 }
