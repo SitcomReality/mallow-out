@@ -1,15 +1,15 @@
 .wave-summary-overlay, #upgradeScreen, #pauseMenu {
   position: fixed;
   inset: 0;
-  background: rgba(183, 228, 199, 0.85); /* Marsh Mint Overlay */
+  background: #ffffff;
+  background-image: radial-gradient(#000 10%, transparent 10%);
+  background-size: 20px 20px;
   display: none;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Start from top to allow scrolling */
+  justify-content: flex-start;
   padding: 40px 0;
   z-index: 300;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }

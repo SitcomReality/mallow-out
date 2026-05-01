@@ -197,10 +197,10 @@ function updateWonkyElement(el, width, height) {
   svg.innerHTML = `
     <g transform="translate(${pad}, ${pad})" shape-rendering="crispEdges">
       <path class="wonky-fill" d="${paths.fillPath}" fill="${fill}" />
-      <path class="wonky-stroke" d="${paths.topPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="square" />
-      <path class="wonky-stroke" d="${paths.rightPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="square" />
-      <path class="wonky-stroke" d="${paths.bottomPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="square" />
-      <path class="wonky-stroke" d="${paths.leftPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="square" />
+      <path class="wonky-stroke" d="${paths.topPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="butt" />
+      <path class="wonky-stroke" d="${paths.rightPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="butt" />
+      <path class="wonky-stroke" d="${paths.bottomPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="butt" />
+      <path class="wonky-stroke" d="${paths.leftPath}" stroke="${stroke}" stroke-width="${strokeWidth}" fill="none" stroke-linecap="butt" />
     </g>
   `;
 }

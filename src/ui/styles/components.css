@@ -74,6 +74,7 @@
   transition: transform 0.1s;
   text-align: center;
   position: relative;
+  color: #000;
 }
 
 .upgrade-card:hover:not(.disabled) {

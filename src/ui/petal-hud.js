@@ -11,8 +11,8 @@ export function createPetalHUD() {
   const NS = 'http://www.w3.org/2000/svg';
   
   container.innerHTML = `
-    <div class="petal-display wonky" data-fill="var(--ui-bg)" data-stroke="var(--mallow-white)" data-stroke-width="4">
-      <div class="petal-label">Petals</div>
+    <div class="petal-display wonky" data-fill="var(--ui-bg)" data-stroke="black" data-stroke-width="4">
+      <div class="petal-label">Equipped Petals</div>
       <svg id="petalStar" width="${c*2}" height="${c*2}" viewBox="0 0 ${c*2} ${c*2}"></svg>
     </div>
   `;
@@ -55,10 +55,12 @@ export function createPetalHUD() {
   function update() {
     gameState.equippedPetals.forEach((petalId, idx) => {
       const petal = petalId ? getPetalById(petalId) : null;
-      const empty = '💨';
+      const empty = '';
       
       if (petal) {
         petals[idx].classList.add('on');
+        petals[idx].setAttribute('fill', 'var(--mallow-pink)');
+        petals[idx].setAttribute('stroke', 'black');
         labels[idx].textContent = petal.icon;
         
         let title = petals[idx].querySelector('title');
@@ -70,6 +72,8 @@ export function createPetalHUD() {
         
       } else {
         petals[idx].classList.remove('on');
+        petals[idx].setAttribute('fill', '#ffffff');
+        petals[idx].setAttribute('stroke', '#000000');
         labels[idx].textContent = empty;
         
         let title = petals[idx].querySelector('title');
