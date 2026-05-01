@@ -12,6 +12,13 @@ html, body {
   line-height: 1.6;
 }
 
+/* Ensure native button styling doesn't override our wonky UI font */
+button {
+  font-family: 'Press Start 2P', monospace;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 0.3; transform: scale(1); }
   50% { opacity: 0.6; transform: scale(1.2); }
