@@ -45,7 +45,7 @@ export function createUpgradeScreen(onContinue) {
     }).join('');
     
     screen.innerHTML = `
-      <div class="upgrade-content wonky" data-fill="var(--mallow-white)" data-stroke="black" data-stroke-width="8">
+      <div class="upgrade-content wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="8">
         <h2 class="upgrade-title">Permanent Upgrades</h2>
         <p class="upgrade-subtitle">
           <span class="currency-icon">🍯</span> 
@@ -54,7 +54,7 @@ export function createUpgradeScreen(onContinue) {
         <div class="upgrade-options">
           ${optionsHTML}
         </div>
-        <button class="continue-btn wonky" data-fill="var(--mallow-pink)" data-stroke="black" data-stroke-width="6" id="upgradeSkip">Continue to Wave ${wave + 1}</button>
+        <button class="continue-btn wonky" data-fill="var(--mallow-pink)" data-stroke="var(--mallow-pink-deep)" data-stroke-width="4" id="upgradeSkip">Continue to Wave ${wave + 1}</button>
       </div>
     `;
     

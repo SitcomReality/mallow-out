@@ -6,11 +6,11 @@
   --jam-red: #ff4d6d;
   --pollen-gold: #ffb703;
   --caramel-amber: #fb8500;
-  --marsh-mint: #ffffff;
-  --marsh-green: #22c55e;
-  --marsh-deep: #000000;
-  --ui-bg: #ffffff;
-  --ui-border: #000000;
-  --ui-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
-  --ui-glow: none;
+  --marsh-mint: #b7e4c7;
+  --marsh-green: #74c69d;
+  --marsh-deep: #1b4332;
+  --ui-bg: rgba(255, 255, 255, 0.15);
+  --ui-border: rgba(255, 255, 255, 0.4);
+  --ui-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --ui-glow: 0 0 20px rgba(255, 194, 209, 0.4);
 }

@@ -51,7 +51,7 @@
   padding: 8px 32px;
   font-size: 28px;
   font-weight: 900;
-  color: #000000;
+  color: white;
 }
 
 @media (max-width: 600px) {
@@ -174,15 +174,14 @@
 
 .petal-hud {
   position: fixed;
-  bottom: 130px;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 120px;
+  left: 24px;
   pointer-events: none;
   z-index: 50;
 }
 
 .petal-display {
-  padding: 8px 16px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -219,24 +218,24 @@
 }
 
 .core {
-  fill: #000000;
-  stroke: #000000;
+  fill: rgba(255, 255, 255, 0.4);
+  stroke: var(--mallow-white);
   stroke-width: 2;
   pointer-events: none;
 }
 
 .petal {
-  fill: #ffffff;
-  stroke: #000000;
-  stroke-width: 3;
+  fill: rgba(255, 255, 255, 0.2);
+  stroke: var(--mallow-white);
+  stroke-width: 2;
   transition: all 0.3s;
   pointer-events: auto;
 }
 
 .petal.on {
-  fill: var(--mallow-pink);
-  stroke: #000000;
-  stroke-width: 4;
+  fill: rgba(255, 255, 255, 0.8);
+  stroke: var(--marsh-green);
+  stroke-width: 3;
 }
 
 .petal.zap {

@@ -25,10 +25,11 @@
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -2px;
-  color: #000;
+  color: var(--mallow-white);
   text-shadow: 
-    6px 6px 0px var(--mallow-pink),
-    -3px -3px 0px var(--mallow-white);
+    4px 4px 0px var(--mallow-pink),
+    -2px -2px 0px var(--marsh-mint),
+    0 10px 30px rgba(0,0,0,0.1);
   margin: 0;
   line-height: 0.9;
   text-align: center;

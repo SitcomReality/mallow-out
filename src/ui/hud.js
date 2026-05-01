@@ -6,16 +6,16 @@ export function createHUD() {
   hud.innerHTML = `
     <div class="hud-top">
       <div class="currency-display">
-        <div class="currency-item wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-deep)" data-stroke-width="4">
+        <div class="currency-item wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="3">
           <span class="currency-icon">🌼</span>
           <span class="currency-value" id="pollenDisplay">0</span>
         </div>
-        <div class="currency-item wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-deep)" data-stroke-width="4">
+        <div class="currency-item wonky" data-fill="var(--mallow-white)" data-stroke="var(--marsh-mint)" data-stroke-width="3">
           <span class="currency-icon">🍯</span>
           <span class="currency-value" id="caramelDisplay">0</span>
         </div>
       </div>
-      <div class="timer-display wonky" data-fill="var(--mallow-white)" data-stroke="black" data-stroke-width="4" id="timerDisplay">30</div>
+      <div class="timer-display wonky" data-fill="var(--jam-red)" data-stroke="white" data-stroke-width="4" id="timerDisplay">30</div>
     </div>
     
     <div class="weapon-bar wonky" data-fill="var(--ui-bg)" data-stroke="var(--mallow-white)" data-stroke-width="4">
