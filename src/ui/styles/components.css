@@ -3,7 +3,7 @@
   padding: 16px 40px;
   font-size: 24px;
   font-weight: 900;
-  color: white;
+  color: #000000;
   cursor: pointer;
   transition: transform 0.1s;
   text-transform: uppercase;
@@ -12,7 +12,7 @@
 
 .big-btn:hover {
   transform: scale(1.05) translateY(-2px);
-  color: var(--mallow-pink-deep);
+  color: #000000;
 }
 
 .big-btn:active { 
@@ -23,13 +23,13 @@
   appearance: none;
   border: none;
   background: transparent;
-  color: var(--mallow-pink-deep);
+  color: #000000;
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
   padding: 10px 20px;
-  opacity: 0.7;
+  opacity: 0.9;
   transition: opacity 0.2s;
   text-decoration: underline;
   margin-top: 10px;

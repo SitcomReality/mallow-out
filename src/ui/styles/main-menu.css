@@ -15,8 +15,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 70%);
-  animation: pulse 6s ease-in-out infinite;
+  /* Remove soft gradients; keep a very subtle banded fill */
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.02),
+      rgba(0,0,0,0.02) 3px,
+      transparent 3px,
+      transparent 6px
+    );
+  animation: none;
   pointer-events: none;
 }
 

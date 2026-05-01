@@ -1,17 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 html, body {
   height: 100%;
   margin: 0;
-  background: linear-gradient(180deg, #d8f3dc 0%, #b7e4c7 100%);
-  color: var(--marsh-deep);
-  font-family: 'Comic Neue', cursive;
+  /* Flat, print-friendly background instead of smooth gradients */
+  background: #fdfdfd;
+  color: #000000;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
   -webkit-font-smoothing: none;
   font-smooth: never;
   overflow: hidden;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.3; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.2); }
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
 }

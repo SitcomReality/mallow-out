@@ -1,16 +1,22 @@
 :root {
-  /* Lush Marshmallow Palette */
+  /* High-contrast fridge-art palette */
   --mallow-white: #ffffff;
-  --mallow-pink: #ffc2d1;
-  --mallow-pink-deep: #fb6f92;
-  --jam-red: #ff4d6d;
-  --pollen-gold: #ffb703;
-  --caramel-amber: #fb8500;
-  --marsh-mint: #b7e4c7;
-  --marsh-green: #74c69d;
-  --marsh-deep: #1b4332;
-  --ui-bg: rgba(255, 255, 255, 0.15);
-  --ui-border: rgba(255, 255, 255, 0.4);
-  --ui-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-  --ui-glow: 0 0 20px rgba(255, 194, 209, 0.4);
+
+  /* Primary accent colors (bolder, more distinct) */
+  --mallow-pink: #ff66aa;        /* hot pink */
+  --mallow-pink-deep: #cc0066;   /* deep magenta */
+  --jam-red: #e60023;            /* punchy red */
+  --pollen-gold: #ffb800;        /* bright yellow-gold */
+  --caramel-amber: #ff7b00;      /* vivid orange */
+
+  /* Supporting greens */
+  --marsh-mint: #66dd99;         /* bright mint */
+  --marsh-green: #009944;        /* deep leaf green */
+  --marsh-deep: #111111;         /* use as generic dark/black */
+
+  /* UI surfaces: mostly flat white with strong black lines */
+  --ui-bg: #ffffff;
+  --ui-border: #000000;
+  --ui-shadow: 0 6px 0 #000000;
+  --ui-glow: 0 0 0 transparent;
 }

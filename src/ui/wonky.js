@@ -125,10 +125,10 @@ export function applyWonkyUI() {
     }
     .wonky-svg {
       position: absolute;
-      top: -15px;
-      left: -15px;
-      width: calc(100% + 30px);
-      height: calc(100% + 30px);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
       z-index: -1;
     }
@@ -178,7 +178,7 @@ export function applyWonkyUI() {
 function updateWonkyElement(el, width, height) {
   if (width === 0 || height === 0) return;
   
-  const pad = 15;
+  const pad = 0;
   const seed = el.dataset.seed || el.id || el.className || 'wonky';
   
   const paths = generateWonkyRectPaths(width, height, seed);

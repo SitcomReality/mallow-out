@@ -75,7 +75,9 @@
     font-size: 18px;
   }
   .petal-hud {
-    bottom: 140px;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
   }
 }
 
@@ -174,8 +176,9 @@
 
 .petal-hud {
   position: fixed;
-  bottom: 120px;
-  left: 24px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   pointer-events: none;
   z-index: 50;
 }
