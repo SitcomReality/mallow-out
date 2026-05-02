@@ -89,8 +89,7 @@ float getObjectDist(vec3 p, int idx) {
   } else if (objType < 2.5) {
     d = sdCylinder(localP, scale.x, scale.y);
   } else if (objType < 3.5) {
-    // Type 3 is now unused (was torus)
-    d = sdSphere(localP, scale.x);
+    d = sdTorus(localP, scale.xy);
   } else {
     d = sdText(localP, scale, uObjData6[idx].w);
   }

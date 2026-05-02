@@ -32,6 +32,12 @@ import {
   HOLE_SPRAY_FINAL_BLEND,
   DISSIPATE_NOISE_AMOUNT,
   DISSIPATE_NOISE_SCALE,
+  RIPPLE_DURATION,
+  RIPPLE_INITIAL_RADIUS,
+  RIPPLE_FINAL_RADIUS,
+  RIPPLE_THICKNESS,
+  RIPPLE_INITIAL_BLEND,
+  RIPPLE_FINAL_BLEND,
 } from './fx-constants.js';
 
 let nextFxId = 10000;
@@ -168,6 +174,33 @@ export function createHoleSprayFX(entryPoint, exitPoint, direction) {
   return fx;
 }
 
+export function createRippleFX(position) {
+  const id = nextFxId++;
+  
+  const fx = {
+    id,
+    type: 'torus',
+    position: { x: position.x, y: 0.01, z: position.z }, // Slightly above floor
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: RIPPLE_INITIAL_RADIUS, y: RIPPLE_THICKNESS, z: 0 },
+    color: '#8afdff', // Matches floor color for a "swell" effect
+    operation: 'union',
+    blendRadius: RIPPLE_INITIAL_BLEND,
+    noiseAmount: 0,
+    noiseScale: 1,
+    noiseOffset: { x: 0, y: 0, z: 0 },
+    
+    fxData: {
+      type: 'ripple',
+      startTime: performance.now() * 0.001,
+      duration: RIPPLE_DURATION,
+    }
+  };
+  
+  activeFX.push(fx);
+  return fx;
+}
+
 export function updateFX(currentTime) {
   const toRemove = [];
   
@@ -231,6 +264,14 @@ export function updateFX(currentTime) {
       }
       
       fx.blendRadius = lerp(HOLE_SPRAY_INITIAL_BLEND, HOLE_SPRAY_FINAL_BLEND, t);
+    } else if (fx.fxData.type === 'ripple') {
+      const radius = lerp(RIPPLE_INITIAL_RADIUS, RIPPLE_FINAL_RADIUS, t);
+      fx.scale.x = radius;
+      // Fade thickness out at the end
+      const thickness = RIPPLE_THICKNESS * (1.0 - t * t);
+      fx.scale.y = thickness;
+      
+      fx.blendRadius = lerp(RIPPLE_INITIAL_BLEND, RIPPLE_FINAL_BLEND, t);
     }
   }
   
