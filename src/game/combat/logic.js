@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
 import { awardPollen } from '../economy.js';
-import { checkMarshmallowPop } from '../marshmallow-pop.js';
 import { damageMarshmallow } from '../marshmallow.js';
 import { onMarshmallowDefeated, session } from '../manager.js';
 
@@ -40,8 +39,6 @@ export function handleMarshmallowHit(hitPoint, damage, isCritical, particleSyste
   if (session.floatingTextSystem) {
     session.floatingTextSystem.createDamageText(hitPoint, damage, isCritical);
   }
-  
-  checkMarshmallowPop(marshmallow, particleSystem);
   
   const defeated = damageMarshmallow(marshmallow, damage, particleSystem);
   if (marshmallowHUD) marshmallowHUD.update(marshmallow);
