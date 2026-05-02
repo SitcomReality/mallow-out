@@ -9,7 +9,7 @@ export const session = {
   isPlaying: false,
   isPaused: false,
   hud: null,
-  bossHUD: null,
+  marshmallowHUD: null,
   upgradeScreen: null,
   petalShop: null,
   pauseMenu: null,
@@ -26,7 +26,7 @@ export function spawnNextMarshmallow() {
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
   
-  if (session.bossHUD) session.bossHUD.update(marshmallow);
+  if (session.marshmallowHUD) session.marshmallowHUD.update(marshmallow);
   
   // Show spawn text
   if (session.floatingTextSystem && marshmallow.type) {
@@ -65,7 +65,7 @@ export function quitToMenu() {
   document.getElementById('crosshair').style.display = 'none';
   
   if (session.hud) session.hud.hide();
-  if (session.bossHUD) session.bossHUD.hide();
+  if (session.marshmallowHUD) session.marshmallowHUD.hide();
   if (session.upgradeScreen) session.upgradeScreen.hide();
   if (session.weaponSelection) session.weaponSelection.hide();
   if (session.pauseMenu) session.pauseMenu.hide();

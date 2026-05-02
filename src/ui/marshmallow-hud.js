@@ -1,5 +1,5 @@
-export function createBossHUD() {
-  const hud = document.getElementById('bossHUD');
+export function createMarshmallowHUD() {
+  const hud = document.getElementById('marshmallowHUD');
   
   function update(marshmallow) {
     if (!marshmallow) {

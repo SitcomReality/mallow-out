@@ -1,0 +1,189 @@
+import * as THREE from 'three';
+import { HOLE_RADIUS, CHUNK_RADIUS } from './marshmallow-constants.js';
+import { CHUNK_REPAIR_INITIAL_BLEND } from './repair-constants.js';
+import { getLocalTransform, calculateSurfaceNormal } from './marshmallow-utils.js';
+
+let nextId = 5000;
+
+export function addHoleToMarshmallow(marshmallowEntity, hitPoint, rayDirection) {
+  const marshmallow = marshmallowEntity.marshmallow;
+  const r = marshmallow.scale.x;
+  const h = marshmallow.scale.y;
+  const holeLength = 2.0 * Math.sqrt(r * r + h * h) + 0.4;
+  const entryOverlap = 0.2;
+  const holePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2 - entryOverlap));
+  
+  const up = new THREE.Vector3(0, 1, 0);
+  const axis = new THREE.Vector3().crossVectors(up, rayDirection).normalize();
+  const angle = Math.acos(up.dot(rayDirection));
+  
+  const worldQuat = new THREE.Quaternion();
+  if (axis.length() > 0.001) {
+    worldQuat.setFromAxisAngle(axis, angle);
+  }
+
+  const local = getLocalTransform(holePosWorld, worldQuat, marshmallow);
+  
+  const hole = {
+    id: nextId++,
+    type: 'cylinder',
+    position: local.position,
+    rotation: local.rotation,
+    scale: { x: HOLE_RADIUS, y: holeLength / 2, z: 0 },
+    color: '#ff00ff',
+    operation: 'subtract',
+    blendRadius: 0.05,
+    parentId: marshmallow.id,
+    noiseAmount: 0.4,
+    noiseScale: 1.0,
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
+    repairData: {
+      type: 'hole',
+      startTime: performance.now() * 0.001,
+      initialRadius: HOLE_RADIUS,
+      initialHeight: holeLength / 2
+    }
+  };
+  
+  marshmallowEntity.holes.push(hole);
+  marshmallowEntity.hitCount++;
+  return hole;
+}
+
+export function addChunkToMarshmallow(marshmallowEntity, hitPoint) {
+  const marshmallow = marshmallowEntity.marshmallow;
+  const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
+  
+  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  
+  const localPos = hitPoint.clone().sub(new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z)).applyQuaternion(mQuatInv);
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
+
+  const chunk = {
+    id: nextId++,
+    type: 'sphere',
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: CHUNK_RADIUS, y: CHUNK_RADIUS, z: CHUNK_RADIUS },
+    color: '#ff00ff',
+    operation: 'subtract',
+    blendRadius: CHUNK_REPAIR_INITIAL_BLEND,
+    parentId: marshmallow.id,
+    noiseAmount: 0.4,
+    noiseScale: 1.0,
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
+    repairData: {
+      type: 'chunk',
+      startTime: performance.now() * 0.001,
+      normal: localNormal,
+      initialScale: CHUNK_RADIUS
+    }
+  };
+  
+  marshmallowEntity.holes.push(chunk);
+  marshmallowEntity.hitCount += 2;
+  return chunk;
+}
+
+export function addSpattererDamage(marshmallowEntity, hitPoint, distance) {
+  const marshmallow = marshmallowEntity.marshmallow;
+  const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
+  
+  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  
+  const maxRange = 15;
+  const minRange = 3;
+  const rangeFactor = Math.max(0, Math.min(1, (distance - minRange) / (maxRange - minRange)));
+  const offsetDistance = 0.2 + rangeFactor * 0.6;
+  
+  const damagePosWorld = hitPoint.clone().add(worldNormal.clone().multiplyScalar(offsetDistance));
+  const localPos = damagePosWorld.clone().sub(new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z)).applyQuaternion(mQuatInv);
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
+  
+  const spatterer = {
+    id: nextId++,
+    type: 'sphere',
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 0.4, y: 0.4, z: 0.4 },
+    color: '#ff00ff',
+    operation: 'subtract',
+    blendRadius: 0.1,
+    parentId: marshmallow.id,
+    noiseAmount: 1.5,
+    noiseScale: 5.0,
+    noiseOffset: { 
+      x: Math.random() * 100, 
+      y: Math.random() * 100, 
+      z: Math.random() * 100 
+    },
+    repairData: {
+      type: 'spatterer',
+      startTime: performance.now() * 0.001,
+      normal: localNormal,
+      initialNoiseAmount: 1.5,
+      initialNoiseScale: 5.0,
+      initialOffset: offsetDistance
+    }
+  };
+  
+  marshmallowEntity.holes.push(spatterer);
+  marshmallowEntity.hitCount += 3;
+  return spatterer;
+}
+
+export function addCleaverDamage(marshmallowEntity, hitPoint, rayDirection) {
+  const marshmallow = marshmallowEntity.marshmallow;
+  const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
+  
+  const up = new THREE.Vector3(0, 1, 0);
+  const orientQuat = new THREE.Quaternion().setFromUnitVectors(up, worldNormal);
+  
+  const angle45 = Math.PI / 4;
+  const cornerQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(angle45, angle45, angle45));
+  const worldQuat = orientQuat.multiply(cornerQuat);
+  
+  const penetrationOffset = 0.55; 
+  const cubePosWorld = hitPoint.clone().add(worldNormal.clone().multiplyScalar(penetrationOffset));
+  
+  const local = getLocalTransform(cubePosWorld, worldQuat, marshmallow);
+  
+  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
+
+  const cleaver = {
+    id: nextId++,
+    type: 'box',
+    position: local.position,
+    rotation: local.rotation,
+    scale: { x: 0.8, y: 0.8, z: 0.8 },
+    color: '#ff00ff',
+    operation: 'subtract',
+    blendRadius: 0.3,
+    parentId: marshmallow.id,
+    noiseAmount: 0,
+    noiseScale: 1.0,
+    noiseOffset: { x: 0, y: 0, z: 0 },
+    repairData: {
+      type: 'cleaver',
+      startTime: performance.now() * 0.001,
+      normal: localNormal,
+      initialBlend: 0.3
+    }
+  };
+  
+  marshmallowEntity.holes.push(cleaver);
+  marshmallowEntity.hitCount += 4;
+  return cleaver;
+}

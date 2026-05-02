@@ -15,52 +15,49 @@ function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-export function updateMeltingEnemies(currentTime) {
+export function updateMeltingMarshmallows(currentTime) {
   const toRemove = [];
   
-  for (const enemy of gameState.meltingMarshmallows) {
-    const elapsed = currentTime - enemy.meltStartTime;
+  for (const marshmallow of gameState.meltingMarshmallows) {
+    const elapsed = currentTime - marshmallow.meltStartTime;
     const t = Math.min(elapsed / MELT_DURATION, 1.0);
     
     if (t >= 1.0) {
-      toRemove.push(enemy);
+      toRemove.push(marshmallow);
       continue;
     }
     
-    if (enemy.meltStartY === undefined) {
-      enemy.meltStartY = enemy.marshmallow.position.y;
+    if (marshmallow.meltStartY === undefined) {
+      marshmallow.meltStartY = marshmallow.marshmallow.position.y;
       
-      enemy.holes.forEach(hole => {
+      marshmallow.holes.forEach(hole => {
         hole.meltStartY = hole.position.y;
       });
       
-      if (!enemy.marshmallow.noiseOffset) enemy.marshmallow.noiseOffset = { x: 0, y: 0, z: 0 };
+      if (!marshmallow.marshmallow.noiseOffset) marshmallow.marshmallow.noiseOffset = { x: 0, y: 0, z: 0 };
     }
     
     // Smooth easing
     const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     
-    const currentY = lerp(enemy.meltStartY, MELT_END_Y, ease);
-    const dy = currentY - enemy.marshmallow.position.y;
+    const currentY = lerp(marshmallow.meltStartY, MELT_END_Y, ease);
     
-    enemy.marshmallow.position.y = currentY;
+    marshmallow.marshmallow.position.y = currentY;
     
-
+    marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
+    marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
+    marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
     
-    enemy.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
-    enemy.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
-    enemy.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
-    
-    if (enemy.marshmallow.targetExpression !== undefined) {
-      const diff = enemy.marshmallow.targetExpression - enemy.marshmallow.expression;
-      enemy.marshmallow.expression += diff * (1.0 / 60.0) * 5.0;
+    if (marshmallow.marshmallow.targetExpression !== undefined) {
+      const diff = marshmallow.marshmallow.targetExpression - marshmallow.marshmallow.expression;
+      marshmallow.marshmallow.expression += diff * (1.0 / 60.0) * 5.0;
     }
     
-    enemy.marshmallow.noiseOffset.y += MELT_NOISE_SPEED * (1.0 / 60.0);
+    marshmallow.marshmallow.noiseOffset.y += MELT_NOISE_SPEED * (1.0 / 60.0);
   }
   
-  for (const enemy of toRemove) {
-    const index = gameState.meltingMarshmallows.indexOf(enemy);
+  for (const mallow of toRemove) {
+    const index = gameState.meltingMarshmallows.indexOf(mallow);
     if (index > -1) {
       gameState.meltingMarshmallows.splice(index, 1);
       console.log("[Melting Complete] Mallow removed from melting state. Remaining melting marshmallows:", gameState.meltingMarshmallows.length);

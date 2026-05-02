@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
 import { castRay, getEnemyDistanceAt } from '../shooting.js';
-import { addHoleToEnemy } from '../enemy.js';
+import { addHoleToMarshmallow } from '../marshmallow-damage.js';
 import { session } from '../manager.js';
 import { getDamageMultiplier } from '../petals/petal-effects.js';
 import { rollCriticalHit } from '../upgrades/weapon-modifiers.js';
@@ -9,7 +9,7 @@ import { BASE_DAMAGE_HOLE } from '../combat-constants.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
 
-export function shoot(screenX, screenY, particleSystem, bossHUD, camera) {
+export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) {
   const ws = gameState.weaponStates;
   if (ws.skewerCooldown > 0) return;
   
@@ -40,10 +40,10 @@ export function shoot(screenX, screenY, particleSystem, bossHUD, camera) {
     let damage = BASE_DAMAGE_HOLE * getDamageMultiplier();
     if (isCritical) damage *= 2;
 
-    addHoleToEnemy(gameState.currentMarshmallow, result.point, direction);
+    addHoleToMarshmallow(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createHoleSpray(result.point, direction);
     
-    handleMarshmallowHit(result.point, damage, isCritical, particleSystem, bossHUD);
+    handleMarshmallowHit(result.point, damage, isCritical, particleSystem, marshmallowHUD);
     rebuildObjectList();
   }
 }

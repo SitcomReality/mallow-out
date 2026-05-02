@@ -8,7 +8,7 @@ import { gameState } from './src/game/state.js';
 import { createRenderer } from './src/game/renderer.js';
 import { initControls } from './src/game/controls.js';
 import { createHUD } from './src/ui/hud.js';
-import { createBossHUD } from './src/ui/boss-hud.js';
+import { createMarshmallowHUD } from './src/ui/marshmallow-hud.js';
 import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { createPetalShop } from './src/ui/petal-shop.js';
@@ -90,7 +90,7 @@ function startGame() {
   session.hud = createHUD();
   session.hud.show();
   
-  session.bossHUD = createBossHUD();
+  session.marshmallowHUD = createMarshmallowHUD();
   
   session.petalShop = createPetalShop();
   
@@ -131,7 +131,7 @@ function startGame() {
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     
-    shoot(x, y, session.particleSystem, session.bossHUD, particleCamera);
+    shoot(x, y, session.particleSystem, session.marshmallowHUD, particleCamera);
   });
 
   // Hook up navigation buttons

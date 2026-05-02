@@ -2,7 +2,7 @@ import { gameState } from '../state.js';
 import { getSceneDistanceAt, rebuildObjectList } from '../combat.js';
 import { getEnemyDistanceAt } from '../shooting.js';
 
-import { addChunkToEnemy } from '../enemy.js';
+import { addChunkToMarshmallow } from '../marshmallow-damage.js';
 import { session } from '../manager.js';
 import { getWeaponDamageBonus, rollCriticalHit } from '../upgrades/weapon-modifiers.js';
 import { getDamageMultiplier } from '../petals/petal-effects.js';
@@ -34,14 +34,14 @@ export function updateProjectiles(delta, time) {
 
       if (hitMarshmallow && gameState.currentMarshmallow) {
         // Hit marshmallow!
-        const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
+        const chunk = addChunkToMarshmallow(gameState.currentMarshmallow, proj.position);
         session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
         
         const isCritical = rollCriticalHit();
         let damage = (BASE_DAMAGE_CHUNK + getWeaponDamageBonus()) * getDamageMultiplier();
         if (isCritical) damage *= 2;
 
-        handleMarshmallowHit(proj.position, damage, isCritical, session.particleSystem, session.bossHUD);
+        handleMarshmallowHit(proj.position, damage, isCritical, session.particleSystem, session.marshmallowHUD);
         
         toRemove.push(proj);
       }

@@ -74,9 +74,7 @@ export function executeMarshmallowPop(marshmallow, particleSystem) {
   gameState.meltingMarshmallows.push(marshmallow);
   gameState.currentMarshmallow = null;
   
-  if (window.sessionStorage.bossHUD) { // Check via session globally if possible or pass it
-      // This is handled in loop.js by clearing currentMarshmallow
-  }
+
   
   onMarshmallowDefeated();
 }

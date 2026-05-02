@@ -23,7 +23,7 @@ export function updateMarshmallows(delta) {
     
     if (marshmallow.popTimer <= 0) {
       executeMarshmallowPop(marshmallow, session.particleSystem);
-      if (session.bossHUD) session.bossHUD.hide();
+      if (session.marshmallowHUD) session.marshmallowHUD.hide();
     }
   } else if (marshmallow.movement) {
     updateMarshmallowMovement(marshmallow, delta);

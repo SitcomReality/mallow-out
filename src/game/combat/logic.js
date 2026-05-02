@@ -30,7 +30,7 @@ export function setPupilLook(marshmallow, hitPoint) {
 /**
  * Orchestrates common damage application logic: economy, UI, health, and death state.
  */
-export function handleMarshmallowHit(hitPoint, damage, isCritical, particleSystem, bossHUD) {
+export function handleMarshmallowHit(hitPoint, damage, isCritical, particleSystem, marshmallowHUD) {
   const marshmallow = gameState.currentMarshmallow;
   if (!marshmallow || damage <= 0) return;
 
@@ -44,7 +44,7 @@ export function handleMarshmallowHit(hitPoint, damage, isCritical, particleSyste
   checkMarshmallowPop(marshmallow, particleSystem);
   
   const defeated = damageMarshmallow(marshmallow, damage, particleSystem);
-  if (bossHUD) bossHUD.update(marshmallow);
+  if (marshmallowHUD) marshmallowHUD.update(marshmallow);
   
   if (defeated) {
     if (gameState.meltingMarshmallows.length >= 2) {
@@ -55,7 +55,7 @@ export function handleMarshmallowHit(hitPoint, damage, isCritical, particleSyste
     deadMarshmallow.meltStartTime = performance.now() * 0.001;
     gameState.meltingMarshmallows.push(deadMarshmallow);
     gameState.currentMarshmallow = null;
-    if (bossHUD) bossHUD.hide();
+    if (marshmallowHUD) marshmallowHUD.hide();
     onMarshmallowDefeated();
   }
 }

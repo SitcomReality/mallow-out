@@ -10,10 +10,10 @@ import {
 
 export function updateRepairs(currentTime, delta) {
   // Only repair the active marshmallow; melting marshmallows stop repairing
-  const allEnemies = [];
-  if (gameState.currentMarshmallow) allEnemies.push(gameState.currentMarshmallow);
+  const activeMarshmallows = [];
+  if (gameState.currentMarshmallow) activeMarshmallows.push(gameState.currentMarshmallow);
 
-  for (const enemy of allEnemies) {
+  for (const marshmallow of activeMarshmallows) {
     if (enemy.marshmallow.targetExpression !== undefined) {
       const diff = enemy.marshmallow.targetExpression - enemy.marshmallow.expression;
       enemy.marshmallow.expression += diff * delta * 5.0;
@@ -101,9 +101,9 @@ export function updateRepairs(currentTime, delta) {
     
     // Cleanup removed damage models to keep CSG operations fast
     for (const hole of toRemove) {
-      const idx = enemy.holes.indexOf(hole);
+      const idx = marshmallow.holes.indexOf(hole);
       if (idx > -1) {
-        enemy.holes.splice(idx, 1);
+        marshmallow.holes.splice(idx, 1);
       }
     }
   }

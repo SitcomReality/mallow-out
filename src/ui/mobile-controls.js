@@ -26,7 +26,7 @@ export function createMobileControls() {
     if (!session.isPlaying || session.isPaused) return;
     
     // For mobile simplified, we tap the center or just use the center-screen projection for the shoot button
-    shoot(0, 0, session.particleSystem, session.bossHUD, session.particleCamera);
+    shoot(0, 0, session.particleSystem, session.marshmallowHUD, session.particleCamera);
   });
 
   return {

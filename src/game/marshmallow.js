@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_HEIGHT, ENEMY_SPAWN_RADIUS } from './marshmallow-constants.js';
+import { MARSHMALLOW_CYLINDER_RADIUS, MARSHMALLOW_CYLINDER_HEIGHT, MARSHMALLOW_HEIGHT, MARSHMALLOW_SPAWN_RADIUS } from './marshmallow-constants.js';
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
@@ -9,7 +9,7 @@ let nextId = 1;
 
 export function createMarshmallow(totalDestroyed) {
   const angle = Math.random() * Math.PI * 2;
-  const distance = Math.random() * ENEMY_SPAWN_RADIUS;
+  const distance = Math.random() * MARSHMALLOW_SPAWN_RADIUS;
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   
@@ -34,11 +34,11 @@ export function createMarshmallow(totalDestroyed) {
   const marshmallow = {
     id: marshmallowId,
     type: 'cylinder',
-    position: { x, y: ENEMY_HEIGHT, z },
+    position: { x, y: MARSHMALLOW_HEIGHT, z },
     rotation: { x: 0, y: 0, z: Math.PI / 2 },
     scale: { 
-      x: ENEMY_CYLINDER_RADIUS * sizeMultiplier, 
-      y: ENEMY_CYLINDER_HEIGHT * heightMultiplier, 
+      x: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier, 
+      y: MARSHMALLOW_CYLINDER_HEIGHT * heightMultiplier, 
       z: 0 
     },
     color: '#' + color.getHexString(),
@@ -68,7 +68,7 @@ export function createMarshmallow(totalDestroyed) {
       speed: BASE_MOVEMENT_SPEED * speedMultiplier,
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: bobAmplitude,
-      baseY: ENEMY_HEIGHT,
+      baseY: MARSHMALLOW_HEIGHT,
       currentDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
       targetDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
       moveTimer: 0,

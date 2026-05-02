@@ -1,7 +1,7 @@
 import { gameState } from './state.js';
 import { session, spawnNextMarshmallow } from './manager.js';
 import { updateControls } from './controls.js';
-import { updateMeltingEnemies } from './melting.js';
+import { updateMeltingMarshmallows } from './melting.js';
 import { updateSpawningMarshmallows } from './spawning.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
@@ -42,7 +42,7 @@ export function runGameLoop(time) {
     if (session.tracerSystem) session.tracerSystem.update(delta);
     
     updateSpawningMarshmallows(time * 0.001);
-    updateMeltingEnemies(time * 0.001);
+    updateMeltingMarshmallows(time * 0.001);
     updateRepairs(time * 0.001, delta);
     updatePetalEffects(time * 0.001);
     updateFX(time * 0.001);
