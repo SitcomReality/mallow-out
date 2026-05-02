@@ -8,8 +8,8 @@ export function updateUniforms(uniforms, time) {
   const player = gameState.player;
   
   // Camera setup - Static position for incremental gameplay
-  player.position.set(0, 4, 12);
-  player.pitch = -0.3;
+  player.position.set(0, 6.5, 8.5);
+  player.pitch = -0.65;
   player.yaw = 0;
   
   uniforms.uCamPos.value.copy(player.position);
@@ -119,7 +119,7 @@ export function updateUniforms(uniforms, time) {
   });
   
   // Environment calculations
-  const sunDir = new THREE.Vector3(0.5, 0.8, 0.3).normalize();
+  const sunDir = new THREE.Vector3(-1.0, 1.5, 1.0).normalize();
   
   uniforms.uSunColor.value.setHex(ENV_COLORS.sun);
   uniforms.uAmbientColor.value.setHex(ENV_COLORS.ambient);

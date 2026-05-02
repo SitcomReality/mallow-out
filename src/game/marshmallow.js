@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_HEIGHT } from './marshmallow-constants.js';
+import { ENEMY_CYLINDER_RADIUS, ENEMY_CYLINDER_HEIGHT, ENEMY_HEIGHT, ENEMY_SPAWN_RADIUS } from './marshmallow-constants.js';
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
@@ -9,7 +9,7 @@ let nextId = 1;
 
 export function createMarshmallow(wave, spawnIndex) {
   const angle = Math.random() * Math.PI * 2;
-  const distance = 8;
+  const distance = Math.random() * ENEMY_SPAWN_RADIUS;
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   

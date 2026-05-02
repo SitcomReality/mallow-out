@@ -7,7 +7,7 @@ let nextId = 1;
 
 export function createEnemy() {
   const angle = Math.random() * Math.PI * 2;
-  const distance = 3 + Math.random() * ENEMY_SPAWN_RADIUS;
+  const distance = Math.random() * ENEMY_SPAWN_RADIUS;
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   

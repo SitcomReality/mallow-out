@@ -14,18 +14,27 @@ struct Object {
 
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
-  return p.y + 4.0;
+  // Floating island
+  vec3 lp = p - vec3(0.0, -1.0, 0.0);
+  float base = sdCylinder(lp, 5.0, 1.0) - 0.2;
+  // Add subtle noise to bottom for a rocky/earthy feel
+  float n = fbm(p.xz * 0.5 + p.y) * 0.8;
+  return base + n * (1.0 - smoothstep(-2.0, -0.5, p.y));
 }
 
 vec3 getFloorColorAt(vec3 p) {
   vec3 col = uFloorColor;
-  // Only calculate expensive floor texture if close to the floor plane (y = -4.0)
-  if (uFloorTextured > 0.5 && p.y < -3.0) {
+  if (uFloorTextured > 0.5 && p.y < 1.0) {
     float pattern = noise(p.xz * 0.8) * 0.6 + fbm(p.xz * 2.0) * 0.4;
     col = mix(col * 0.6, col * 1.4, pattern);
-    float grid = smoothstep(0.0, 0.02, abs(fract(p.x * 0.5 + 0.5) - 0.5)) * 
-                 smoothstep(0.0, 0.02, abs(fract(p.z * 0.5 + 0.5) - 0.5));
-    col = mix(col * 1.2, col, grid);
+    
+    // Circular ring pattern instead of grid to match island shape
+    float dist = length(p.xz);
+    float rings = smoothstep(0.0, 0.05, abs(fract(dist * 0.5) - 0.5));
+    col = mix(col * 1.2, col, rings);
+    
+    // Darken edges slightly
+    col = mix(col, col * 0.5, smoothstep(4.0, 5.5, dist));
   }
   return col;
 }

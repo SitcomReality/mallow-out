@@ -157,7 +157,7 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   }
   
   // Keep within bounds (loose boundary) - nudge smoothly instead of teleport
-  const maxDist = 15;
+  const maxDist = 4.5;
   const pX = marshmallow.marshmallow.position.x;
   const pZ = marshmallow.marshmallow.position.z;
   const distFromOrigin = Math.sqrt(pX * pX + pZ * pZ);
