@@ -14,27 +14,19 @@ struct Object {
 
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
-  // Floating island
-  vec3 lp = p - vec3(0.0, -1.0, 0.0);
-  float base = sdCylinder(lp, 5.0, 1.0) - 0.2;
-  // Add subtle noise to bottom for a rocky/earthy feel
-  float n = fbm(p.xz * 0.5 + p.y) * 0.8;
-  return base + n * (1.0 - smoothstep(-2.0, -0.5, p.y));
+  // Simplified flat circular disk at y=0
+  return sdCylinder(p + vec3(0.0, 0.1, 0.0), 5.5, 0.1);
 }
 
 vec3 getFloorColorAt(vec3 p) {
   vec3 col = uFloorColor;
-  if (uFloorTextured > 0.5 && p.y < 1.0) {
-    float pattern = noise(p.xz * 0.8) * 0.6 + fbm(p.xz * 2.0) * 0.4;
-    col = mix(col * 0.6, col * 1.4, pattern);
-    
-    // Circular ring pattern instead of grid to match island shape
+  if (uFloorTextured > 0.5) {
     float dist = length(p.xz);
-    float rings = smoothstep(0.0, 0.05, abs(fract(dist * 0.5) - 0.5));
-    col = mix(col * 1.2, col, rings);
-    
-    // Darken edges slightly
-    col = mix(col, col * 0.5, smoothstep(4.0, 5.5, dist));
+    // Cheap concentric ring pattern
+    float rings = smoothstep(0.0, 0.1, abs(fract(dist * 0.8) - 0.5));
+    col = mix(col * 1.15, col * 0.9, rings);
+    // Darken edge of the disk for visual definition
+    col = mix(col, col * 0.4, smoothstep(4.8, 5.5, dist));
   }
   return col;
 }
