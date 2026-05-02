@@ -45,6 +45,8 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
         session.floatingTextSystem.createDamageText(result.point, 1, false);
       }
       createRippleFX(result.point);
+      // New floor splash particles
+      particleSystem.createFloorSplash(result.point);
       rebuildObjectList();
       return;
     }
@@ -54,7 +56,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     if (isCritical) damage *= 2;
 
     applyHolepunch(gameState.currentMarshmallow, result.point, direction);
-    particleSystem.createHoleSpray(result.point, direction);
+    
+    // Improved mallow splatter
+    const hitNormal = direction.clone().multiplyScalar(-1);
+    particleSystem.createMallowSplatter(result.point, hitNormal);
     
     handleMarshmallowHit(result.point, damage, isCritical, particleSystem, marshmallowHUD);
     rebuildObjectList();

@@ -1,19 +1,21 @@
 import * as THREE from 'three';
 import {
-  BLOOD_PARTICLE_COUNT,
-  BLOOD_PARTICLE_LIFETIME,
-  BLOOD_PARTICLE_MIN_SPEED,
-  BLOOD_PARTICLE_MAX_SPEED,
-  BLOOD_PARTICLE_SIZE_START,
-  BLOOD_PARTICLE_SIZE_END,
-  BLOOD_PARTICLE_GRAVITY,
-  BLOOD_PARTICLE_DRAG,
-  BLOOD_COLOR_R,
-  BLOOD_COLOR_G,
-  BLOOD_COLOR_B,
-  HOLE_SPRAY_PARTICLE_COUNT,
-  HOLE_SPRAY_LIFETIME,
-  HOLE_SPRAY_SPEED,
+  MALLOW_SPLAT_COUNT,
+  MALLOW_SPLAT_LIFETIME,
+  MALLOW_SPLAT_MIN_SPEED,
+  MALLOW_SPLAT_MAX_SPEED,
+  MALLOW_SPLAT_GRAVITY,
+  MALLOW_SPLAT_DRAG,
+  MALLOW_SPLAT_SIZE_START,
+  MALLOW_SPLAT_SIZE_END,
+  COLOR_MALLOW,
+  FLOOR_SPLASH_COUNT,
+  FLOOR_SPLASH_LIFETIME,
+  FLOOR_SPLASH_SPEED,
+  FLOOR_SPLASH_GRAVITY,
+  FLOOR_SPLASH_SIZE_START,
+  FLOOR_SPLASH_SIZE_END,
+  COLOR_FLOOR
 } from './particle-constants.js';
 
 export class ParticleSystem {
@@ -21,99 +23,67 @@ export class ParticleSystem {
     this.particles = [];
   }
 
-  createBloodSplatter(position, normal) {
-    const count = BLOOD_PARTICLE_COUNT;
-    
-    for (let i = 0; i < count; i++) {
-      // Random cone around the normal direction
+  createMallowSplatter(position, normal) {
+    for (let i = 0; i < MALLOW_SPLAT_COUNT; i++) {
       const theta = Math.random() * Math.PI * 2;
-      const phi = Math.random() * Math.PI * 0.5; // Hemisphere
-      
-      const spread = new THREE.Vector3(
-        Math.sin(phi) * Math.cos(theta),
-        Math.cos(phi),
-        Math.sin(phi) * Math.sin(theta)
-      );
-      
-      // Align with normal
-      const up = new THREE.Vector3(0, 1, 0);
-      const q = new THREE.Quaternion().setFromUnitVectors(up, normal);
+      const phi = Math.random() * Math.PI * 0.7; // Wider hemisphere
+      const spread = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+      const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
       spread.applyQuaternion(q);
       
-      const speed = BLOOD_PARTICLE_MIN_SPEED + Math.random() * (BLOOD_PARTICLE_MAX_SPEED - BLOOD_PARTICLE_MIN_SPEED);
-      
+      const speed = MALLOW_SPLAT_MIN_SPEED + Math.random() * (MALLOW_SPLAT_MAX_SPEED - MALLOW_SPLAT_MIN_SPEED);
       this.particles.push({
         position: position.clone(),
         velocity: spread.multiplyScalar(speed),
-        life: BLOOD_PARTICLE_LIFETIME,
-        maxLife: BLOOD_PARTICLE_LIFETIME,
-        size: BLOOD_PARTICLE_SIZE_START,
-        color: { r: BLOOD_COLOR_R, g: BLOOD_COLOR_G, b: BLOOD_COLOR_B },
-        type: 'blood',
+        life: MALLOW_SPLAT_LIFETIME * (0.8 + Math.random() * 0.4),
+        maxLife: MALLOW_SPLAT_LIFETIME,
+        size: MALLOW_SPLAT_SIZE_START,
+        color: { ...COLOR_MALLOW },
+        gravity: MALLOW_SPLAT_GRAVITY,
+        drag: MALLOW_SPLAT_DRAG,
+        sizeStart: MALLOW_SPLAT_SIZE_START,
+        sizeEnd: MALLOW_SPLAT_SIZE_END
       });
     }
   }
 
-  createHoleSpray(position, direction) {
-    const count = HOLE_SPRAY_PARTICLE_COUNT;
-    
-    for (let i = 0; i < count; i++) {
-      const spread = direction.clone();
-      spread.x += (Math.random() - 0.5) * 0.3;
-      spread.y += (Math.random() - 0.5) * 0.3;
-      spread.z += (Math.random() - 0.5) * 0.3;
-      spread.normalize();
+  createFloorSplash(position) {
+    for (let i = 0; i < FLOOR_SPLASH_COUNT; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const up = 0.5 + Math.random() * 0.5;
+      const velocity = new THREE.Vector3(Math.cos(angle), up, Math.sin(angle)).normalize().multiplyScalar(FLOOR_SPLASH_SPEED * (0.5 + Math.random() * 0.5));
       
       this.particles.push({
         position: position.clone(),
-        velocity: spread.multiplyScalar(HOLE_SPRAY_SPEED),
-        life: HOLE_SPRAY_LIFETIME,
-        maxLife: HOLE_SPRAY_LIFETIME,
-        size: BLOOD_PARTICLE_SIZE_START * 0.8,
-        color: { r: BLOOD_COLOR_R, g: BLOOD_COLOR_G, b: BLOOD_COLOR_B },
-        type: 'spray',
+        velocity,
+        life: FLOOR_SPLASH_LIFETIME * (0.7 + Math.random() * 0.6),
+        maxLife: FLOOR_SPLASH_LIFETIME,
+        size: FLOOR_SPLASH_SIZE_START,
+        color: { ...COLOR_FLOOR },
+        gravity: FLOOR_SPLASH_GRAVITY,
+        drag: 0.92,
+        sizeStart: FLOOR_SPLASH_SIZE_START,
+        sizeEnd: FLOOR_SPLASH_SIZE_END
       });
     }
   }
 
   update(delta) {
-    const toRemove = [];
-    
-    for (const particle of this.particles) {
-      particle.life -= delta;
-      
-      if (particle.life <= 0) {
-        toRemove.push(particle);
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.life -= delta;
+      if (p.life <= 0) {
+        this.particles.splice(i, 1);
         continue;
       }
-      
-      // Physics
-      particle.velocity.y += BLOOD_PARTICLE_GRAVITY * delta;
-      particle.velocity.multiplyScalar(BLOOD_PARTICLE_DRAG);
-      
-      particle.position.x += particle.velocity.x * delta;
-      particle.position.y += particle.velocity.y * delta;
-      particle.position.z += particle.velocity.z * delta;
-      
-      // Size fade
-      const t = 1.0 - (particle.life / particle.maxLife);
-      particle.size = BLOOD_PARTICLE_SIZE_START * (1 - t) + BLOOD_PARTICLE_SIZE_END * t;
-    }
-    
-    // Remove dead particles
-    for (const particle of toRemove) {
-      const index = this.particles.indexOf(particle);
-      if (index > -1) {
-        this.particles.splice(index, 1);
-      }
+      p.velocity.y += p.gravity * delta;
+      p.velocity.multiplyScalar(p.drag);
+      p.position.addScaledVector(p.velocity, delta);
+      const t = 1.0 - (p.life / p.maxLife);
+      p.size = p.sizeStart * (1 - t) + p.sizeEnd * t;
     }
   }
 
-  clear() {
-    this.particles = [];
-  }
-
-  getParticles() {
-    return this.particles;
-  }
+  clear() { this.particles = []; }
+  getParticles() { return this.particles; }
 }
