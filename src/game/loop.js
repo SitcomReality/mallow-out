@@ -5,7 +5,6 @@ import { updateMeltingMarshmallows } from './melting.js';
 import { updateSpawningMarshmallows } from './spawning.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
-import { updatePetalEffects } from './petals/petal-effects.js';
 import { updateFX } from './fx.js';
 import { updateDynamicResolution } from './render-logic.js';
 
@@ -44,7 +43,6 @@ export function runGameLoop(time) {
     updateSpawningMarshmallows(time * 0.001);
     updateMeltingMarshmallows(time * 0.001);
     updateRepairs(time * 0.001, delta);
-    updatePetalEffects(time * 0.001);
     updateFX(time * 0.001);
     rebuildObjectList();
     

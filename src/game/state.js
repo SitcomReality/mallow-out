@@ -33,10 +33,6 @@ export const gameState = {
     caramel_bonus: 0,
   },
   equippedPetals: [null, null, null, null, null], // 5 petal slots
-  activePetalEffects: [], // Currently active timed effects
-  guaranteedFloaty: false, // Lucky Clover effect flag
-  nextKillBonus: false, // Sweet Tooth effect flag
-  petalTriggers: [], // History of triggers
 };
 
 // Re-export shared runtime config for convenience to avoid incorrect relative imports elsewhere

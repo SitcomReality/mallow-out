@@ -4,7 +4,6 @@ import { castRay, getEnemyDistanceAt } from '../shooting.js';
 import { addHoleToMarshmallow } from '../marshmallow-damage.js';
 import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
-import { getDamageMultiplier } from '../petals/petal-effects.js';
 import { rollCriticalHit } from '../upgrades/weapon-modifiers.js';
 import { BASE_DAMAGE_HOLE } from '../combat-constants.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
@@ -48,7 +47,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     }
 
     const isCritical = rollCriticalHit();
-    let damage = BASE_DAMAGE_HOLE * getDamageMultiplier();
+    let damage = BASE_DAMAGE_HOLE;
     if (isCritical) damage *= 2;
 
     addHoleToMarshmallow(gameState.currentMarshmallow, result.point, direction);

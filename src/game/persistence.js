@@ -7,7 +7,6 @@ export function saveGame() {
     totalMarshmallowsDestroyed: gameState.totalMarshmallowsDestroyed,
     currencies: { ...gameState.currencies },
     upgrades: { ...gameState.upgrades },
-    equippedPetals: [...gameState.equippedPetals],
   };
   
   try {
