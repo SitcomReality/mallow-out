@@ -14,26 +14,26 @@ export function updateRepairs(currentTime, delta) {
   if (gameState.currentMarshmallow) activeMarshmallows.push(gameState.currentMarshmallow);
 
   for (const marshmallow of activeMarshmallows) {
-    if (enemy.marshmallow.targetExpression !== undefined) {
-      const diff = enemy.marshmallow.targetExpression - enemy.marshmallow.expression;
-      enemy.marshmallow.expression += diff * delta * 5.0;
+    if (marshmallow.marshmallow.targetExpression !== undefined) {
+      const diff = marshmallow.marshmallow.targetExpression - marshmallow.marshmallow.expression;
+      marshmallow.marshmallow.expression += diff * delta * 5.0;
     }
     
     // Return pupils to center over time
-    if (enemy.marshmallow.pupilLookHold !== undefined && enemy.marshmallow.pupilLookHold > 0) {
-        enemy.marshmallow.pupilLookHold -= delta;
+    if (marshmallow.marshmallow.pupilLookHold !== undefined && marshmallow.marshmallow.pupilLookHold > 0) {
+        marshmallow.marshmallow.pupilLookHold -= delta;
     } else {
-        if (enemy.marshmallow.pupilLookX !== undefined) {
-            enemy.marshmallow.pupilLookX *= Math.pow(0.01, delta); // fast decay
+        if (marshmallow.marshmallow.pupilLookX !== undefined) {
+            marshmallow.marshmallow.pupilLookX *= Math.pow(0.01, delta); // fast decay
         }
-        if (enemy.marshmallow.pupilLookY !== undefined) {
-            enemy.marshmallow.pupilLookY *= Math.pow(0.01, delta);
+        if (marshmallow.marshmallow.pupilLookY !== undefined) {
+            marshmallow.marshmallow.pupilLookY *= Math.pow(0.01, delta);
         }
     }
 
     const toRemove = [];
     
-    for (const hole of enemy.holes) {
+    for (const hole of marshmallow.holes) {
       if (!hole.repairData) continue;
       
       const elapsed = currentTime - hole.repairData.startTime;
