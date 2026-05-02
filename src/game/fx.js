@@ -215,17 +215,23 @@ export function updateFX(currentTime) {
       continue;
     }
     
-    // Update position
+    // Ensure we have a safe velocity object for FX that don't define movement
+    const vel = fx.fxData.velocity || { x: 0, y: 0, z: 0 };
+    
+    // Update position (support both THREE.Vector3 and plain objects)
     const dt = 1.0 / 60.0; // Approximate delta
-    fx.position.x += fx.fxData.velocity.x * dt;
-    fx.position.y += fx.fxData.velocity.y * dt;
-    fx.position.z += fx.fxData.velocity.z * dt;
+    fx.position.x = (fx.position.x || 0) + (vel.x || 0) * dt;
+    fx.position.y = (fx.position.y || 0) + (vel.y || 0) * dt;
+    fx.position.z = (fx.position.z || 0) + (vel.z || 0) * dt;
+    
+    // Ensure noiseOffset exists
+    if (!fx.noiseOffset) fx.noiseOffset = { x: 0, y: 0, z: 0 };
     
     // Update noise offset to animate noise in movement direction
     const noiseSpeed = 8.0;
-    fx.noiseOffset.x += fx.fxData.velocity.x * dt * noiseSpeed;
-    fx.noiseOffset.y += fx.fxData.velocity.y * dt * noiseSpeed;
-    fx.noiseOffset.z += fx.fxData.velocity.z * dt * noiseSpeed;
+    fx.noiseOffset.x += (vel.x || 0) * dt * noiseSpeed;
+    fx.noiseOffset.y += (vel.y || 0) * dt * noiseSpeed;
+    fx.noiseOffset.z += (vel.z || 0) * dt * noiseSpeed;
     
     // Check if in dissipation phase (last 20%)
     const dissipateT = t > 0.8 ? (t - 0.8) / 0.2 : 0;
