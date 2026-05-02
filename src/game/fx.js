@@ -177,10 +177,13 @@ export function createHoleSprayFX(entryPoint, exitPoint, direction) {
 export function createRippleFX(position) {
   const id = nextFxId++;
   
+  const startY = 0.01;         // start slightly above the floor
+  const endY = -0.6;           // end well below the surface by despawn
+  
   const fx = {
     id,
     type: 'torus',
-    position: { x: position.x, y: 0.01, z: position.z }, // Slightly above floor
+    position: { x: position.x, y: startY, z: position.z },
     rotation: { x: 0, y: 0, z: 0 },
     scale: { x: RIPPLE_INITIAL_RADIUS, y: RIPPLE_THICKNESS, z: 0 },
     color: '#8afdff', // Matches floor color for a "swell" effect
@@ -194,6 +197,8 @@ export function createRippleFX(position) {
       type: 'ripple',
       startTime: performance.now() * 0.001,
       duration: RIPPLE_DURATION,
+      startY,
+      endY
     }
   };
   
@@ -278,6 +283,11 @@ export function updateFX(currentTime) {
       fx.scale.y = thickness;
       
       fx.blendRadius = lerp(RIPPLE_INITIAL_BLEND, RIPPLE_FINAL_BLEND, t);
+
+      // Descend the torus vertically over its lifetime so it sinks below the surface
+      const sy = (fx.fxData.startY !== undefined) ? fx.fxData.startY : fx.position.y;
+      const ey = (fx.fxData.endY !== undefined) ? fx.fxData.endY : (sy - 0.6);
+      fx.position.y = lerp(sy, ey, t);
     }
   }
   
