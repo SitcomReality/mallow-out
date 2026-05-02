@@ -45,14 +45,21 @@ export function updateUniforms(uniforms, time) {
   // Clear old group data to prevent stale values
   uniforms.uGroupData.value.forEach(v => v.set(0, 0, 0, 0));
   
-  // First pass: identify groups and assign their group data
+  // First pass: identify groups.
+  // A group is either an object of type 'group' OR a marshmallow (parent of holes).
   gameState.objects.forEach(obj => {
-    if (obj.type === 'group') {
+    // Check if it's a group-type object or has children in the current object list
+    const hasChildren = gameState.objects.some(other => other.parentId === obj.id);
+    if (obj.type === 'group' || hasChildren) {
       if (!groupMap.has(obj.id)) {
-        groupMap.set(obj.id, nextGid++);
-        const gIdx = groupMap.get(obj.id) - 1;
+        const gid = nextGid++;
+        groupMap.set(obj.id, gid);
+        const gIdx = gid - 1;
         if (gIdx < 32) {
-          uniforms.uGroupData.value[gIdx].set(opMap[obj.operation] || 0, obj.blendRadius || 0, 0, 0);
+          // Groups default to union with 0 blend unless they are a group-type object with specific settings
+          const op = obj.type === 'group' ? (opMap[obj.operation] || 0) : 0;
+          const blend = obj.type === 'group' ? (obj.blendRadius || 0) : 0;
+          uniforms.uGroupData.value[gIdx].set(op, blend, 0, 0);
         }
       }
     }
@@ -67,11 +74,14 @@ export function updateUniforms(uniforms, time) {
     let finalPos = { ...obj.position };
     let finalRot = { ...obj.rotation };
     
+    // Assign gid if it's a parent or a child
+    if (groupMap.has(obj.id)) {
+      gid = groupMap.get(obj.id);
+    } else if (obj.parentId && groupMap.has(obj.parentId)) {
+      gid = groupMap.get(obj.parentId);
+    }
+
     if (obj.parentId) {
-      if (groupMap.has(obj.parentId)) {
-        gid = groupMap.get(obj.parentId);
-      }
-      
       // Transform local to world space if parent is found
       const parent = gameState.objects.find(o => o.id === obj.parentId);
       if (parent) {

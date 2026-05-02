@@ -59,8 +59,9 @@ function getLocalTransform(worldPos, worldQuat, marshmallow) {
 }
 
 export function addHoleToEnemy(enemy, hitPoint, rayDirection) {
-  const holeLength = ENEMY_CYLINDER_RADIUS * 4; 
-  const entryOverlap = 0.5;
+  // Shorten the cylinder so it pierces the marshmallow (max diagonal ~3.6) but avoids the floor.
+  const holeLength = 3.8; 
+  const entryOverlap = 0.2;
   const holePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(holeLength / 2 - entryOverlap));
   
   const up = new THREE.Vector3(0, 1, 0);
