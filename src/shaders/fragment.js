@@ -83,7 +83,8 @@ void main() {
     
     // Thick comic outlines on internal object silhouettes
     if (uShowOutline > 0.5) {
-      float silhouetteInner = smoothstep(0.28, 0.0, dot(n, -rd));
+      // Adjusted threshold to be thinner and only at extreme grazing angles
+      float silhouetteInner = smoothstep(0.12, 0.04, dot(n, -rd));
       col = mix(col, uOutlineColor, silhouetteInner);
     } else {
       float silhouette = 0.12;
@@ -113,9 +114,10 @@ void main() {
   float ndcDepth = ((uFar + uNear) / (uFar - uNear)) + (1.0 / viewZ) * ((-2.0 * uFar * uNear) / (uFar - uNear));
   gl_FragDepth = hit ? (ndcDepth * 0.5 + 0.5) : 1.0;
 
-  // Global Comic Outlines (Silhouettes)
-  if (uShowOutline > 0.5) {
-    float outlineDistThreshold = 0.055;
+  // Global Comic Outlines (Outer Silhouettes against the background)
+  if (!hit && uShowOutline > 0.5) {
+    // Reduced threshold to prevent massive black halos
+    float outlineDistThreshold = 0.012;
     float outlineStrength = smoothstep(outlineDistThreshold, 0.0, minD);
     if (outlineStrength > 0.0) {
       col = mix(col, uOutlineColor, outlineStrength);
