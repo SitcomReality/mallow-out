@@ -18,12 +18,9 @@ import { ParticleSystem } from './src/effects/particles.js';
 import { FloatingTextSystem } from './src/effects/floating-text.js';
 import { FloatingTextRenderer } from './src/effects/floating-text-renderer.js';
 import { session, startWave, quitToMenu, togglePause } from './src/game/manager.js';
-import { createWeaponSelection } from './src/ui/weapon-selection.js';
-import { offerWeaponChoices, selectWeapon } from './src/game/weapon-selection.js';
 import { runGameLoop } from './src/game/loop.js';
 import { shoot } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
-import { createWeaponStatus } from './src/ui/weapon-status.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
 import { applyWonkyUI } from './src/ui/wonky.js';
 applyWonkyUI();
@@ -106,7 +103,7 @@ function startGame() {
   session.petalHUD = createPetalHUD();
   session.petalHUD.show();
   
-  session.weaponStatus = createWeaponStatus();
+
   
   session.upgradeScreen = createUpgradeScreen(() => {
     // Continue to next wave (upgrades are purchased in the shop UI)
