@@ -1,5 +1,5 @@
 import { gameState } from './state.js';
-import { session } from './manager.js';
+import { session, spawnNextMarshmallow } from './manager.js';
 import { updateControls } from './controls.js';
 import { updateMeltingEnemies } from './melting.js';
 import { updateSpawningMarshmallows } from './spawning.js';
