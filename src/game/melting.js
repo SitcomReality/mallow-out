@@ -50,9 +50,23 @@ export function updateMeltingMarshmallows(currentTime) {
     const currentY = lerp(marshmallow.meltStartY, MELT_END_Y, ease);
     marshmallow.marshmallow.position.y = currentY;
     
-    marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
-    marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
-    marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
+    // Noise/blend should peak at halfway, then decline to 0 by despawn.
+    // Compute a 0..1 progress for the first half and second half separately.
+    const half = 0.5;
+    if (t <= half) {
+      // Increasing phase: from start values up to the defined "end" (peak) at halfway.
+      const p = t / half; // 0..1
+      marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, p);
+      marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, p);
+      marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, p);
+    } else {
+      // Decreasing phase: from peak down to 0 as it finishes melting.
+      const p = (t - half) / (1.0 - half); // 0..1
+      // Start values for decline are the peak values (MELT_*_END), end at 0
+      marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_END, 0.0, p);
+      marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_END, 0.0, p);
+      marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_END, 0.0, p);
+    }
     
     // Start shrinking halfway through the descent so by the end it's imperceptibly small
     const shrinkStartT = 0.5;
