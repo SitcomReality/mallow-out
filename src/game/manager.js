@@ -75,7 +75,6 @@ export function quitToMenu() {
   gameState.currentMarshmallow = null;
   gameState.meltingMarshmallows = [];
   gameState.objects = [];
-  gameState.projectiles = [];
   
   // Reset weapon state and upgrades to sane defaults for a fresh menu state
   gameState.weaponStates = {

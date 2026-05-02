@@ -9,7 +9,6 @@ import { updateFX } from './fx.js';
 import { updateDynamicResolution } from './render-logic.js';
 
 import { updateWeaponSystems } from './weapons/weapon-logic.js';
-import { updateProjectiles } from './weapons/projectile-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
 import { CLEAVER_CHARGE_TIME } from './weapons/weapon-stats.js';
 
@@ -34,7 +33,6 @@ export function runGameLoop(time) {
     
     // 3. Combat, Physics and Global FX
     updateWeaponSystems(delta);
-    updateProjectiles(delta, time * 0.001);
     
     session.particleSystem.update(delta);
     session.floatingTextSystem.update(delta);

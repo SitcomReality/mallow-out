@@ -7,7 +7,6 @@ import { gameState } from './state.js';
 import { PostProcessor } from '../render/post-process.js';
 import { ParticleRenderer } from '../effects/particle-renderer.js';
 import { TracerSystem } from '../effects/tracer-line.js';
-import { ProjectileRenderer } from '../effects/projectile-renderer.js';
 
 export function createRenderer(container) {
   const { renderer, scene, camera, quad } = createEngine(container);
@@ -28,9 +27,6 @@ export function createRenderer(container) {
   
   // Create tracer system
   const tracerSystem = new TracerSystem(particleScene);
-  
-  // Create projectile renderer
-  const projectileRenderer = new ProjectileRenderer(particleScene);
   
   // Create post-processor
   const postProcessor = new PostProcessor(renderer);
@@ -95,12 +91,9 @@ export function createRenderer(container) {
       particleRenderer.update(particleSystem.getParticles(), particleCamera);
     }
     
-    // Update projectiles
-    projectileRenderer.update(gameState.projectiles, particleCamera);
-    
     // Render with post-processing, passing raymarching and effects scenes
     postProcessor.render(scene, camera, particleScene, particleCamera);
   }
 
-  return { render, uniforms, renderer, postProcessor, tracerSystem, projectileRenderer, particleCamera, particleScene };
+  return { render, uniforms, renderer, postProcessor, tracerSystem, particleCamera, particleScene };
 }

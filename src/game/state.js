@@ -18,7 +18,6 @@ export const gameState = {
   currentMarshmallow: null,
   meltingMarshmallows: [],
   objects: [],
-  projectiles: [], // for globber projectiles
   currentWeapon: 0,
   totalMarshmallowsDestroyed: 0,
   currencies: {

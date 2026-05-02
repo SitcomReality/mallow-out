@@ -78,13 +78,12 @@ function startGame() {
   session.isPaused = false;
   
   const container = document.getElementById('gameContainer');
-  const { render, tracerSystem, projectileRenderer, particleCamera, particleScene } = createRenderer(container);
+  const { render, tracerSystem, particleCamera, particleScene } = createRenderer(container);
   
   session.renderFn = render;
   session.particleSystem = new ParticleSystem();
   session.floatingTextSystem = new FloatingTextSystem();
   session.tracerSystem = tracerSystem;
-  session.projectileRenderer = projectileRenderer;
   
   // Initialize UI components
   session.hud = createHUD();
