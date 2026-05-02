@@ -67,9 +67,17 @@ export function createRenderer(container) {
 
     // Sync particle camera with player state
     particleCamera.position.copy(gameState.player.position);
-    // Negate yaw because Three.js camera rotation Y is counter-clockwise (positive turns left),
-    // while our raymarching yaw is positive for turning right.
-    particleCamera.rotation.set(gameState.player.pitch, -gameState.player.yaw, 0, 'YXZ');
+    
+    // Match uniforms.js forward vector calculation exactly to ensure 
+    // raymarching and 3D projection (for clicks) are perfectly aligned.
+    const player = gameState.player;
+    const forward = new THREE.Vector3(
+      Math.sin(player.yaw) * Math.cos(player.pitch),
+      Math.sin(player.pitch),
+      -Math.cos(player.yaw) * Math.cos(player.pitch)
+    ).normalize();
+    
+    particleCamera.lookAt(particleCamera.position.clone().add(forward));
     
     // Update particles
     if (particleSystem) {
