@@ -16,6 +16,9 @@ struct FaceParams {
     vec2 mouthPos;
     vec2 mouthSize;
     float mouthAngle;
+    vec2 cheekPos;
+    vec2 cheekSize;
+    float cheekAlpha;
     float lineThickness;
 };
 
@@ -33,6 +36,9 @@ FaceParams getDefaultFace() {
     p.mouthPos = DEF_MOUTH_P;
     p.mouthSize = DEF_MOUTH_S;
     p.mouthAngle = DEF_MOUTH_A;
+    p.cheekPos = DEF_CHEEK_P;
+    p.cheekSize = DEF_CHEEK_S;
+    p.cheekAlpha = DEF_CHEEK_A;
     p.lineThickness = FACE_LINE_THICKNESS;
     return p;
 }
@@ -45,6 +51,7 @@ FaceParams getAngryFace() {
     p.mouthPos = ANG_MOUTH_P;
     p.mouthSize = ANG_MOUTH_S;
     p.mouthAngle = ANG_MOUTH_A;
+    p.cheekAlpha = ANG_CHEEK_A;
     return p;
 }
 
@@ -57,6 +64,7 @@ FaceParams getSurprisedFace() {
     p.pupilSize = SUR_PUPIL_S;
     p.mouthPos = SUR_MOUTH_P;
     p.mouthSize = SUR_MOUTH_S;
+    p.cheekAlpha = SUR_CHEEK_A;
     return p;
 }
 
@@ -74,6 +82,9 @@ FaceParams mixParams(FaceParams a, FaceParams b, float t) {
     r.mouthPos = mix(a.mouthPos, b.mouthPos, t);
     r.mouthSize = mix(a.mouthSize, b.mouthSize, t);
     r.mouthAngle = mix(a.mouthAngle, b.mouthAngle, t);
+    r.cheekPos = mix(a.cheekPos, b.cheekPos, t);
+    r.cheekSize = mix(a.cheekSize, b.cheekSize, t);
+    r.cheekAlpha = mix(a.cheekAlpha, b.cheekAlpha, t);
     r.lineThickness = mix(a.lineThickness, b.lineThickness, t);
     return r;
 }
@@ -129,6 +140,11 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   // 1. Mouth
   float mouthDist = drawBox(uv, p.mouthPos, p.mouthSize, p.mouthAngle);
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, mouthDist));
+
+  // 1b. Cheeks
+  float cheekDist = drawBox(uvMirrored, p.cheekPos, p.cheekSize, 0.0);
+  vec3 rosy = vec3(1.0, 0.4, 0.5); // Rosy pink
+  col = mix(col, rosy, smoothstep(aa, -aa, cheekDist) * p.cheekAlpha);
   
   // 2. Eyebrows
   float browDist = drawBox(uvMirrored, p.browPos, p.browSize, p.browAngle * sideSign);
