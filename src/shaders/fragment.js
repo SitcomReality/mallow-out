@@ -83,13 +83,12 @@ void main() {
     
     // Thick comic outlines on internal object silhouettes
     if (uShowOutline > 0.5) {
-      // Make inner silhouette much bolder and more aliased:
-      // use a wider threshold range and amplify blend; this creates strong black rim at grazing angles.
+      // Slightly reduce inner silhouette thickness/strength to be less overwhelming
       float dotNV = dot(n, -rd);
-      // Heavily favor aliasing by using a sharp transition near the grazing angle
-      float silhouetteInner = smoothstep(0.6, 0.02, dotNV);
-      // Amplify the outline blend and clamp so it can fully replace color at extreme grazing
-      silhouetteInner = clamp(silhouetteInner * 1.6, 0.0, 1.0);
+      // Moderate the transition to be a bit softer (narrower aggressive aliasing)
+      float silhouetteInner = smoothstep(0.6, 0.08, dotNV);
+      // Reduce amplification so outlines are less dominant
+      silhouetteInner = clamp(silhouetteInner * 1.1, 0.0, 1.0);
       col = mix(col, uOutlineColor, silhouetteInner);
     } else {
       float silhouette = 0.12;
@@ -121,11 +120,11 @@ void main() {
 
   // Global Comic Outlines (Outer Silhouettes against the background)
   if (!hit && uShowOutline > 0.5) {
-    // Increase outer silhouette thickness/significance for bold aliased halo:
-    float outlineDistThreshold = 0.06; // raised from 0.012 to make outlines thicker
+    // Reduce outer silhouette thickness a bit for subtler halo
+    float outlineDistThreshold = 0.035; // slightly reduced from 0.06
     float outlineStrength = smoothstep(outlineDistThreshold, 0.0, minD);
-    // Amplify and clamp to ensure near-full black at strong silhouette positions
-    outlineStrength = clamp(outlineStrength * 1.8, 0.0, 1.0);
+    // Lower amplification so outer outline doesn't fully dominate
+    outlineStrength = clamp(outlineStrength * 1.2, 0.0, 1.0);
     if (outlineStrength > 0.0) {
       col = mix(col, uOutlineColor, outlineStrength);
     }
