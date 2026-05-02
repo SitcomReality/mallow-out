@@ -30,6 +30,13 @@ export function updateMeltingMarshmallows(currentTime) {
     if (marshmallow.meltStartY === undefined) {
       marshmallow.meltStartY = marshmallow.marshmallow.position.y;
       
+      // Capture the starting scale so we can shrink from that value
+      marshmallow.meltStartScale = {
+        x: marshmallow.marshmallow.scale.x,
+        y: marshmallow.marshmallow.scale.y,
+        z: marshmallow.marshmallow.scale.z !== undefined ? marshmallow.marshmallow.scale.z : marshmallow.marshmallow.scale.x
+      };
+      
       marshmallow.holes.forEach(hole => {
         hole.meltStartY = hole.position.y;
       });
@@ -37,16 +44,31 @@ export function updateMeltingMarshmallows(currentTime) {
       if (!marshmallow.marshmallow.noiseOffset) marshmallow.marshmallow.noiseOffset = { x: 0, y: 0, z: 0 };
     }
     
-    // Smooth easing
+    // Smooth easing for position
     const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     
     const currentY = lerp(marshmallow.meltStartY, MELT_END_Y, ease);
-    
     marshmallow.marshmallow.position.y = currentY;
     
     marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
     marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
     marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
+    
+    // Start shrinking halfway through the descent so by the end it's imperceptibly small
+    const shrinkStartT = 0.5;
+    const finalScaleFactor = 0.01; // nearly invisible at end
+    if (t <= shrinkStartT) {
+      // Keep original start scale until shrink begins
+      marshmallow.marshmallow.scale.x = marshmallow.meltStartScale.x;
+      marshmallow.marshmallow.scale.y = marshmallow.meltStartScale.y;
+      marshmallow.marshmallow.scale.z = marshmallow.meltStartScale.z;
+    } else {
+      const localT = (t - shrinkStartT) / (1.0 - shrinkStartT); // 0..1 from halfway to end
+      const factor = lerp(1.0, finalScaleFactor, localT);
+      marshmallow.marshmallow.scale.x = marshmallow.meltStartScale.x * factor;
+      marshmallow.marshmallow.scale.y = marshmallow.meltStartScale.y * factor;
+      marshmallow.marshmallow.scale.z = marshmallow.meltStartScale.z * factor;
+    }
     
     if (marshmallow.marshmallow.targetExpression !== undefined) {
       const diff = marshmallow.marshmallow.targetExpression - marshmallow.marshmallow.expression;
