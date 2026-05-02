@@ -276,18 +276,37 @@ export function updateFX(currentTime) {
       
       fx.blendRadius = lerp(HOLE_SPRAY_INITIAL_BLEND, HOLE_SPRAY_FINAL_BLEND, t);
     } else if (fx.fxData.type === 'ripple') {
-      const radius = lerp(RIPPLE_INITIAL_RADIUS, RIPPLE_FINAL_RADIUS, t);
-      fx.scale.x = radius;
-      // Fade thickness out at the end
-      const thickness = RIPPLE_THICKNESS * (1.0 - t * t);
-      fx.scale.y = thickness;
+      const distFromCenter = Math.sqrt(fx.position.x * fx.position.x + fx.position.z * fx.position.z);
+      // Floor radius is 5.5. Calculate the maximum growth allowed before hitting the edge.
+      const maxAllowedRadius = Math.max(RIPPLE_INITIAL_RADIUS, 5.5 - distFromCenter);
       
-      fx.blendRadius = lerp(RIPPLE_INITIAL_BLEND, RIPPLE_FINAL_BLEND, t);
+      // Calculate how much of the intended growth (up to RIPPLE_FINAL_RADIUS) can actually happen
+      const totalGrowth = RIPPLE_FINAL_RADIUS - RIPPLE_INITIAL_RADIUS;
+      const possibleGrowth = maxAllowedRadius - RIPPLE_INITIAL_RADIUS;
+      
+      // Determine the fraction of the normal duration after which we hit the boundary
+      const boundaryT = totalGrowth > 0 ? Math.min(1.0, possibleGrowth / totalGrowth) : 1.0;
+      
+      // Map the current time progress 't' to a boundary-scaled 'effectiveT'
+      const effectiveT = boundaryT > 0.001 ? Math.min(1.0, t / boundaryT) : 1.0;
 
-      // Descend the torus vertically over its lifetime so it sinks below the surface
+      const radius = lerp(RIPPLE_INITIAL_RADIUS, maxAllowedRadius, effectiveT);
+      fx.scale.x = radius;
+      
+      // Thickness and blend fade out over the effective lifetime
+      const thickness = RIPPLE_THICKNESS * (1.0 - effectiveT * effectiveT);
+      fx.scale.y = thickness;
+      fx.blendRadius = lerp(RIPPLE_INITIAL_BLEND, RIPPLE_FINAL_BLEND, effectiveT);
+
+      // Sink early: reach endY by the time we hit the edge (effectiveT = 1.0)
       const sy = (fx.fxData.startY !== undefined) ? fx.fxData.startY : fx.position.y;
       const ey = (fx.fxData.endY !== undefined) ? fx.fxData.endY : (sy - 0.6);
-      fx.position.y = lerp(sy, ey, t);
+      fx.position.y = lerp(sy, ey, effectiveT);
+      
+      // If we've reached the edge/sunk state, mark for removal
+      if (effectiveT >= 1.0) {
+        toRemove.push(fx);
+      }
     }
   }
   
