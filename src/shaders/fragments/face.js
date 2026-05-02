@@ -154,12 +154,12 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
       mouthDist = sdCircle(uv - p.mouthPos, p.mouthSize.x);
   } else if (expression > 1.5) {
       // Angry: Frown arc
-      vec2 mouthUV = vec2(uv.x, -(uv.y - p.mouthPos.y));
+      vec2 mouthUV = vec2(uv.x, uv.y - p.mouthPos.y);
       mouthDist = sdArc(mouthUV, p.mouthSize.x, p.mouthSize.y, p.mouthAngle);
   } else {
-      // Happy: Smile arc (invert arc angle so it's a smile, not a frown)
-      vec2 mouthUV = vec2(uv.x, uv.y - p.mouthPos.y);
-      mouthDist = sdArc(mouthUV, p.mouthSize.x, p.mouthSize.y, -p.mouthAngle);
+      // Happy: Smile arc (flipped Y for u-shape)
+      vec2 mouthUV = vec2(uv.x, -(uv.y - p.mouthPos.y));
+      mouthDist = sdArc(mouthUV, p.mouthSize.x, p.mouthSize.y, p.mouthAngle);
   }
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, mouthDist));
 
@@ -168,10 +168,10 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   vec3 rosy = vec3(1.0, 0.4, 0.5); 
   col = mix(col, rosy, smoothstep(aa, -aa, cheekDist) * p.cheekAlpha);
   
-  // 2. Eyebrows
+  // 2. Eyebrows (uvMirrored already handles mirroring, so we keep rotation constant)
   vec2 browA = vec2(-p.browSize.x, 0.0);
   vec2 browB = vec2(p.browSize.x, 0.0);
-  float sa = sin(p.browAngle * sideSign), ca = cos(p.browAngle * sideSign);
+  float sa = sin(p.browAngle), ca = cos(p.browAngle);
   mat2 rot = mat2(ca, -sa, sa, ca);
   vec2 browUV = (uvMirrored - p.browPos) * rot;
   float browDist = sdCapsule(browUV, browA, browB, p.browSize.y);
