@@ -145,11 +145,6 @@ vec4 map(vec3 p) {
     
     float gid = uObjData0[i].w;
     float d = getObjectDist(p, i);
-    
-    // Clip objects to the floor disk radius (5.5)
-    float floorClip = length(p.xz) - 5.5;
-    d = max(d, floorClip);
-
     vec3 col = uObjData3[i].xyz;
     float op = uObjData0[i].y;
     float blend = uObjData0[i].z;
