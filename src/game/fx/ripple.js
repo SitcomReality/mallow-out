@@ -9,8 +9,8 @@ import {
 export function createRippleFX(position) {
   const id = getNextFxId();
   
-  const startY = 0.1;
-  const endY = -0.6;
+  const startY = 0.3;
+  const endY = -0.4;
   
   const fx = {
     id,

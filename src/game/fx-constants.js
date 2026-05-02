@@ -15,9 +15,9 @@ export const DISSIPATE_NOISE_AMOUNT = 3;
 export const DISSIPATE_NOISE_SCALE = 8;
 
 // Ripple Effect
-export const RIPPLE_DURATION = 1.2;
-export const RIPPLE_INITIAL_RADIUS = 0.1;
-export const RIPPLE_FINAL_RADIUS = 3.0;
+export const RIPPLE_DURATION = 0.7;
+export const RIPPLE_INITIAL_RADIUS = 0.05;
+export const RIPPLE_FINAL_RADIUS = 1.5;
 export const RIPPLE_THICKNESS = 0.08;
-export const RIPPLE_INITIAL_BLEND = 0.05;
-export const RIPPLE_FINAL_BLEND = 1.5;
+export const RIPPLE_INITIAL_BLEND = 0.5;
+export const RIPPLE_FINAL_BLEND = 0.3;
