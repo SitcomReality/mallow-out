@@ -12,16 +12,7 @@ export function createEngine(container) {
   const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2));
   scene.add(quad);
 
-  window.addEventListener('resize', () => {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    renderer.setSize(w, h);
-    if (quad.material && quad.material.uniforms.uResolution) {
-      // Use actual drawing buffer dimensions to ensure the aspect ratio 
-      // stays correct regardless of the render scale settings.
-      quad.material.uniforms.uResolution.value.set(renderer.domElement.width, renderer.domElement.height);
-    }
-  });
+
 
   return { renderer, scene, camera, quad, canvas };
 }

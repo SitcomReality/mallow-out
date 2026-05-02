@@ -17,8 +17,9 @@ export function createRenderer(container) {
   const uniforms = material.uniforms;
   
   // Create a separate scene and perspective camera for 3D effects (particles, tracers, projectiles)
+  // FOV is 90 to match the shader's implicit FOV (tan(45)=1)
   const particleScene = new THREE.Scene();
-  const particleCamera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const particleCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 1000);
   particleScene.add(particleCamera);
   
   // Create particle renderer
@@ -37,18 +38,28 @@ export function createRenderer(container) {
   postProcessor.setVignette(0.2);   // Softer vignette
   
   let lastScale = -1;
+  let lastWidth = -1;
+  let lastHeight = -1;
 
   function render(time, particleSystem, floatingTextSystem) {
-    // Dynamic resolution application
-    if (settings.renderScale !== lastScale) {
-      const w = Math.floor(window.innerWidth * settings.renderScale);
-      const h = Math.floor(window.innerHeight * settings.renderScale);
+    // Dynamic resolution application or window resize
+    const currentWidth = window.innerWidth;
+    const currentHeight = window.innerHeight;
+    
+    if (settings.renderScale !== lastScale || currentWidth !== lastWidth || currentHeight !== lastHeight) {
+      const w = Math.floor(currentWidth * settings.renderScale);
+      const h = Math.floor(currentHeight * settings.renderScale);
+      
       renderer.setSize(w, h, false);
       uniforms.uResolution.value.set(w, h);
       postProcessor.resize(w, h);
-      particleCamera.aspect = w / h;
+      
+      particleCamera.aspect = currentWidth / currentHeight;
       particleCamera.updateProjectionMatrix();
+      
       lastScale = settings.renderScale;
+      lastWidth = currentWidth;
+      lastHeight = currentHeight;
     }
 
     updateUniforms(uniforms, time);
