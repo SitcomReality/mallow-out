@@ -1,18 +1,15 @@
-import { ALL_MARSHMALLOW_TYPES, MARSHMALLOW_TYPES } from './marshmallow-types.js';
-import { gameState } from './state.js';
+import { MARSHMALLOW_TYPES } from './marshmallow-types.js';
 
+/**
+ * Selects a marshmallow type based on simple weighted rarity.
+ * Standardized to only Standard and Golden Rare.
+ */
 export function selectMarshmallowType() {
-  // Weighted random selection
-  const totalWeight = ALL_MARSHMALLOW_TYPES.reduce((sum, type) => sum + type.weight, 0);
-  let random = Math.random() * totalWeight;
+  const roll = Math.random() * 100;
   
-  for (const type of ALL_MARSHMALLOW_TYPES) {
-    random -= type.weight;
-    if (random <= 0) {
-      return type;
-    }
+  if (roll < MARSHMALLOW_TYPES.GOLDEN.weight) {
+    return MARSHMALLOW_TYPES.GOLDEN;
   }
   
-  // Fallback to standard
   return MARSHMALLOW_TYPES.STANDARD;
 }

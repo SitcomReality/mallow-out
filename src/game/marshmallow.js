@@ -7,30 +7,31 @@ import { BASE_MOVEMENT_SPEED, BASE_BOB_AMPLITUDE } from './marshmallow-type-cons
 
 let nextId = 1;
 
+/**
+ * Creates a marshmallow entity.
+ * Distinctions between types are now purely visual (color/name) and reward-based.
+ * Size and movement properties are unified with minor random variance for flavor.
+ */
 export function createMarshmallow(totalDestroyed) {
   const angle = Math.random() * Math.PI * 2;
   const distance = Math.random() * MARSHMALLOW_SPAWN_RADIUS;
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   
-  // Select marshmallow type
   const type = selectMarshmallowType();
   
-  // Apply type's color variation
-  const hue = type.color.hue + (Math.random() - 0.5) * 0.05;
+  // Minor visual variation (Hue/Sat/Light)
+  const hue = type.color.hue + (Math.random() - 0.5) * 0.04;
   const sat = type.color.satMin + Math.random() * (type.color.satMax - type.color.satMin);
   const light = type.color.lightMin + Math.random() * (type.color.lightMax - type.color.lightMin);
   const color = new THREE.Color().setHSL(hue, sat, light);
   
-  // Apply size variation
-  const sizeMultiplier = type.sizeMultiplier.min + Math.random() * (type.sizeMultiplier.max - type.sizeMultiplier.min);
-  const heightMultiplier = type.heightMultiplier ? 
-    (type.heightMultiplier.min + Math.random() * (type.heightMultiplier.max - type.heightMultiplier.min)) : 
-    1.0;
+  // Minor size variation for all types
+  const sizeMultiplier = 0.95 + Math.random() * 0.1;
+  const heightMultiplier = 0.95 + Math.random() * 0.1;
   
   const marshmallowId = nextId++;
   
-  // Create marshmallow shell (outer)
   const marshmallow = {
     id: marshmallowId,
     type: 'cylinder',
@@ -48,12 +49,7 @@ export function createMarshmallow(totalDestroyed) {
     expression: EXPRESSION_DEFAULT,
   };
   
-  // Movement parameters
-  const speedMultiplier = type.speedMultiplier.min + Math.random() * (type.speedMultiplier.max - type.speedMultiplier.min);
-  const bobAmplitude = type.bobAmplitude ? 
-    (type.bobAmplitude.min + Math.random() * (type.bobAmplitude.max - type.bobAmplitude.min)) :
-    BASE_BOB_AMPLITUDE;
-  
+  // Unified movement parameters for all types
   const entity = {
     marshmallow,
     holes: [],
@@ -64,10 +60,9 @@ export function createMarshmallow(totalDestroyed) {
     id: marshmallowId,
     type: type,
     movement: {
-      pattern: type.movementPattern,
-      speed: BASE_MOVEMENT_SPEED * speedMultiplier,
+      speed: BASE_MOVEMENT_SPEED * (0.9 + Math.random() * 0.2),
       bobPhase: Math.random() * Math.PI * 2,
-      bobAmplitude: bobAmplitude,
+      bobAmplitude: BASE_BOB_AMPLITUDE * (0.8 + Math.random() * 0.4),
       baseY: MARSHMALLOW_HEIGHT,
       currentDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
       targetDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
