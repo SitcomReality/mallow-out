@@ -135,7 +135,7 @@ export function updateUniforms(uniforms, time) {
   uniforms.uFloorTextured.value = ENV_SETTINGS.floorTextured;
   uniforms.uSkyTextured.value = ENV_SETTINGS.skyTextured;
   
-  // Selection/outline (disabled for now)
+  // Selection/outline - controlled by settings.outlinesEnabled
   uniforms.uSelectionInfo.value.set(0, 0);
-  uniforms.uShowOutline.value = 0;
+  uniforms.uShowOutline.value = settings.outlinesEnabled ? 1 : 0;
 }

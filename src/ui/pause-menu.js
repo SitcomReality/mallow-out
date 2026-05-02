@@ -22,6 +22,10 @@ export function createPauseMenu(onResume, onQuit) {
           <input type="checkbox" id="ao" ${settings.aoEnabled ? 'checked' : ''}>
         </div>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Outlines</label>
+          <input type="checkbox" id="outlines" ${settings.outlinesEnabled ? 'checked' : ''}>
+        </div>
+        <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Dynamic Resolution</label>
           <input type="checkbox" id="dynamicRes" ${settings.dynamicRes ? 'checked' : ''}>
         </div>
@@ -48,6 +52,11 @@ export function createPauseMenu(onResume, onQuit) {
   
   document.getElementById('ao').addEventListener('change', (e) => {
     settings.aoEnabled = e.target.checked;
+  });
+
+  // Toggle global outlines for SDF objects
+  document.getElementById('outlines').addEventListener('change', (e) => {
+    settings.outlinesEnabled = e.target.checked;
   });
   
   document.getElementById('dynamicRes').addEventListener('change', (e) => {

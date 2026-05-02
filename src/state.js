@@ -14,4 +14,6 @@ export const settings = {
   celShading: true,
   shadowsEnabled: true,
   aoEnabled: false,
+  // Global outline toggle for comic/cartoon isolines
+  outlinesEnabled: true,
 };
