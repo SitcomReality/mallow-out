@@ -1,6 +1,4 @@
 import { gameState } from '../state.js';
-import { getFireRateMultiplier } from '../petals/petal-effects.js';
-import { getWeaponFireRateMultiplier } from '../upgrades/weapon-modifiers.js';
 import { 
   CLEAVER_CHARGE_TIME
 } from './weapon-stats.js';
