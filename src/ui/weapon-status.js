@@ -67,7 +67,6 @@ export function createWeaponStatus() {
 
   return {
     updateCleaverCharge,
-    updateMelterHeat,
     hide
   };
 }

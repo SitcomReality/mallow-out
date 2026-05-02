@@ -18,8 +18,7 @@
     <div class="content">
       <h1 class="game-title">Mallow Out</h1>
       <div class="menu-buttons">
-
-        <button id="mainBtn" class="big-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" aria-label="Start game" disabled>Loading...</button>
+        <button id="mainBtn" class="big-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" aria-label="Start game">New Game</button>
         <button id="resetGame" class="secondary-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" style="display:none; padding: 10px;">Start New (Wipe Save)</button>
       </div>
     </div>
@@ -30,15 +29,10 @@
     </footer>
   </div>
 
-  <div id="loadingOverlay" style="display:none; position: fixed; inset: 0; background: #87ceeb; z-index: 1000; align-items: center; justify-content: center; flex-direction: column;">
-    <h2 style="font-size: 24px; color: #000000; text-transform: uppercase; animation: pulse 1s infinite;">Loading...</h2>
-  </div>
-
   <div id="gameContainer" style="display:none;"></div>
-  <div id="notificationContainer"></div>
-
+  <div id="crosshair" style="display:none;"></div>
   <div id="hud" style="display:none;"></div>
-  <div id="marshmallowHUD" style="display:none;"></div>
+  <div id="bossHUD" style="display:none;"></div>
   <div id="upgradeScreen"></div>
   <div id="pauseMenu"></div>
 
