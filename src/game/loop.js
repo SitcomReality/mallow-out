@@ -54,14 +54,7 @@ export function runGameLoop(time) {
     // 4. UI Updates
     if (session.hud) session.hud.update();
     
-    if (session.weaponStatus) {
-      const ws = gameState.weaponStates;
-      if (gameState.currentWeapon === 3 && (ws.cleaverCharging || ws.cleaverCharge > 0)) {
-        session.weaponStatus.updateCleaverCharge(ws.cleaverCharge, CLEAVER_CHARGE_TIME);
-      } else {
-        session.weaponStatus.hide();
-      }
-    }
+
     
 
   }

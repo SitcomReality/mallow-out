@@ -7,7 +7,11 @@ import { PLAYER_HEIGHT } from './controls-constants.js';
 export function updateUniforms(uniforms, time) {
   const player = gameState.player;
   
-  // Camera setup
+  // Camera setup - Static position for incremental gameplay
+  player.position.set(0, 4, 12);
+  player.pitch = -0.3;
+  player.yaw = 0;
+  
   uniforms.uCamPos.value.copy(player.position);
   
   const forward = new THREE.Vector3(

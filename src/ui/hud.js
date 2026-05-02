@@ -27,9 +27,7 @@ export function createHUD() {
     hide() {
       hud.style.display = 'none';
     },
-    setActiveWeapon(index) {
-      // Weapon bar removed
-    },
+
     update() {
       document.getElementById('pollenDisplay').textContent = gameState.currencies.pollen;
       document.getElementById('caramelDisplay').textContent = gameState.currencies.caramel;

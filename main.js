@@ -21,7 +21,7 @@ import { session, startWave, quitToMenu, togglePause } from './src/game/manager.
 import { createWeaponSelection } from './src/ui/weapon-selection.js';
 import { offerWeaponChoices, selectWeapon } from './src/game/weapon-selection.js';
 import { runGameLoop } from './src/game/loop.js';
-import { shoot, releaseCleaver, stopShooting } from './src/game/combat.js';
+import { shoot } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
 import { createWeaponStatus } from './src/ui/weapon-status.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
@@ -111,13 +111,6 @@ function startGame() {
   session.upgradeScreen = createUpgradeScreen(() => {
     // Continue to next wave (upgrades are purchased in the shop UI)
     gameState.currentWave++;
-    offerWeaponChoices();
-    session.weaponSelection.show();
-  });
-
-  session.weaponSelection = createWeaponSelection((weaponIndex) => {
-    selectWeapon(weaponIndex);
-    if (session.hud) session.hud.setActiveWeapon(weaponIndex);
     startWave();
   });
   
@@ -146,26 +139,17 @@ function startGame() {
   });
   
   // Mouse Click / Shooting
-  let mouseDown = false;
-  
-  container.addEventListener('mousedown', () => {
-    if (!session.isPaused) {
-      mouseDown = true;
-      shoot(session.particleSystem, session.bossHUD);
-    }
+  container.addEventListener('mousedown', (e) => {
+    if (session.isPaused) return;
+    
+    const rect = container.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    
+    shoot(x, y, session.particleSystem, session.bossHUD, particleCamera);
   });
-  
-  container.addEventListener('mouseup', () => {
-    mouseDown = false;
-    stopShooting();
-    if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
-      releaseCleaver(session.particleSystem, session.bossHUD);
-    }
-  });
-  
 
   // Begin the adventure
-  offerWeaponChoices();
-  session.weaponSelection.show();
+  startWave();
   requestAnimationFrame(runGameLoop);
 }

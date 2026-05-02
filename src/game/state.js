@@ -21,8 +21,6 @@ export const gameState = {
   objects: [],
   projectiles: [], // for globber projectiles
   currentWeapon: 0,
-  selectedWeaponForWave: null,
-  weaponChoicesOffered: [null, null],
   currentWave: STARTING_WAVE,
   waveTimer: new WaveTimer(),
   marshmallowsSpawnedThisWave: 0,
@@ -37,11 +35,7 @@ export const gameState = {
     damageDealt: 0,
   },
   weaponStates: {
-    skewerReady: true,
-    globberCooldown: 0,
-    spattererCooldown: 0,
-    cleaverCharge: 0,
-    cleaverCharging: false
+    skewerCooldown: 0
   },
   upgrades: {
     pollen_multiplier: 0,

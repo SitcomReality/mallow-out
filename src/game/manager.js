@@ -120,20 +120,11 @@ export function quitToMenu() {
   gameState.objects = [];
   gameState.projectiles = [];
   gameState.currentWave = STARTING_WAVE;
-  gameState.selectedWeaponForWave = null;
   gameState.marshmallowsSpawnedThisWave = 0;
   gameState.marshmallowsDestroyedThisWave = 0;
   gameState.waveTimer.stop();
-  gameState.player.recoilTime = 0;
-  gameState.player.recoilPitchAmount = 0;
-  gameState.player.recoilYawAmount = 0;
-  gameState.player.recoilReturnOffset = 0;
   gameState.weaponStates = {
-    skewerReady: true,
-    globberCooldown: 0,
-    spattererCooldown: 0,
-    cleaverCharge: 0,
-    cleaverCharging: false
+    skewerCooldown: 0
   };
   gameState.upgrades = {
     pollen_multiplier: 0,

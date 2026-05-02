@@ -25,15 +25,8 @@ export function createMobileControls() {
     e.preventDefault();
     if (!session.isPlaying || session.isPaused) return;
     
-    shoot(session.particleSystem, session.bossHUD);
-  });
-
-  shootBtn.addEventListener('pointerup', (e) => {
-    e.preventDefault();
-    stopShooting();
-    if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
-      releaseCleaver(session.particleSystem, session.bossHUD);
-    }
+    // For mobile simplified, we tap the center or just use the center-screen projection for the shoot button
+    shoot(0, 0, session.particleSystem, session.bossHUD, session.particleCamera);
   });
 
   return {
