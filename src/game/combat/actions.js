@@ -24,12 +24,15 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
 
   const result = castRay(origin, direction, getSceneDistanceAt);
   
-  // Visual tracer start position
-  const visualOrigin = origin.clone().add(direction.clone().multiplyScalar(0.5));
+  // Visual tracer start position: unproject a point at the bottom-center of the screen
+  const tracerOriginNDC = new THREE.Vector3(0, -1, 0.99); // Near the bottom-center "lens"
+  tracerOriginNDC.unproject(camera);
+  const visualOrigin = tracerOriginNDC;
+
   const effectEnd = result.hit ? result.point : origin.clone().add(direction.clone().multiplyScalar(60));
 
   if (session.tracerSystem) {
-    session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffffff);
+    session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffff00);
   }
 
   if (result.hit) {
