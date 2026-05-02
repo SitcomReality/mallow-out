@@ -2,9 +2,7 @@ import { gameState } from '../state.js';
 import { getFireRateMultiplier } from '../petals/petal-effects.js';
 import { getWeaponFireRateMultiplier } from '../upgrades/weapon-modifiers.js';
 import { 
-  CLEAVER_CHARGE_TIME, 
-  MELTER_COOLDOWN_PER_SECOND, 
-  MELTER_MAX_HEAT 
+  CLEAVER_CHARGE_TIME
 } from './weapon-stats.js';
 
 /**
