@@ -28,15 +28,9 @@ export function triggerRandomPetal() {
   } else {
     // Empty slot - award caramel vapor bonus
     const vaporPercent = CARAMEL_VAPOR_MIN_PERCENT + Math.random() * (CARAMEL_VAPOR_MAX_PERCENT - CARAMEL_VAPOR_MIN_PERCENT);
-    const vaporBonus = Math.floor(gameState.currentWaveStats.caramelEarned * vaporPercent);
+    const vaporBonus = Math.floor(gameState.currencies.caramel * vaporPercent * 0.1); // Scaled vapor for empty trigger
     
-    gameState.currentWaveStats.caramelEarned += vaporBonus;
-    gameState.petalTriggersThisWave.push({
-      name: 'Caramel Vapor',
-      icon: '💨',
-      bonus: vaporBonus,
-      slot: slotIndex
-    });
+    gameState.currencies.caramel += vaporBonus;
     console.log(`[Petal] Empty slot ${slotIndex} - awarded ${vaporBonus} caramel vapor`);
   }
   

@@ -3,13 +3,11 @@ import { gameState } from '../game/state.js';
 import { ALL_UPGRADES } from '../game/upgrades/upgrade-types.js';
 import { getUpgradeCost, getUpgradeEffect, isMaxLevel } from '../game/upgrades/upgrade-calculator.js';
 
-export function createUpgradeScreen(onContinue) {
+export function createUpgradeScreen() {
   const screen = document.getElementById('upgradeScreen');
-  let currentOptions = []; // Persist options across purchases in a single wave
-  let purchasedThisWave = new Set();
+  let currentOptions = [];
   
-  function show(wave) {
-    // If we're entering the shop for the first time this wave, pick 3 random upgrades
+  function show() {
     if (currentOptions.length === 0) {
       const availableUpgrades = ALL_UPGRADES.filter(upgrade => 
         !isMaxLevel(upgrade.id, gameState.upgrades[upgrade.id] || 0)
@@ -54,7 +52,7 @@ export function createUpgradeScreen(onContinue) {
         <div class="upgrade-options">
           ${optionsHTML}
         </div>
-        <button class="continue-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" id="upgradeSkip">Continue to Wave ${wave + 1}</button>
+        <button class="continue-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" id="upgradeClose">Close</button>
       </div>
     `;
     
@@ -82,12 +80,8 @@ export function createUpgradeScreen(onContinue) {
       });
     });
     
-    document.getElementById('upgradeSkip').addEventListener('click', () => {
-      // Clear options for next wave's shop visit
-      currentOptions = [];
-      purchasedThisWave.clear();
+    document.getElementById('upgradeClose').addEventListener('click', () => {
       hide();
-      onContinue(null);
     });
   }
   

@@ -15,9 +15,11 @@ export function createHUD() {
           <span class="currency-value" id="caramelDisplay">0</span>
         </div>
       </div>
-      <div class="timer-display wonky" data-fill="#dc143c" data-stroke="#000000" data-stroke-width="4" id="timerDisplay">30</div>
+      <div class="nav-buttons">
+         <button id="navShop" class="nav-btn wonky" data-fill="#00ff7f" data-stroke="#000000" data-stroke-width="3">Shop</button>
+         <button id="navUpgrades" class="nav-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="3">Upgrades</button>
+      </div>
     </div>
-    
   `;
   
   return {
@@ -29,13 +31,8 @@ export function createHUD() {
     },
 
     update() {
-      document.getElementById('pollenDisplay').textContent = gameState.currencies.pollen;
-      document.getElementById('caramelDisplay').textContent = gameState.currencies.caramel;
-      
-      if (gameState.waveTimer.active) {
-        const remaining = Math.ceil(gameState.waveTimer.getRemainingTime());
-        document.getElementById('timerDisplay').textContent = remaining;
-      }
+      document.getElementById('pollenDisplay').textContent = Math.floor(gameState.currencies.pollen);
+      document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel);
     }
   };
 }

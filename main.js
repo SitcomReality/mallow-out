@@ -10,7 +10,6 @@ import { initControls } from './src/game/controls.js';
 import { createHUD } from './src/ui/hud.js';
 import { createBossHUD } from './src/ui/boss-hud.js';
 import { createUpgradeScreen } from './src/ui/upgrade-screen.js';
-import { createWaveSummary } from './src/ui/wave-summary.js';
 import { createPauseMenu } from './src/ui/pause-menu.js';
 import { createPetalShop } from './src/ui/petal-shop.js';
 import { createPetalHUD } from './src/ui/petal-hud.js';
@@ -93,30 +92,12 @@ function startGame() {
   
   session.bossHUD = createBossHUD();
   
-  session.waveSummary = createWaveSummary(() => {
-    // After wave summary, show petal shop
-    if (session.petalShop) {
-      session.petalShop.show();
-    }
-  });
+  session.petalShop = createPetalShop();
   
-  session.petalShop = createPetalShop(() => {
-    // After petal shop, show upgrade screen
-    if (session.upgradeScreen) {
-      session.upgradeScreen.show(gameState.currentWave);
-    }
-  });
-  
+  session.upgradeScreen = createUpgradeScreen();
+
   session.petalHUD = createPetalHUD();
   session.petalHUD.show();
-  
-
-  
-  session.upgradeScreen = createUpgradeScreen(() => {
-    // Continue to next wave (upgrades are purchased in the shop UI)
-    gameState.currentWave++;
-    startWave();
-  });
   
   session.pauseMenu = createPauseMenu(
     () => togglePause(),
@@ -153,8 +134,16 @@ function startGame() {
     shoot(x, y, session.particleSystem, session.bossHUD, particleCamera);
   });
 
+  // Hook up navigation buttons
+  document.getElementById('navShop').addEventListener('click', () => {
+    session.petalShop.show();
+  });
+  document.getElementById('navUpgrades').addEventListener('click', () => {
+    session.upgradeScreen.show();
+  });
+
   // Begin the adventure
-  startWave();
+  spawnNextMarshmallow();
   
   // Force a synchronous render to compile shaders
   if (session.renderFn) {

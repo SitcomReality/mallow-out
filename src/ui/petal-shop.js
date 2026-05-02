@@ -2,16 +2,19 @@ import { gameState } from '../game/state.js';
 import { ALL_PETALS } from '../game/petals/petal-types.js';
 import { PETAL_SHOP_OFFERS, PETAL_SLOTS } from '../game/petals/petal-constants.js';
 
-export function createPetalShop(onContinue) {
-  const container = document.createElement('div');
+export function createPetalShop() {
+  const container = document.createElementNS ? document.createElement('div') : null;
   container.id = 'petalShop';
   container.className = 'wave-summary-overlay';
   document.body.appendChild(container);
   
+  let offers = [];
+  
   function show() {
-    // Select random petals to offer
-    const shuffled = [...ALL_PETALS].sort(() => Math.random() - 0.5);
-    const offers = shuffled.slice(0, PETAL_SHOP_OFFERS);
+    if (offers.length === 0) {
+      const shuffled = [...ALL_PETALS].sort(() => Math.random() - 0.5);
+      offers = shuffled.slice(0, PETAL_SHOP_OFFERS);
+    }
     
     const offersHTML = offers.map(petal => {
       const canAfford = gameState.currencies.pollen >= petal.cost;
@@ -90,7 +93,6 @@ export function createPetalShop(onContinue) {
     
     document.getElementById('petalShopContinue').addEventListener('click', () => {
       hide();
-      onContinue();
     });
   }
   

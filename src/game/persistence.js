@@ -3,12 +3,9 @@ import { STARTING_WAVE } from './wave-constants.js';
 
 const SAVE_KEY = 'mallow_out_savegame';
 
-/**
- * Persists the current game progression to localStorage.
- */
 export function saveGame() {
   const saveData = {
-    currentWave: gameState.currentWave,
+    totalMarshmallowsDestroyed: gameState.totalMarshmallowsDestroyed,
     currencies: { ...gameState.currencies },
     upgrades: { ...gameState.upgrades },
     equippedPetals: [...gameState.equippedPetals],
@@ -33,7 +30,7 @@ export function loadGame() {
     const data = JSON.parse(saved);
     
     // Merge data into state
-    gameState.currentWave = data.currentWave || STARTING_WAVE;
+    gameState.totalMarshmallowsDestroyed = data.totalMarshmallowsDestroyed || 0;
     gameState.currencies = data.currencies || { pollen: 0, caramel: 0 };
     gameState.upgrades = data.upgrades || {};
     gameState.equippedPetals = data.equippedPetals || [null, null, null, null, null];

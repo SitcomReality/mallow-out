@@ -8,7 +8,7 @@ import { rebuildObjectList } from './combat.js';
 import { updatePetalEffects } from './petals/petal-effects.js';
 import { updateFX } from './fx.js';
 import { updateDynamicResolution } from './render-logic.js';
-import { updateWaveLogic } from './wave-logic.js';
+
 import { updateWeaponSystems } from './weapons/weapon-logic.js';
 import { updateProjectiles } from './weapons/projectile-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
@@ -28,13 +28,10 @@ export function runGameLoop(time) {
   if (!session.isPaused) {
     // 1. Performance and Wave Management
     updateDynamicResolution(delta);
-    updateWaveLogic(delta);
 
-    // 2. Systems and Input (some only during active wave)
-    if (gameState.waveInProgress) {
-      updateControls(delta);
-      updateMarshmallows(delta);
-    }
+    // 2. Systems and Input
+    updateControls(delta);
+    updateMarshmallows(delta);
     
     // 3. Combat, Physics and Global FX
     updateWeaponSystems(delta);
@@ -53,6 +50,10 @@ export function runGameLoop(time) {
     
     // 4. UI Updates
     if (session.hud) session.hud.update();
+    
+    if (!gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
+       spawnNextMarshmallow();
+    }
     
 
     
