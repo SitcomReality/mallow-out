@@ -138,4 +138,5 @@ export function updateUniforms(uniforms, time) {
   // Selection/outline - controlled by settings.outlinesEnabled
   uniforms.uSelectionInfo.value.set(0, 0);
   uniforms.uShowOutline.value = settings.outlinesEnabled ? 1 : 0;
+  uniforms.uOutlineColor.value.set(0, 0, 0); // Ensure black outlines by default
 }

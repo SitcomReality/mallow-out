@@ -23,11 +23,17 @@ void main() {
   vec3 hitCol = vec3(0.0);
   vec3 hitP;
   bool hit = false;
+  float minD = 1e10;
   
   for (int i = 0; i < 160; i++) {
     if (float(i) >= uMaxSteps) break;
     hitP = ro + rd * t;
     vec4 res = map(hitP);
+    
+    // Track minimum distance for global silhouettes
+    float dNorm = res.x / max(t, 1.0);
+    minD = min(minD, dNorm);
+    
     if (res.x < EPSILON * max(1.0, t)) {
       hitCol = res.yzw;
       hit = true;
@@ -75,9 +81,14 @@ void main() {
 
     col = litColor;
     
-    // Subtle silhouette
-    float silhouette = 0.12;
-    if (dot(n, -rd) < silhouette) col *= 0.7;
+    // Thick comic outlines on internal object silhouettes
+    if (uShowOutline > 0.5) {
+      float silhouetteInner = smoothstep(0.28, 0.0, dot(n, -rd));
+      col = mix(col, uOutlineColor, silhouetteInner);
+    } else {
+      float silhouette = 0.12;
+      if (dot(n, -rd) < silhouette) col *= 0.7;
+    }
   } else {
     // If we didn't hit anything, we're at uDrawDist
     t = uDrawDist;
@@ -102,27 +113,12 @@ void main() {
   float ndcDepth = ((uFar + uNear) / (uFar - uNear)) + (1.0 / viewZ) * ((-2.0 * uFar * uNear) / (uFar - uNear));
   gl_FragDepth = hit ? (ndcDepth * 0.5 + 0.5) : 1.0;
 
-  if (uSelectionInfo.x > 0.5 && uShowOutline > 0.5) {
-    float tSel = 0.0;
-    float minD = 1e10;
-    bool hitSel = false;
-    for (int i = 0; i < 60; i++) {
-      float d = mapSelected(ro + rd * tSel);
-      float dNorm = d / max(tSel, 1.0);
-      minD = min(minD, dNorm);
-      if (d < 0.002) {
-        hitSel = true;
-        break;
-      }
-      tSel += d * 0.8;
-      if (tSel > uDrawDist) break;
-    }
-    if (!hitSel) {
-      // Increase outline detection radius and strengthen blend for a thicker, more cartoony line.
-      float outline = smoothstep(0.040, 0.0, minD); // raised from 0.012 -> 0.040
-      if (outline > 0.0) {
-        col = mix(col, uOutlineColor * 1.5, outline * 1.2); // stronger blend multiplier
-      }
+  // Global Comic Outlines (Silhouettes)
+  if (uShowOutline > 0.5) {
+    float outlineDistThreshold = 0.055;
+    float outlineStrength = smoothstep(outlineDistThreshold, 0.0, minD);
+    if (outlineStrength > 0.0) {
+      col = mix(col, uOutlineColor, outlineStrength);
     }
   }
 
