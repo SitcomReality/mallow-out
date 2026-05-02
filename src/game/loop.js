@@ -13,7 +13,7 @@ import { updateWaveLogic } from './wave-logic.js';
 import { updateWeaponSystems } from './weapons/weapon-logic.js';
 import { updateProjectiles } from './weapons/projectile-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
-import { CLEAVER_CHARGE_TIME, MELTER_MAX_HEAT } from './weapons/weapon-stats.js';
+import { CLEAVER_CHARGE_TIME } from './weapons/weapon-stats.js';
 
 let lastTime = 0;
 
