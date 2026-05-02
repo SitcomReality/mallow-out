@@ -118,9 +118,10 @@ void main() {
       if (tSel > uDrawDist) break;
     }
     if (!hitSel) {
-      float outline = smoothstep(0.012, 0.0, minD);
+      // Increase outline detection radius and strengthen blend for a thicker, more cartoony line.
+      float outline = smoothstep(0.040, 0.0, minD); // raised from 0.012 -> 0.040
       if (outline > 0.0) {
-        col = mix(col, uOutlineColor * 1.5, outline * 0.85);
+        col = mix(col, uOutlineColor * 1.5, outline * 1.2); // stronger blend multiplier
       }
     }
   }
