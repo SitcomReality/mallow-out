@@ -89,17 +89,27 @@ FaceParams mixParams(FaceParams a, FaceParams b, float t) {
     return r;
 }
 
-float drawBox(vec2 p, vec2 center, vec2 size, float angle) {
-    p -= center;
-    float c = cos(angle), s = sin(angle);
-    p = vec2(p.x * c - p.y * s, p.x * s + p.y * c);
-    vec2 d = abs(p) - size;
-    return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
+float sdEllipse(vec2 p, vec2 r) {
+    float k0 = length(p/r);
+    float k1 = length(p/(r*r));
+    return k0*(k0-1.0)/k1;
 }
 
-float drawHollowBox(vec2 p, vec2 center, vec2 size, float angle, float thickness) {
-    float d = drawBox(p, center, size, angle);
-    return abs(d) - thickness;
+float sdCircle(vec2 p, float r) {
+    return length(p) - r;
+}
+
+float sdArc(vec2 p, float r, float thickness, float angle) {
+    p.x = abs(p.x);
+    float sca = sin(angle);
+    float scb = cos(angle);
+    return ((scb*p.x - sca*p.y) > 0.0) ? length(p - vec2(sca, scb)*r) - thickness : abs(length(p) - r) - thickness;
+}
+
+float sdCapsule(vec2 p, vec2 a, vec2 b, float r) {
+    vec2 pa = p - a, ba = b - a;
+    float h = clamp(dot(pa, ba)/dot(ba, ba), 0.0, 1.0);
+    return length(pa - ba*h) - r;
 }
 
 vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 lookDir) {
@@ -131,50 +141,67 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   FaceParams p = mixParams(p1, p2, blendT);
   
   vec3 col = baseCol;
-  float aa = 0.02;
+  float aa = 0.015;
   
   vec2 uvMirrored = vec2(abs(uv.x), uv.y);
   float sideSign = sign(uv.x); 
   if (sideSign == 0.0) sideSign = 1.0;
   
   // 1. Mouth
-  float mouthDist = drawBox(uv, p.mouthPos, p.mouthSize, p.mouthAngle);
+  float mouthDist;
+  if (expression > 2.5) {
+      // Surprised: Round O-mouth
+      mouthDist = sdCircle(uv - p.mouthPos, p.mouthSize.x);
+  } else if (expression > 1.5) {
+      // Angry: Frown arc
+      vec2 mouthUV = vec2(uv.x, -(uv.y - p.mouthPos.y));
+      mouthDist = sdArc(mouthUV, p.mouthSize.x, p.mouthSize.y, p.mouthAngle);
+  } else {
+      // Happy: Smile arc
+      vec2 mouthUV = vec2(uv.x, uv.y - p.mouthPos.y);
+      mouthDist = sdArc(mouthUV, p.mouthSize.x, p.mouthSize.y, p.mouthAngle);
+  }
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, mouthDist));
 
   // 1b. Cheeks
-  float cheekDist = drawBox(uvMirrored, p.cheekPos, p.cheekSize, 0.0);
-  vec3 rosy = vec3(1.0, 0.4, 0.5); // Rosy pink
+  float cheekDist = sdCircle(uvMirrored - p.cheekPos, p.cheekSize.x);
+  vec3 rosy = vec3(1.0, 0.4, 0.5); 
   col = mix(col, rosy, smoothstep(aa, -aa, cheekDist) * p.cheekAlpha);
   
   // 2. Eyebrows
-  float browDist = drawBox(uvMirrored, p.browPos, p.browSize, p.browAngle * sideSign);
+  vec2 browA = vec2(-p.browSize.x, 0.0);
+  vec2 browB = vec2(p.browSize.x, 0.0);
+  float sa = sin(p.browAngle * sideSign), ca = cos(p.browAngle * sideSign);
+  mat2 rot = mat2(ca, -sa, sa, ca);
+  vec2 browUV = (uvMirrored - p.browPos) * rot;
+  float browDist = sdCapsule(browUV, browA, browB, p.browSize.y);
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, browDist));
   
   // 3. Eyes
-  float eyeFrameDist = drawHollowBox(uvMirrored, p.eyePos, p.eyeSize, 0.0, p.lineThickness);
+  float eyeDist = sdEllipse(uvMirrored - p.eyePos, p.eyeSize);
+  float eyeFrameDist = abs(eyeDist) - p.lineThickness;
   
-  vec2 innerSize = max(vec2(0.0), p.eyeSize - p.lineThickness);
+  vec2 innerSize = max(vec2(0.01), p.eyeSize - p.lineThickness);
   
-  // Dynamic Pupil Position based on lookDir
-  vec2 lookRange = innerSize - p.pupilSize;
+  // Dynamic Pupil Position
+  vec2 lookRange = innerSize * 0.6;
   vec2 pupilLookDir = lookDir;
-  pupilLookDir.x *= sideSign; // Invert x for the left eye in mirrored space
-  vec2 currentPupilCenter = p.eyePos + p.pupilPos + pupilLookDir * lookRange;
+  pupilLookDir.x *= sideSign; 
+  vec2 currentPupilCenter = p.eyePos + pupilLookDir * lookRange;
   
-  float pupilDist = drawBox(uvMirrored, currentPupilCenter, p.pupilSize, 0.0);
-  float innerEyeBox = drawBox(uvMirrored, p.eyePos, innerSize, 0.0);
-  float pupilClipped = max(pupilDist, innerEyeBox);
+  float pupilDist = sdCircle(uvMirrored - currentPupilCenter, p.pupilSize.x);
+  float innerEyeArea = sdEllipse(uvMirrored - p.eyePos, innerSize);
+  float pupilClipped = max(pupilDist, innerEyeArea);
   
-  // Catchlights follow the pupil slightly but stay mostly in place
+  // Catchlights
   vec2 catchL = vec2(-currentPupilCenter.x, currentPupilCenter.y) + p.catchlightPos + lookDir * 0.02;
   vec2 catchR = vec2(currentPupilCenter.x, currentPupilCenter.y) + p.catchlightPos + lookDir * 0.02;
-  
-  float catchDistL = drawBox(uv, catchL, p.catchlightSize, 0.0);
-  float catchDistR = drawBox(uv, catchR, p.catchlightSize, 0.0);
+  float catchDistL = sdCircle(uv - catchL, p.catchlightSize.x);
+  float catchDistR = sdCircle(uv - catchR, p.catchlightSize.x);
   float catchDist = min(catchDistL, catchDistR);
   float catchClipped = max(catchDist, pupilClipped);
 
-  // Blend Eyes
+  // Final Blending
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, eyeFrameDist));
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, pupilClipped));
   col = mix(col, vec3(1.0), smoothstep(aa, -aa, catchClipped));

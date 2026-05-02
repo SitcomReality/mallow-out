@@ -8,41 +8,42 @@ export const EXPRESSION_SURPRISED = 3;
  * Extracted for easier tweaking and testing.
  */
 export const FACE_STYLE = {
-  lineThickness: 0.025,
+  lineThickness: 0.035, // Slightly thicker for "paint" feel
   default: {
-    browPos: [0.35, 0.45],
-    browSize: [0.18, 0.03],
-    browAngle: 0.0,
-    eyePos: [0.32, 0.1],
-    eyeSize: [0.15, 0.2],
+    browPos: [0.38, 0.48],
+    browSize: [0.22, 0.04],
+    browAngle: 0.1,
+    eyePos: [0.35, 0.12],
+    eyeSize: [0.25, 0.25], // Large round eyes
     pupilPos: [0.0, 0.0],
-    pupilSize: [0.08, 0.12],
-    catchlightPos: [0.03, 0.05],
-    catchlightSize: [0.02, 0.03],
+    pupilSize: [0.12, 0.12], // Round pupils
+    catchlightPos: [0.05, 0.06],
+    catchlightSize: [0.03, 0.03],
     mouthPos: [0.0, -0.3],
-    mouthSize: [0.25, 0.08],
-    mouthAngle: 0.0,
-    cheekPos: [0.55, -0.15],
-    cheekSize: [0.08, 0.08],
+    mouthSize: [0.35, 0.05], // Smile radius and thickness
+    mouthAngle: 1.2, // Angle for the arc
+    cheekPos: [0.65, -0.12],
+    cheekSize: [0.12, 0.12],
     cheekAlpha: 1.0,
   },
   angry: {
     cheekAlpha: 0.0,
-    browPos: [0.28, 0.35],
-    browAngle: 0.35,
-    pupilSize: [0.1, 0.14],
-    mouthPos: [0.0, -0.35],
-    mouthSize: [0.22, 0.03],
-    mouthAngle: -0.15,
+    browPos: [0.3, 0.4],
+    browAngle: 0.45,
+    eyeSize: [0.25, 0.12], // Squinting
+    pupilSize: [0.1, 0.1],
+    mouthPos: [0.0, -0.45],
+    mouthSize: [0.25, 0.04],
+    mouthAngle: 0.8, // Frown arc
   },
   surprised: {
-    browPos: [0.4, 0.55],
-    browAngle: -0.25,
-    eyeSize: [0.15, 0.1],
-    eyePos: [0.32, 0.2],
-    pupilSize: [0.06, 0.06],
-    mouthSize: [0.05, 0.05],
-    mouthPos: [0.05, -0.3],
+    browPos: [0.45, 0.6],
+    browAngle: -0.2,
+    eyeSize: [0.28, 0.28], // Very round
+    eyePos: [0.35, 0.15],
+    pupilSize: [0.08, 0.08],
+    mouthSize: [0.12, 0.12], // O-shape
+    mouthPos: [0.0, -0.4],
     cheekAlpha: 0.0,
   }
 };
