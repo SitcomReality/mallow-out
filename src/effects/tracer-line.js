@@ -12,10 +12,14 @@ export class TracerSystem {
       color,
       transparent: true,
       opacity: 1,
-      linewidth: 2
+      linewidth: 2,
+      depthTest: false,          // Render on top of raymarching quad/depth
+      depthWrite: false,         // Don't write to depth buffer
+      blending: THREE.AdditiveBlending
     });
     
     const line = new THREE.Line(geometry, material);
+    line.frustumCulled = false;  // Prevent automatic culling so short/fast tracers aren't dropped
     this.scene.add(line);
     
     const tracer = {
