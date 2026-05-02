@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
 import { castRay, getEnemyDistanceAt } from '../shooting.js';
-import { addHoleToMarshmallow } from '../marshmallow-damage.js';
+import { applyHolepunch } from '../damage/actions.js';
 import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
 import { rollCriticalHit } from '../upgrades/weapon-modifiers.js';
-import { BASE_DAMAGE_HOLE } from '../combat-constants.js';
+import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
 
@@ -50,10 +50,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     }
 
     const isCritical = rollCriticalHit();
-    let damage = BASE_DAMAGE_HOLE;
+    let damage = BASE_DAMAGE_HOLEPUNCH;
     if (isCritical) damage *= 2;
 
-    addHoleToMarshmallow(gameState.currentMarshmallow, result.point, direction);
+    applyHolepunch(gameState.currentMarshmallow, result.point, direction);
     particleSystem.createHoleSpray(result.point, direction);
     
     handleMarshmallowHit(result.point, damage, isCritical, particleSystem, marshmallowHUD);

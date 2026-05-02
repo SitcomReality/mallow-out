@@ -67,7 +67,6 @@ export function quitToMenu() {
   if (session.hud) session.hud.hide();
   if (session.marshmallowHUD) session.marshmallowHUD.hide();
   if (session.upgradeScreen) session.upgradeScreen.hide();
-  if (session.weaponSelection) session.weaponSelection.hide();
   if (session.pauseMenu) session.pauseMenu.hide();
   if (session.mobileControls) session.mobileControls.hide();
   

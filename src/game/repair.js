@@ -7,6 +7,7 @@ import {
   CHUNK_REPAIR_INITIAL_BLEND, 
   CHUNK_REPAIR_FINAL_BLEND 
 } from './repair-constants.js';
+import { DAMAGE_TYPES } from './damage/types.js';
 
 export function updateRepairs(currentTime, delta) {
   // Only repair the active marshmallow; melting marshmallows stop repairing
@@ -48,7 +49,7 @@ export function updateRepairs(currentTime, delta) {
         continue;
       }
       
-      if (hole.repairData.type === 'hole') {
+      if (hole.repairData.type === DAMAGE_TYPES.HOLEPUNCH) {
         // Decrease radius until it disappears
         hole.scale.x = hole.repairData.initialRadius * (1.0 - t);
 
@@ -57,7 +58,7 @@ export function updateRepairs(currentTime, delta) {
           const lengthT = (t - 0.75) / 0.25;
           hole.scale.y = hole.repairData.initialHeight * (1.0 - lengthT);
         }
-      } else if (hole.repairData.type === 'chunk') {
+      } else if (hole.repairData.type === DAMAGE_TYPES.ROUND_CHUNK) {
         const speed = CHUNK_REPAIR_SPEED * delta;
         hole.position.x += hole.repairData.normal.x * speed;
         hole.position.y += hole.repairData.normal.y * speed;
@@ -71,7 +72,7 @@ export function updateRepairs(currentTime, delta) {
         if (!hole.noiseOffset) hole.noiseOffset = { x: 0, y: 0, z: 0 };
         hole.noiseOffset.y += CHUNK_REPAIR_NOISE_SPEED * delta;
         
-      } else if (hole.repairData.type === 'spatterer') {
+      } else if (hole.repairData.type === DAMAGE_TYPES.SPATTER) {
         // Move away from surface
         const speed = 1.0 * delta;
         hole.position.x += hole.repairData.normal.x * speed;
@@ -82,7 +83,7 @@ export function updateRepairs(currentTime, delta) {
         hole.noiseAmount = hole.repairData.initialNoiseAmount * (1.0 - t) + 0.4 * t;
         hole.noiseScale = hole.repairData.initialNoiseScale * (1.0 - t) + 3.0 * t;
         
-      } else if (hole.repairData.type === 'cleaver') {
+      } else if (hole.repairData.type === DAMAGE_TYPES.KERF_CHUNK) {
         // Move away along attack direction
         const speed = 1.5 * delta;
         hole.position.x += hole.repairData.normal.x * speed;

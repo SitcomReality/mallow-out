@@ -1,11 +1,15 @@
 import * as THREE from 'three';
-import { HOLE_RADIUS, CHUNK_RADIUS } from './marshmallow-constants.js';
-import { CHUNK_REPAIR_INITIAL_BLEND } from './repair-constants.js';
-import { getLocalTransform, calculateSurfaceNormal } from './marshmallow-utils.js';
+import { DAMAGE_TYPES } from './types.js';
+import { HOLE_RADIUS, CHUNK_RADIUS } from '../marshmallow-constants.js';
+import { CHUNK_REPAIR_INITIAL_BLEND } from '../repair-constants.js';
+import { getLocalTransform, calculateSurfaceNormal } from '../marshmallow-utils.js';
 
 let nextId = 5000;
 
-export function addHoleToMarshmallow(marshmallowEntity, hitPoint, rayDirection) {
+/**
+ * HOLEPUNCH: A cylindrical hole through the marshmallow.
+ */
+export function applyHolepunch(marshmallowEntity, hitPoint, rayDirection) {
   const marshmallow = marshmallowEntity.marshmallow;
   const r = marshmallow.scale.x;
   const h = marshmallow.scale.y;
@@ -42,7 +46,7 @@ export function addHoleToMarshmallow(marshmallowEntity, hitPoint, rayDirection) 
       z: Math.random() * 100 
     },
     repairData: {
-      type: 'hole',
+      type: DAMAGE_TYPES.HOLEPUNCH,
       startTime: performance.now() * 0.001,
       initialRadius: HOLE_RADIUS,
       initialHeight: holeLength / 2
@@ -54,7 +58,10 @@ export function addHoleToMarshmallow(marshmallowEntity, hitPoint, rayDirection) 
   return hole;
 }
 
-export function addChunkToMarshmallow(marshmallowEntity, hitPoint) {
+/**
+ * ROUND CHUNK: A spherical subtraction from the marshmallow surface.
+ */
+export function applyRoundChunk(marshmallowEntity, hitPoint) {
   const marshmallow = marshmallowEntity.marshmallow;
   const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
   
@@ -82,7 +89,7 @@ export function addChunkToMarshmallow(marshmallowEntity, hitPoint) {
       z: Math.random() * 100 
     },
     repairData: {
-      type: 'chunk',
+      type: DAMAGE_TYPES.ROUND_CHUNK,
       startTime: performance.now() * 0.001,
       normal: localNormal,
       initialScale: CHUNK_RADIUS
@@ -94,7 +101,10 @@ export function addChunkToMarshmallow(marshmallowEntity, hitPoint) {
   return chunk;
 }
 
-export function addSpattererDamage(marshmallowEntity, hitPoint, distance) {
+/**
+ * SPATTER: A noisy spherical subtraction, typical of spread/spatter effects.
+ */
+export function applySpatter(marshmallowEntity, hitPoint, distance) {
   const marshmallow = marshmallowEntity.marshmallow;
   const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
   
@@ -110,7 +120,7 @@ export function addSpattererDamage(marshmallowEntity, hitPoint, distance) {
   const localPos = damagePosWorld.clone().sub(new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z)).applyQuaternion(mQuatInv);
   const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
   
-  const spatterer = {
+  const spatter = {
     id: nextId++,
     type: 'sphere',
     position: { x: localPos.x, y: localPos.y, z: localPos.z },
@@ -128,7 +138,7 @@ export function addSpattererDamage(marshmallowEntity, hitPoint, distance) {
       z: Math.random() * 100 
     },
     repairData: {
-      type: 'spatterer',
+      type: DAMAGE_TYPES.SPATTER,
       startTime: performance.now() * 0.001,
       normal: localNormal,
       initialNoiseAmount: 1.5,
@@ -137,12 +147,15 @@ export function addSpattererDamage(marshmallowEntity, hitPoint, distance) {
     }
   };
   
-  marshmallowEntity.holes.push(spatterer);
+  marshmallowEntity.holes.push(spatter);
   marshmallowEntity.hitCount += 3;
-  return spatterer;
+  return spatter;
 }
 
-export function addCleaverDamage(marshmallowEntity, hitPoint, rayDirection) {
+/**
+ * KERF CHUNK: A boxy/angled cut into the marshmallow.
+ */
+export function applyKerfChunk(marshmallowEntity, hitPoint, rayDirection) {
   const marshmallow = marshmallowEntity.marshmallow;
   const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
   
@@ -162,7 +175,7 @@ export function addCleaverDamage(marshmallowEntity, hitPoint, rayDirection) {
   const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
   const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
 
-  const cleaver = {
+  const kerf = {
     id: nextId++,
     type: 'box',
     position: local.position,
@@ -176,14 +189,14 @@ export function addCleaverDamage(marshmallowEntity, hitPoint, rayDirection) {
     noiseScale: 1.0,
     noiseOffset: { x: 0, y: 0, z: 0 },
     repairData: {
-      type: 'cleaver',
+      type: DAMAGE_TYPES.KERF_CHUNK,
       startTime: performance.now() * 0.001,
       normal: localNormal,
       initialBlend: 0.3
     }
   };
   
-  marshmallowEntity.holes.push(cleaver);
+  marshmallowEntity.holes.push(kerf);
   marshmallowEntity.hitCount += 4;
-  return cleaver;
+  return kerf;
 }

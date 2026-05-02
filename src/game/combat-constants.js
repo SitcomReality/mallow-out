@@ -1,4 +1,4 @@
-export const BASE_DAMAGE_CHUNK = 2.0;
-export const BASE_DAMAGE_HOLE = 1.5;
-export const BASE_DAMAGE_SPATTERER = 3.0;
-export const BASE_DAMAGE_CLEAVER = 4.5;
+export const BASE_DAMAGE_ROUND_CHUNK = 2.0;
+export const BASE_DAMAGE_HOLEPUNCH = 1.5;
+export const BASE_DAMAGE_SPATTER = 3.0;
+export const BASE_DAMAGE_KERF_CHUNK = 4.5;
