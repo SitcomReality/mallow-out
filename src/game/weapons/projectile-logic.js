@@ -3,13 +3,11 @@ import { getSceneDistanceAt, rebuildObjectList } from '../combat.js';
 import { getEnemyDistanceAt } from '../shooting.js';
 
 import { addChunkToEnemy } from '../enemy.js';
-import { damageMarshmallow } from '../marshmallow.js';
-import { checkMarshmallowPop } from '../marshmallow-pop.js';
-import { awardPollen } from '../economy.js';
-import { session, onMarshmallowDefeated } from '../manager.js';
-import { getWeaponDamageBonus, applyCriticalMultiplier } from '../upgrades/weapon-modifiers.js';
+import { session } from '../manager.js';
+import { getWeaponDamageBonus, rollCriticalHit } from '../upgrades/weapon-modifiers.js';
 import { getDamageMultiplier } from '../petals/petal-effects.js';
 import { BASE_DAMAGE_CHUNK } from '../combat-constants.js';
+import { handleMarshmallowHit } from '../combat.js';
 
 /**
  * Updates physics, collisions, and damage for all active projectiles.
@@ -39,27 +37,11 @@ export function updateProjectiles(delta, time) {
         const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
         session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);
         
+        const isCritical = rollCriticalHit();
         let damage = (BASE_DAMAGE_CHUNK + getWeaponDamageBonus()) * getDamageMultiplier();
-        damage = applyCriticalMultiplier(damage);
-        awardPollen(damage);
-        
-        // Check for pop before applying damage
-        checkMarshmallowPop(gameState.currentMarshmallow, session.particleSystem);
-        
-        const defeated = damageMarshmallow(gameState.currentMarshmallow, damage, session.particleSystem);
-        if (session.bossHUD) session.bossHUD.update(gameState.currentMarshmallow);
-        
-        if (defeated) {
-          if (gameState.meltingMarshmallows.length >= 2) {
-            gameState.meltingMarshmallows.shift();
-          }
-          const deadMarshmallow = gameState.currentMarshmallow;
-          deadMarshmallow.meltStartTime = time;
-          gameState.meltingMarshmallows.push(deadMarshmallow);
-          gameState.currentMarshmallow = null;
-          if (session.bossHUD) session.bossHUD.hide();
-          onMarshmallowDefeated();
-        }
+        if (isCritical) damage *= 2;
+
+        handleMarshmallowHit(proj.position, damage, isCritical, session.particleSystem, session.bossHUD);
         
         toRemove.push(proj);
       }
