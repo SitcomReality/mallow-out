@@ -22,7 +22,7 @@ export function spawnNextMarshmallow() {
   if (gameState.currentMarshmallow) return;
   if (gameState.meltingMarshmallows.length > 1) return;
   
-  const marshmallow = createMarshmallow(1, gameState.totalMarshmallowsDestroyed);
+  const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed);
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
   

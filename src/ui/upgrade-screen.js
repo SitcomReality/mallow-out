@@ -21,23 +21,21 @@ export function createUpgradeScreen() {
       const currentLevel = gameState.upgrades[upgrade.id] || 0;
       const cost = getUpgradeCost(upgrade.id, currentLevel);
       const maxed = isMaxLevel(upgrade.id, currentLevel);
-      const alreadyPurchased = purchasedThisWave.has(upgrade.id);
-      const canAfford = !maxed && !alreadyPurchased && gameState.currencies.caramel >= cost;
+      const canAfford = !maxed && gameState.currencies.caramel >= cost;
       
       return `
-        <div class="upgrade-card wonky ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${alreadyPurchased ? 'purchased' : ''}" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" data-id="${upgrade.id}" data-cost="${cost}">
+        <div class="upgrade-card wonky ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''}" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" data-id="${upgrade.id}" data-cost="${cost}">
           <div class="upgrade-card-icon" style="font-size: 32px;">${upgrade.icon}</div>
           <h3 class="upgrade-card-name" style="font-size: 10px; color: #000000; margin: 8px 0;">${upgrade.name}</h3>
-          <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">${maxed ? 'MAX LEVEL' : alreadyPurchased ? 'PURCHASED' : 'Level ' + currentLevel}</div>
+          <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">${maxed ? 'MAX LEVEL' : 'Level ' + currentLevel}</div>
           <p class="upgrade-card-desc" style="font-size: 8px; color: #000000; margin: 8px 0;">${upgrade.description}</p>
           <div class="upgrade-effect">${upgrade.shortDesc}</div>
-          ${(!maxed && !alreadyPurchased) ? `
+          ${!maxed ? `
             <div class="upgrade-cost">
               <span class="currency-icon">🍯</span>
               <span>${cost}</span>
             </div>
           ` : ''}
-          ${alreadyPurchased ? '<div class="upgrade-purchased-badge">✓ Bought</div>' : ''}
         </div>
       `;
     }).join('');
@@ -73,10 +71,9 @@ export function createUpgradeScreen() {
         // Purchase upgrade
         gameState.currencies.caramel -= cost;
         gameState.upgrades[upgradeId] = currentLevel + 1;
-        purchasedThisWave.add(upgradeId);
         
         // Re-render the same options
-        show(wave);
+        show();
       });
     });
     

@@ -16,7 +16,7 @@ import { createPetalHUD } from './src/ui/petal-hud.js';
 import { ParticleSystem } from './src/effects/particles.js';
 import { FloatingTextSystem } from './src/effects/floating-text.js';
 import { FloatingTextRenderer } from './src/effects/floating-text-renderer.js';
-import { session, startWave, quitToMenu, togglePause } from './src/game/manager.js';
+import { session, quitToMenu, togglePause, spawnNextMarshmallow } from './src/game/manager.js';
 import { runGameLoop } from './src/game/loop.js';
 import { shoot } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';

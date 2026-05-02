@@ -9,7 +9,7 @@ import {
 export function applyPetalEffect(petal) {
   switch (petal.id) {
     case 'caramel_burst':
-      gameState.currentWaveStats.caramelEarned += 20;
+      gameState.currencies.caramel += 20;
       break;
       
     case 'next_kill_bonus':
@@ -35,7 +35,8 @@ export function applyPetalEffect(petal) {
       break;
       
     case 'time_extension':
-      gameState.waveTimer.addTimeBonus(10);
+      // Time extension removed in endless mode, maybe award small currency bonus instead
+      gameState.currencies.pollen += 25;
       break;
       
     case 'slow_motion':

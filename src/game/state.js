@@ -30,13 +30,13 @@ export const gameState = {
   },
   upgrades: {
     pollen_multiplier: 0,
-    wave_duration: 0,
     caramel_bonus: 0,
   },
   equippedPetals: [null, null, null, null, null], // 5 petal slots
   activePetalEffects: [], // Currently active timed effects
   guaranteedFloaty: false, // Lucky Clover effect flag
   nextKillBonus: false, // Sweet Tooth effect flag
+  petalTriggers: [], // History of triggers
 };
 
 // Re-export shared runtime config for convenience to avoid incorrect relative imports elsewhere

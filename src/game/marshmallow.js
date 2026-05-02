@@ -7,7 +7,7 @@ import { BASE_MOVEMENT_SPEED, BASE_BOB_AMPLITUDE } from './marshmallow-type-cons
 
 let nextId = 1;
 
-export function createMarshmallow(wave, spawnIndex) {
+export function createMarshmallow(totalDestroyed) {
   const angle = Math.random() * Math.PI * 2;
   const distance = Math.random() * ENEMY_SPAWN_RADIUS;
   const x = Math.cos(angle) * distance;
@@ -58,10 +58,9 @@ export function createMarshmallow(wave, spawnIndex) {
     marshmallow,
     holes: [],
     hitCount: 0,
-    maxHealth: getMarshmallowHealth(wave, spawnIndex),
-    currentHealth: getMarshmallowHealth(wave, spawnIndex),
-    wave: wave,
-    spawnIndex: spawnIndex,
+    maxHealth: getMarshmallowHealth(totalDestroyed),
+    currentHealth: getMarshmallowHealth(totalDestroyed),
+    totalIndex: totalDestroyed,
     id: marshmallowId,
     type: type,
     movement: {

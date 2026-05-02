@@ -13,14 +13,7 @@ export const UPGRADE_TYPES = {
     description: 'Increase pollen earned from damage',
     shortDesc: '+20% pollen per level'
   },
-  WAVE_DURATION: {
-    id: 'wave_duration',
-    category: UPGRADE_CATEGORIES.ECONOMY,
-    name: 'Time Extension',
-    icon: '⏰',
-    description: 'Start waves with more time',
-    shortDesc: '+5 seconds per level'
-  },
+
   CARAMEL_BONUS: {
     id: 'caramel_bonus',
     category: UPGRADE_CATEGORIES.ECONOMY,

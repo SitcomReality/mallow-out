@@ -14,11 +14,14 @@ export function triggerRandomPetal() {
     const petalData = getPetalById(petal);
     if (petalData) {
       applyPetalEffect(petalData);
-      gameState.petalTriggersThisWave.push({
+      gameState.petalTriggers.push({
         name: petalData.name,
         icon: petalData.icon,
-        slot: slotIndex
+        slot: slotIndex,
+        time: Date.now()
       });
+      // Keep trigger history manageable
+      if (gameState.petalTriggers.length > 20) gameState.petalTriggers.shift();
       console.log(`[Petal] Triggered ${petalData.name} from slot ${slotIndex}`);
     }
     

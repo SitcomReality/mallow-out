@@ -13,8 +13,7 @@ export function createBossHUD() {
     
     hud.innerHTML = `
       <div class="boss-info">
-        <h2 class="boss-name wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">${typeName} #${marshmallow.spawnIndex + 1}</h2>
-        <p class="boss-wave" style="font-size: 8px; color: #000000;">Wave ${marshmallow.wave}</p>
+        <h2 class="boss-name wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">${typeName} #${marshmallow.totalIndex + 1}</h2>
       </div>
       <div class="boss-health-bar wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4">
         <div class="boss-health-fill ${isDanger ? 'danger' : ''}" style="width: ${healthPercent}%; background: #32cd32;"></div>
