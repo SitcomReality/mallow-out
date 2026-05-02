@@ -24,10 +24,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
 
   const result = castRay(origin, direction, getSceneDistanceAt);
   
-  // Visual tracer start position: unproject a point at the bottom-center of the screen
-  const tracerOriginNDC = new THREE.Vector3(0, -1, 0.99); // Near the bottom-center "lens"
-  tracerOriginNDC.unproject(camera);
-  const visualOrigin = tracerOriginNDC;
+  // Visual tracer start position: place the tracer above the camera and slightly forward so it appears to shoot down
+  // Use the computed click ray direction as a forward vector reference but clone it to avoid mutating the original.
+  const camForward = direction.clone();
+  const visualOrigin = camera.position.clone().add(new THREE.Vector3(0, 2.5, 0)).add(camForward.multiplyScalar(1.5));
 
   const effectEnd = result.hit ? result.point : origin.clone().add(direction.clone().multiplyScalar(60));
 
