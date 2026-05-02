@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
 import { castRay, getEnemyDistanceAt } from './shooting.js';
-import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage, addLaserDamage } from './enemy.js';
+import { addHoleToEnemy, addChunkToEnemy, addSpattererDamage, addCleaverDamage } from './enemy.js';
 import { activeFX } from './fx.js';
 import { damageMarshmallow } from './marshmallow.js';
 import { checkMarshmallowPop } from './marshmallow-pop.js';
@@ -15,7 +15,6 @@ import {
   BASE_DAMAGE_HOLE, 
   BASE_DAMAGE_SPATTERER,
   BASE_DAMAGE_CLEAVER,
-  BASE_DAMAGE_LASER_PER_TICK,
 } from './combat-constants.js';
 import {
   SKEWER_RECOIL_PITCH,
