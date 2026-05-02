@@ -15,7 +15,13 @@ export class TracerSystem {
       linewidth: 2
     });
     
+    // Ensure tracers always render on top of the SDF by disabling depth testing/writing
+    material.depthTest = false;
+    material.depthWrite = false;
+    
     const line = new THREE.Line(geometry, material);
+    // Make sure it renders after other objects in the same scene
+    line.renderOrder = 9999;
     this.scene.add(line);
     
     const tracer = {
