@@ -1,91 +1,11 @@
-import { MOUSE_SENSITIVITY } from './controls-constants.js';
 import { gameState } from './state.js';
-
-const keys = {};
-
 import * as THREE from 'three';
 
 export function initControls(container) {
   const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-  
-  // Pointer lock
-  container.addEventListener('click', () => {
-    container.requestPointerLock();
-  });
-
-  document.addEventListener('pointerlockchange', () => {
-    if (document.pointerLockElement !== container) {
-      // Lost pointer lock
-    }
-  });
-
-  // Mouse movement
-  document.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement === container) {
-      // Invert horizontal yaw so moving mouse right turns right (positive yaw)
-      gameState.player.yaw += e.movementX * MOUSE_SENSITIVITY;
-      // Keep vertical mouse (pitch) behavior unchanged (not inverted)
-      gameState.player.pitch -= e.movementY * MOUSE_SENSITIVITY;
-      gameState.player.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, gameState.player.pitch));
-      
-      gameState.player.rotation.y = gameState.player.yaw;
-      gameState.player.rotation.x = gameState.player.pitch;
-    }
-  });
-
-  // Keyboard
-  document.addEventListener('keydown', (e) => {
-    keys[e.key.toLowerCase()] = true;
-  });
-
-  document.addEventListener('keyup', (e) => {
-    keys[e.key.toLowerCase()] = false;
-  });
-
-  return { keys, camera };
+  return { camera };
 }
 
 export function updateControls(delta) {
-  // Basic WASD movement (fixed directions)
-  const baseSpeed = 5;
-  const speed = baseSpeed * delta;
-  const yaw = gameState.player.yaw;
-
-  // Forward vector matches the ray direction used elsewhere: (sin(yaw), 0, -cos(yaw))
-  const forwardX = Math.sin(yaw);
-  const forwardZ = -Math.cos(yaw);
-
-  // Right vector is perpendicular to forward on the XZ plane
-  const rightX = Math.cos(yaw);
-  const rightZ = Math.sin(yaw);
-
-  if (keys['w']) {
-    gameState.player.position.x += forwardX * speed;
-    gameState.player.position.z += forwardZ * speed;
-  }
-  
-  // Joystick handling for mobile aiming
-  if (gameState.joystickDelta) {
-    const turnSpeed = 2.0; // radians per second
-    gameState.player.yaw += gameState.joystickDelta.x * turnSpeed * delta;
-    gameState.player.pitch += gameState.joystickDelta.y * turnSpeed * delta;
-    
-    // Clamp vertical rotation
-    gameState.player.pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, gameState.player.pitch));
-    
-    gameState.player.rotation.y = gameState.player.yaw;
-    gameState.player.rotation.x = gameState.player.pitch;
-  }
-  if (keys['s']) {
-    gameState.player.position.x -= forwardX * speed;
-    gameState.player.position.z -= forwardZ * speed;
-  }
-  if (keys['a']) {
-    gameState.player.position.x -= rightX * speed;
-    gameState.player.position.z -= rightZ * speed;
-  }
-  if (keys['d']) {
-    gameState.player.position.x += rightX * speed;
-    gameState.player.position.z += rightZ * speed;
-  }
+  // Controls functionality has been removed for incremental game conversion.
 }

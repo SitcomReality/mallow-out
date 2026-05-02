@@ -95,7 +95,6 @@ export function togglePause() {
   if (session.isPaused) {
     stopShooting();
     session.pauseMenu.show();
-    document.exitPointerLock();
   } else {
     session.pauseMenu.hide();
   }
@@ -120,7 +119,6 @@ export function quitToMenu() {
   gameState.meltingMarshmallows = [];
   gameState.objects = [];
   gameState.projectiles = [];
-  gameState.bubbles = [];
   gameState.currentWave = STARTING_WAVE;
   gameState.selectedWeaponForWave = null;
   gameState.marshmallowsSpawnedThisWave = 0;

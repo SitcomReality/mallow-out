@@ -9,7 +9,7 @@ import { onMarshmallowDefeated, session } from './manager.js';
 import { awardPollen } from './economy.js';
 import { getDamageMultiplier, getFireRateMultiplier } from './petals/petal-effects.js';
 import { getWeaponDamageBonus, applyCriticalMultiplier, rollCriticalHit } from './upgrades/weapon-modifiers.js';
-import { getBubbleDistanceAt, popBubble } from './bubble.js';
+
 import { 
   BASE_DAMAGE_CHUNK, 
   BASE_DAMAGE_HOLE, 
@@ -53,12 +53,7 @@ export function rebuildObjectList() {
     gameState.objects.push(...activeFX);
   }
   
-  // Add bubbles
-  for (const bubble of gameState.bubbles) {
-    gameState.objects.push(bubble.group);
-    gameState.objects.push(bubble.skin);
-    gameState.objects.push(bubble.voidObj);
-  }
+
 }
 
 export function getSceneDistanceAt(p) {
@@ -66,11 +61,7 @@ export function getSceneDistanceAt(p) {
   if (gameState.currentMarshmallow) {
     dist = Math.min(dist, getEnemyDistanceAt(gameState.currentMarshmallow, p));
   }
-  for (const bubble of gameState.bubbles) {
-    if (bubble.state !== 'popping') {
-      dist = Math.min(dist, getBubbleDistanceAt(bubble, p));
-    }
-  }
+
   return dist;
 }
 
@@ -124,8 +115,7 @@ export function shoot(particleSystem, bossHUD) {
       maxLifetime: 5.0,
     });
     
-    if (session.weaponModels) session.weaponModels.animateRecoil(0.4, 0.3, 0.1);
-    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
+
     player.recoilTime = 0;
     player.recoilPitchAmount = GLOBBER_RECOIL_PITCH;
     player.recoilYawAmount = (Math.random() * 0.04 - 0.02);
@@ -146,10 +136,8 @@ export function shoot(particleSystem, bossHUD) {
   // Determine visual endpoint for tracers/effects
   const effectEnd = result.hit ? result.point : origin.clone().add(direction.clone().multiplyScalar(60));
 
-  // Handle weapon firing visual feedback (recoil, muzzle flash, tracers) regardless of hit
+  // Handle weapon firing visual feedback (recoil, tracers) regardless of hit
   if (weapon === 0) {
-    if (session.weaponModels) session.weaponModels.animateRecoil(0.6, 0.4, 0.2);
-    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     if (session.tracerSystem) session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffffff);
     ws.skewerReady = false;
     player.recoilTime = 0;
@@ -159,8 +147,6 @@ export function shoot(particleSystem, bossHUD) {
     player.recoilRecoveryDuration = SKEWER_RECOIL_RECOVERY;
     player.recoilReturnOffset = (Math.random() * 0.2 - 0.1) * SKEWER_RECOIL_PITCH;
   } else if (weapon === 2) {
-    if (session.weaponModels) session.weaponModels.animateRecoil(0.5, 0.35, 0.15);
-    if (session.weaponModels) session.weaponModels.createMuzzleFlash();
     ws.spattererCooldown = 1.0;
     player.recoilTime = 0;
     player.recoilPitchAmount = SPATTERER_RECOIL_PITCH;
@@ -171,39 +157,12 @@ export function shoot(particleSystem, bossHUD) {
   }
 
   if (result.hit) {
-    let hitBubble = null;
     let hitMarshmallow = false;
     
     let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, result.point) : 1e10;
-    
-    let closestBubble = null;
-    let minBubbleDist = 1e10;
-    for (const bubble of gameState.bubbles) {
-      if (bubble.state !== 'popping') {
-        const d = getBubbleDistanceAt(bubble, result.point);
-        if (d < minBubbleDist) {
-          minBubbleDist = d;
-          closestBubble = bubble;
-        }
-      }
-    }
 
-    // Determine what was actually hit
-    if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
-      hitBubble = closestBubble;
-    } else if (distToMarshmallow < 0.1) {
+    if (distToMarshmallow < 0.1) {
       hitMarshmallow = true;
-    }
-
-    if (hitBubble) {
-      popBubble(hitBubble, result.point);
-      rebuildObjectList();
-      
-      // Floating text for bubble pop
-      if (session.floatingTextSystem) {
-        session.floatingTextSystem.createInfoText(result.point, "POP!", 'info');
-      }
-      return; // Stop processing, we hit a bubble
     }
 
     if (!hitMarshmallow || !gameState.currentMarshmallow) return;
@@ -289,10 +248,6 @@ export function releaseCleaver(particleSystem, bossHUD) {
   
   const result = castRay(origin, direction, getSceneDistanceAt);
   
-  // Visual effects (always trigger on release if charged)
-  if (session.weaponModels) session.weaponModels.animateRecoil(0.8, 0.5, 0.3);
-  if (session.weaponModels) session.weaponModels.createMuzzleFlash();
-
   player.recoilTime = 0;
   player.recoilPitchAmount = CLEAVER_RECOIL_PITCH;
   player.recoilYawAmount = (Math.random() * 0.1 - 0.05);
@@ -301,34 +256,12 @@ export function releaseCleaver(particleSystem, bossHUD) {
   player.recoilReturnOffset = 0;
 
   if (result.hit) {
-    let hitBubble = null;
     let hitMarshmallow = false;
     
     let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, result.point) : 1e10;
-    
-    let closestBubble = null;
-    let minBubbleDist = 1e10;
-    for (const bubble of gameState.bubbles) {
-      if (bubble.state !== 'popping') {
-        const d = getBubbleDistanceAt(bubble, result.point);
-        if (d < minBubbleDist) {
-          minBubbleDist = d;
-          closestBubble = bubble;
-        }
-      }
-    }
 
-    if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
-      hitBubble = closestBubble;
-    } else if (distToMarshmallow < 0.1) {
+    if (distToMarshmallow < 0.1) {
       hitMarshmallow = true;
-    }
-
-    if (hitBubble) {
-      popBubble(hitBubble, result.point);
-      rebuildObjectList();
-      if (session.floatingTextSystem) session.floatingTextSystem.createInfoText(result.point, "POP!", 'info');
-      return;
     }
 
     if (!hitMarshmallow || !gameState.currentMarshmallow) return;

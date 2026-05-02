@@ -1,9 +1,6 @@
 import * as THREE from 'three';
 
-export const worldState = {
-  time: 0.35,
-  timeSpeed: 0.01,
-};
+export const worldState = {};
 
 export const settings = {
   renderScale: 0.5,

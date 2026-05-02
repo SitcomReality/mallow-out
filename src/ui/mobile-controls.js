@@ -12,15 +12,12 @@ export function createMobileControls() {
   document.body.appendChild(container);
   
   container.innerHTML = `
-    <div id="joystickZone" class="joystick-zone"></div>
     <div class="mobile-actions">
       <button id="mobileShootBtn" class="mobile-shoot-btn wonky" data-fill="#dc143c" data-stroke="#000000" data-stroke-width="6">
         <span class="shoot-icon">🎯</span>
       </button>
     </div>
   `;
-
-  let manager = null;
   const shootBtn = container.querySelector('#mobileShootBtn');
 
   // Shooting logic for mobile
@@ -39,31 +36,6 @@ export function createMobileControls() {
     }
   });
 
-  function initJoystick() {
-    if (manager) manager.destroy();
-    
-    manager = nipplejs.create({
-      zone: document.getElementById('joystickZone'),
-      mode: 'static',
-      position: { left: '80px', bottom: '80px' },
-      color: 'white',
-      size: 120
-    });
-
-    manager.on('move', (evt, data) => {
-      if (!data.vector) return;
-      // Map joystick to look delta
-      gameState.joystickDelta = {
-        x: data.vector.x * data.force * 1.5,
-        y: data.vector.y * data.force * 1.5
-      };
-    });
-
-    manager.on('end', () => {
-      gameState.joystickDelta = null;
-    });
-  }
-
   return {
     show() {
       if (!isMobile) {
@@ -71,11 +43,9 @@ export function createMobileControls() {
         return;
       }
       container.style.display = 'block';
-      initJoystick();
     },
     hide() {
       container.style.display = 'none';
-      if (manager) manager.destroy();
     }
   };
 }

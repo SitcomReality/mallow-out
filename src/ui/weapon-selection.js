@@ -37,12 +37,6 @@ export function createWeaponSelection(onSelect) {
         const weaponIndex = parseInt(card.dataset.weapon, 10);
         hide();
         onSelect(weaponIndex);
-        
-        // Try to request pointer lock since this is a click event
-        const gameContainer = document.getElementById('gameContainer');
-        if (gameContainer && !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            gameContainer.requestPointerLock();
-        }
       });
     });
   }

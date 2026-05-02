@@ -46,5 +46,4 @@ export function resetWaveStats() {
   gameState.currentWaveStats.pollenEarned = 0;
   gameState.currentWaveStats.caramelEarned = 0;
   gameState.currentWaveStats.damageDealt = 0;
-  gameState.currentWaveStats.bubblesPopped = 0;
 }

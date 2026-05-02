@@ -23,7 +23,6 @@ export function updateWaveLogic(delta) {
     
     if (session.waveSummary) {
       session.waveSummary.show();
-      document.exitPointerLock();
     }
   }
   

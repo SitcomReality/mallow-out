@@ -6,7 +6,6 @@ import { updateSpawningMarshmallows } from './spawning.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { updatePetalEffects } from './petals/petal-effects.js';
-import { updateBubbles } from './bubble.js';
 import { updateFX } from './fx.js';
 import { updateDynamicResolution } from './render-logic.js';
 import { updateWaveLogic } from './wave-logic.js';
@@ -49,7 +48,6 @@ export function runGameLoop(time) {
     updateMeltingEnemies(time * 0.001);
     updateRepairs(time * 0.001, delta);
     updatePetalEffects(time * 0.001);
-    updateBubbles(delta, time * 0.001);
     updateFX(time * 0.001);
     rebuildObjectList();
     
@@ -65,9 +63,7 @@ export function runGameLoop(time) {
       }
     }
     
-    if (session.weaponModels) {
-      session.weaponModels.update();
-    }
+
   }
   
   // 5. Rendering

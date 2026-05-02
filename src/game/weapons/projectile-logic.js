@@ -1,7 +1,7 @@
 import { gameState } from '../state.js';
 import { getSceneDistanceAt, rebuildObjectList } from '../combat.js';
 import { getEnemyDistanceAt } from '../shooting.js';
-import { getBubbleDistanceAt, popBubble } from '../bubble.js';
+
 import { addChunkToEnemy } from '../enemy.js';
 import { damageMarshmallow } from '../marshmallow.js';
 import { checkMarshmallowPop } from '../marshmallow-pop.js';
@@ -22,40 +22,19 @@ export function updateProjectiles(delta, time) {
     proj.position.z += proj.velocity.z * delta;
     proj.lifetime -= delta;
     
-    // Check collision with scene (marshmallow + bubbles)
+    // Check collision with scene
     const dist = getSceneDistanceAt(proj.position);
     
     if (dist < proj.size) {
-      let hitBubble = null;
       let hitMarshmallow = false;
       
       let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, proj.position) : 1e10;
       
-      let closestBubble = null;
-      let minBubbleDist = 1e10;
-      for (const bubble of gameState.bubbles) {
-        if (bubble.state !== 'popping') {
-          const d = getBubbleDistanceAt(bubble, proj.position);
-          if (d < minBubbleDist) {
-            minBubbleDist = d;
-            closestBubble = bubble;
-          }
-        }
-      }
-
-      if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
-        hitBubble = closestBubble;
-      } else if (distToMarshmallow < proj.size + 0.1) {
+      if (distToMarshmallow < proj.size + 0.1) {
         hitMarshmallow = true;
       }
 
-      if (hitBubble) {
-        popBubble(hitBubble, proj.position);
-        rebuildObjectList();
-        if (session.floatingTextSystem) session.floatingTextSystem.createInfoText(proj.position, "POP!", 'info');
-        toRemove.push(proj);
-        continue; 
-      } else if (hitMarshmallow && gameState.currentMarshmallow) {
+      if (hitMarshmallow && gameState.currentMarshmallow) {
         // Hit marshmallow!
         const chunk = addChunkToEnemy(gameState.currentMarshmallow, proj.position);
         session.particleSystem.createBloodSplatter(proj.position, chunk.repairData.normal);

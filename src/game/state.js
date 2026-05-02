@@ -27,7 +27,6 @@ export const gameState = {
   waveTimer: new WaveTimer(),
   marshmallowsSpawnedThisWave: 0,
   marshmallowsDestroyedThisWave: 0,
-  bubbles: [],
   currencies: {
     pollen: 0,
     caramel: 0,
@@ -36,7 +35,6 @@ export const gameState = {
     pollenEarned: 0,
     caramelEarned: 0,
     damageDealt: 0,
-    bubblesPopped: 0,
   },
   weaponStates: {
     skewerReady: true,

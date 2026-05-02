@@ -23,7 +23,6 @@ import { offerWeaponChoices, selectWeapon } from './src/game/weapon-selection.js
 import { runGameLoop } from './src/game/loop.js';
 import { shoot, releaseCleaver, stopShooting } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
-import { WeaponModels } from './src/game/weapons/weapon-models.js';
 import { createWeaponStatus } from './src/ui/weapon-status.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
 import { applyWonkyUI } from './src/ui/wonky.js';
@@ -76,7 +75,7 @@ function startGame() {
   session.isPaused = false;
   
   const container = document.getElementById('gameContainer');
-  const { render, tracerSystem, projectileRenderer, particleCamera, particleScene, viewmodelScene } = createRenderer(container);
+  const { render, tracerSystem, projectileRenderer, particleCamera, particleScene } = createRenderer(container);
   
   session.renderFn = render;
   session.particleSystem = new ParticleSystem();
@@ -119,7 +118,6 @@ function startGame() {
   session.weaponSelection = createWeaponSelection((weaponIndex) => {
     selectWeapon(weaponIndex);
     if (session.hud) session.hud.setActiveWeapon(weaponIndex);
-    if (session.weaponModels) session.weaponModels.setWeapon(weaponIndex);
     startWave();
   });
   
@@ -133,9 +131,6 @@ function startGame() {
   
   // Initialize floating text renderer (needs camera for projection)
   session.floatingTextRenderer = new FloatingTextRenderer(particleCamera);
-  
-  // Initialize weapon models (needs camera to attach to, and a scene to live in)
-  session.weaponModels = new WeaponModels(viewmodelScene, particleCamera);
   
   session.mobileControls = createMobileControls();
   session.mobileControls.show();
@@ -154,7 +149,7 @@ function startGame() {
   let mouseDown = false;
   
   container.addEventListener('mousedown', () => {
-    if (document.pointerLockElement === container && !session.isPaused) {
+    if (!session.isPaused) {
       mouseDown = true;
       shoot(session.particleSystem, session.bossHUD);
     }
