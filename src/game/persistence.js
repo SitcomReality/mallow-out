@@ -1,5 +1,4 @@
 import { gameState } from './state.js';
-import { STARTING_WAVE } from './wave-constants.js';
 
 const SAVE_KEY = 'mallow_out_savegame';
 
@@ -13,7 +12,7 @@ export function saveGame() {
   
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
-    console.log('[Persistence] Game saved successfully at Wave', gameState.currentWave);
+    console.log('[Persistence] Game saved successfully');
   } catch (e) {
     console.error('[Persistence] Failed to save game:', e);
   }
@@ -35,7 +34,7 @@ export function loadGame() {
     gameState.upgrades = data.upgrades || {};
     gameState.equippedPetals = data.equippedPetals || [null, null, null, null, null];
     
-    console.log('[Persistence] Game loaded successfully from Wave', gameState.currentWave);
+    console.log('[Persistence] Game loaded successfully');
     return true;
   } catch (e) {
     console.error('[Persistence] Failed to load game:', e);

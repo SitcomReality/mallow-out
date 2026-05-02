@@ -71,14 +71,13 @@ export function quitToMenu() {
   if (session.pauseMenu) session.pauseMenu.hide();
   if (session.mobileControls) session.mobileControls.hide();
   
+  // Reset gameplay state (remove active entities, particles, and current selection)
   gameState.currentMarshmallow = null;
   gameState.meltingMarshmallows = [];
   gameState.objects = [];
   gameState.projectiles = [];
-  gameState.currentWave = STARTING_WAVE;
-  gameState.marshmallowsSpawnedThisWave = 0;
-  gameState.marshmallowsDestroyedThisWave = 0;
-  gameState.waveTimer.stop();
+  
+  // Reset weapon state and upgrades to sane defaults for a fresh menu state
   gameState.weaponStates = {
     skewerCooldown: 0
   };
