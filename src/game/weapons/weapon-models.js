@@ -42,7 +42,6 @@ export class WeaponModels {
       case 1: return 0x9b59b6; // Globber - Purple
       case 2: return 0xe67e22; // Spatterer - Bronze
       case 3: return 0x7f8c8d; // Cleaver - Iron
-      case 4: return 0xff4d00; // Melter - Hot Core
       default: return 0xffffff;
     }
   }
@@ -61,10 +60,6 @@ export class WeaponModels {
         return cone;
       case 3: // Cleaver - box/axe
         return new THREE.BoxGeometry(1.2, 1.5, 0.3);
-      case 4: // Melter - glowing cylinder
-        const melter = new THREE.CylinderGeometry(0.2, 0.2, 2, 8);
-        melter.rotateX(Math.PI / 2);
-        return melter;
       default:
         return new THREE.BoxGeometry(0.5, 0.5, 0.5);
     }

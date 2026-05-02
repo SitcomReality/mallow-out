@@ -2,7 +2,7 @@ import { gameState } from './state.js';
 import { stopShooting } from './combat.js';
 
 export function offerWeaponChoices() {
-  const allIndices = [0, 1, 2, 3, 4];
+  const allIndices = [0, 1, 2, 3];
   // Fisher-Yates shuffle
   for (let i = allIndices.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -23,9 +23,4 @@ export function selectWeapon(weaponIndex) {
   ws.spattererCooldown = 0;
   ws.cleaverCharge = 0;
   ws.cleaverCharging = false;
-  ws.melterHeat = 0;
-  ws.melterOverheated = false;
-  ws.lastMelterFire = 0;
-  ws.lastMelterTracer = 0;
-  ws.lastMelterDamage = 0;
 }

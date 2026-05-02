@@ -60,8 +60,6 @@ export function runGameLoop(time) {
       const ws = gameState.weaponStates;
       if (gameState.currentWeapon === 3 && (ws.cleaverCharging || ws.cleaverCharge > 0)) {
         session.weaponStatus.updateCleaverCharge(ws.cleaverCharge, CLEAVER_CHARGE_TIME);
-      } else if (gameState.currentWeapon === 4 && (ws.melterHeat > 0 || ws.melterOverheated)) {
-        session.weaponStatus.updateMelterHeat(ws.melterHeat, MELTER_MAX_HEAT, ws.melterOverheated);
       } else {
         session.weaponStatus.hide();
       }

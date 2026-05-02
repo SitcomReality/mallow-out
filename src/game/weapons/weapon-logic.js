@@ -77,16 +77,5 @@ function updateCooldowns(delta) {
     ws.cleaverCharge = Math.max(0, ws.cleaverCharge - delta);
   }
   
-  // Melter heat management
-  if (ws.melterOverheated) {
-    ws.melterHeat = Math.max(0, ws.melterHeat - (MELTER_COOLDOWN_PER_SECOND * 0.5) * delta);
-    if (ws.melterHeat <= 0) {
-      ws.melterOverheated = false;
-    }
-  } else {
-    const now = performance.now();
-    if (gameState.currentWeapon !== 4 || (now - (ws.lastMelterFire || 0) > 100)) {
-      ws.melterHeat = Math.max(0, ws.melterHeat - MELTER_COOLDOWN_PER_SECOND * delta);
-    }
-  }
+
 }

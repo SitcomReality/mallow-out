@@ -59,45 +59,7 @@ export function createWeaponStatus() {
     `;
   }
 
-  function updateMelterHeat(heat, maxHeat, overheated) {
-    const percent = (heat / maxHeat) * 100;
-    
-    let color = '#ffb703'; // Yellow
-    let animation = 'none';
-    
-    if (overheated) {
-      color = '#ff4d6d'; // Red
-      animation = 'mallow-shake 0.1s infinite';
-    } else if (percent > 85) {
-      color = '#ff4d6d'; // Red
-      animation = 'mallow-shake 0.2s infinite';
-    } else if (percent > 60) {
-      color = '#fb8500'; // Orange
-    }
 
-    container.innerHTML = `
-      <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" style="
-        padding: 8px 20px;
-        min-width: 200px;
-        animation: ${animation};
-      ">
-        <div style="text-align: center; color: #000000; font-size: 8px; font-weight: 400; margin-bottom: 4px;">
-          ${overheated ? 'OVERHEATED!' : 'HEAT'}
-        </div>
-        <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" style="
-          height: 12px;
-          overflow: hidden;
-        ">
-          <div style="
-            background: ${color};
-            height: 100%;
-            width: ${percent}%;
-            transition: width 0.1s;
-          "></div>
-        </div>
-      </div>
-    `;
-  }
 
   function hide() {
     container.innerHTML = '';

@@ -34,8 +34,6 @@ import {
   GLOBBER_FIRE_COOLDOWN,
   SPATTERER_MAX_RANGE,
   CLEAVER_CHARGE_TIME,
-  MELTER_HEAT_PER_SECOND,
-  MELTER_MAX_HEAT,
 } from './weapons/weapon-stats.js';
 
 /**
@@ -90,72 +88,6 @@ function setPupilLook(marshmallow, hitPoint) {
 }
 
 /**
- * Internal helper for melter damage ticks
- */
-function handleMelterHit(result, visualOrigin, direction, particleSystem, bossHUD) {
-  if (result.hit) {
-    let hitBubble = null;
-    let hitMarshmallow = false;
-    
-    let distToMarshmallow = gameState.currentMarshmallow ? getEnemyDistanceAt(gameState.currentMarshmallow, result.point) : 1e10;
-    
-    let closestBubble = null;
-    let minBubbleDist = 1e10;
-    for (const bubble of gameState.bubbles) {
-      if (bubble.state !== 'popping') {
-        const d = getBubbleDistanceAt(bubble, result.point);
-        if (d < minBubbleDist) {
-          minBubbleDist = d;
-          closestBubble = bubble;
-        }
-      }
-    }
-
-    if (closestBubble && minBubbleDist < distToMarshmallow + 0.1) {
-      hitBubble = closestBubble;
-    } else if (distToMarshmallow < 0.1) {
-      hitMarshmallow = true;
-    }
-
-    if (hitBubble) {
-      popBubble(hitBubble, result.point);
-      rebuildObjectList();
-      if (session.floatingTextSystem) session.floatingTextSystem.createInfoText(result.point, "POP!", 'info');
-      return;
-    }
-
-    if (!hitMarshmallow || !gameState.currentMarshmallow) return;
-
-    let damage = 0;
-    const isCritical = rollCriticalHit();
-    setPupilLook(gameState.currentMarshmallow, result.point);
-    
-    addLaserDamage(gameState.currentMarshmallow, result.point);
-    damage = (BASE_DAMAGE_LASER_PER_TICK + getWeaponDamageBonus() * 0.2) * getDamageMultiplier();
-    if (isCritical) damage *= 2;
-    
-    if (damage > 0) {
-      awardPollen(damage);
-      if (session.floatingTextSystem) session.floatingTextSystem.createDamageText(result.point, damage, isCritical);
-      checkMarshmallowPop(gameState.currentMarshmallow, particleSystem);
-      const defeated = damageMarshmallow(gameState.currentMarshmallow, damage, particleSystem);
-      if (bossHUD) bossHUD.update(gameState.currentMarshmallow);
-      
-      if (defeated) {
-        if (gameState.meltingMarshmallows.length >= 2) gameState.meltingMarshmallows.shift();
-        const deadMarshmallow = gameState.currentMarshmallow;
-        deadMarshmallow.meltStartTime = performance.now() * 0.001;
-        gameState.meltingMarshmallows.push(deadMarshmallow);
-        gameState.currentMarshmallow = null;
-        if (bossHUD) bossHUD.hide();
-        onMarshmallowDefeated();
-      }
-    }
-    rebuildObjectList();
-  }
-}
-
-/**
  * Handles weapon firing logic, raycasting, and damaging enemies.
  */
 export function shoot(particleSystem, bossHUD) {
@@ -167,7 +99,6 @@ export function shoot(particleSystem, bossHUD) {
   if (weapon === 0 && !ws.skewerReady) return;
   if (weapon === 1 && ws.globberCooldown > 0) return;
   if (weapon === 2 && ws.spattererCooldown > 0) return;
-  if (weapon === 4 && ws.melterOverheated) return;
   
   const origin = player.position.clone();
   const direction = new THREE.Vector3(
@@ -212,34 +143,6 @@ export function shoot(particleSystem, bossHUD) {
     return; // Continue charging
   }
   
-  let shouldDamageMelter = false;
-
-  if (weapon === 4) {
-    const now = performance.now();
-    ws.lastMelterFire = now;
-    ws.melterHeat += MELTER_HEAT_PER_SECOND * (1/30);
-    if (ws.melterHeat >= MELTER_MAX_HEAT) {
-      ws.melterOverheated = true;
-      stopShooting();
-      return;
-    }
-
-    // Unthrottled visual update for the melter beam
-    const result = castRay(origin, direction, getSceneDistanceAt);
-    const effectEnd = result.hit ? result.point : origin.clone().add(direction.clone().multiplyScalar(60));
-    if (session.tracerSystem) {
-      session.tracerSystem.setPersistentBeam('melter', visualOrigin, effectEnd, 0xff6600);
-    }
-    
-    shouldDamageMelter = now - (ws.lastMelterDamage || 0) > 200;
-    if (!shouldDamageMelter) return;
-    ws.lastMelterDamage = now;
-
-    // Continue to hit logic if it's damage time
-    handleMelterHit(result, visualOrigin, direction, particleSystem, bossHUD);
-    return;
-  }
-
   const result = castRay(origin, direction, getSceneDistanceAt);
   
   // Determine visual endpoint for tracers/effects
@@ -305,10 +208,6 @@ export function shoot(particleSystem, bossHUD) {
       return; // Stop processing, we hit a bubble
     }
 
-    if (weapon === 4 && !shouldDamageMelter) {
-        return; // Ray hit, but it's not time for a damage tick
-    }
-
     if (!hitMarshmallow || !gameState.currentMarshmallow) return;
 
     let damage = 0;
@@ -367,9 +266,6 @@ export function shoot(particleSystem, bossHUD) {
 }
 
 export function stopShooting() {
-  if (session.tracerSystem) {
-    session.tracerSystem.removePersistentBeam('melter');
-  }
 }
 
 export function releaseCleaver(particleSystem, bossHUD) {

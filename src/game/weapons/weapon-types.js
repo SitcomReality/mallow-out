@@ -26,12 +26,5 @@ export const WEAPONS = [
     icon: '🪓',
     description: 'Chops off massive chunks.',
     drawback: 'Requires charging before release.'
-  },
-  {
-    id: 4,
-    name: 'Melter',
-    icon: '🔥',
-    description: 'Continuous beam that melts through marshmallow.',
-    drawback: 'Overheats quickly with sustained use.'
   }
 ];

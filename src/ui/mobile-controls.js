@@ -29,28 +29,15 @@ export function createMobileControls() {
     if (!session.isPlaying || session.isPaused) return;
     
     shoot(session.particleSystem, session.bossHUD);
-    
-    // For automatic weapons like the melter, we can check if it's held
-    if (gameState.currentWeapon === 4) {
-       shootBtn.isPressed = true;
-    }
   });
 
   shootBtn.addEventListener('pointerup', (e) => {
     e.preventDefault();
-    shootBtn.isPressed = false;
     stopShooting();
     if (gameState.currentWeapon === 3 && gameState.weaponStates.cleaverCharging) {
       releaseCleaver(session.particleSystem, session.bossHUD);
     }
   });
-
-  // Continuous fire for Melter on mobile
-  const fireInterval = setInterval(() => {
-    if (shootBtn.isPressed && gameState.currentWeapon === 4 && session.isPlaying && !session.isPaused) {
-      shoot(session.particleSystem, session.bossHUD);
-    }
-  }, 1000/30);
 
   function initJoystick() {
     if (manager) manager.destroy();

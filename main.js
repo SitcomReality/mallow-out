@@ -168,15 +168,7 @@ function startGame() {
     }
   });
   
-  // Continuous firing for melter
-  setInterval(() => {
-    if (session.isPlaying && !session.isPaused && mouseDown && document.pointerLockElement === container) {
-      if (gameState.currentWeapon === 4) {
-        shoot(session.particleSystem, session.bossHUD);
-      }
-    }
-  }, 1000/30); // 30 FPS for continuous beam
-  
+
   // Begin the adventure
   offerWeaponChoices();
   session.weaponSelection.show();
