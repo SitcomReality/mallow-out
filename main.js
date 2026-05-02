@@ -30,6 +30,7 @@ const mainBtn = document.getElementById('mainBtn');
 const resetBtn = document.getElementById('resetGame');
 
 function updateMenuUI() {
+  mainBtn.disabled = false;
   if (hasSaveGame()) {
     mainBtn.textContent = 'Continue';
     resetBtn.style.display = 'block';
@@ -56,9 +57,15 @@ resetBtn.addEventListener('click', () => {
 
 function enterGame() {
   document.getElementById('menu').style.display = 'none';
-  document.getElementById('gameContainer').style.display = 'block';
-  document.getElementById('crosshair').style.display = 'block';
-  startGame();
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  loadingOverlay.style.display = 'flex';
+  
+  // Allow UI to render the loading screen before blocking the thread with shader compilation
+  setTimeout(() => {
+    document.getElementById('gameContainer').style.display = 'block';
+    document.getElementById('crosshair').style.display = 'block';
+    startGame();
+  }, 50);
 }
 
 updateMenuUI();
@@ -148,5 +155,13 @@ function startGame() {
 
   // Begin the adventure
   startWave();
+  
+  // Force a synchronous render to compile shaders
+  if (session.renderFn) {
+    session.renderFn(performance.now(), session.particleSystem, session.floatingTextSystem);
+  }
+  
+  document.getElementById('loadingOverlay').style.display = 'none';
+
   requestAnimationFrame(runGameLoop);
 }
