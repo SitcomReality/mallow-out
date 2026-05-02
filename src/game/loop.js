@@ -10,7 +10,6 @@ import { updateDynamicResolution } from './render-logic.js';
 
 import { updateWeaponSystems } from './weapons/weapon-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
-import { CLEAVER_CHARGE_TIME } from './weapons/weapon-stats.js';
 
 let lastTime = 0;
 

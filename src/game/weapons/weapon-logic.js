@@ -1,7 +1,4 @@
 import { gameState } from '../state.js';
-import { 
-  CLEAVER_CHARGE_TIME
-} from './weapon-stats.js';
 
 /**
  * Orchestrates all active weapon systems (cooldowns).
