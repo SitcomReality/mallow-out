@@ -31,6 +31,8 @@ export const gameState = {
 
   // Dynamic cost for marshmallow treats (starts at 1 and increases by 1 each purchase)
   marshmallowTreatCost: 1,
+  // Persisted player marshmallow identity (keeps name across respawns / savegames)
+  playerMarshmallowName: null,
 
   // Weapon state used by shooting/combat logic (prevents undefined accesses)
   weaponStates: {

@@ -5,6 +5,7 @@ import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './fa
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
 import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
+import { gameState } from './state.js';
 
 let nextId = 1;
 
@@ -61,6 +62,13 @@ export function createMarshmallow(totalDestroyed) {
     expression: EXPRESSION_DEFAULT,
   };
   
+  // Determine name: reuse persisted player name if present, otherwise generate and persist it
+  let mName = gameState.playerMarshmallowName;
+  if (!mName) {
+    mName = generateMarshmallowName();
+    gameState.playerMarshmallowName = mName;
+  }
+  
   const entity = {
     marshmallow,
     holes: [],
@@ -70,7 +78,7 @@ export function createMarshmallow(totalDestroyed) {
     totalIndex: totalDestroyed,
     id: marshmallowId,
     type: type,
-    name: generateMarshmallowName(),
+    name: mName,
     lastHitTime: performance.now() * 0.001,
     isDying: false,
     movement: {
