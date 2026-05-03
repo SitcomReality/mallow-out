@@ -8,6 +8,7 @@ import {
   SPAWN_NOISE_START,
   SPAWN_NOISE_END
 } from './spawn-constants.js';
+import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
 
 function lerp(a, b, t) {
   return a + (b - a) * t;
@@ -40,12 +41,32 @@ export function updateSpawningMarshmallows(currentTime) {
     enemy.marshmallow.noiseOffset = { x: 0, y: 0, z: 0 };
   }
 
-  // Once animation is complete, we can clear the start time to stop processing
+  // Once animation is complete, reconcile movement so there is no frame-jump
   if (t >= 1.0) {
-    delete enemy.spawnStartTime;
+    // Capture the final interpolated world Y before we snap any internal bases
+    const finalY = enemy.marshmallow.position.y;
+
     // Reset to exact intended values
     enemy.marshmallow.position.y = SPAWN_END_Y;
     enemy.marshmallow.blendRadius = SPAWN_BLEND_END;
     enemy.marshmallow.noiseAmount = SPAWN_NOISE_END;
+
+    // If this entity uses the idle movement system, adjust its baseY and bobPhase
+    // so the transition from the spawned position into normal bobbing is continuous.
+    if (enemy.movement) {
+      // Preserve amplitude if present, otherwise fallback to base constant
+      const amp = enemy.movement.bobAmplitude || BASE_BOB_AMPLITUDE;
+      enemy.movement.baseY = SPAWN_END_Y;
+
+      // Compute the current offset that the bob should represent and clamp safely into [-1,1]
+      const currentOffset = finalY - enemy.movement.baseY;
+      const ratio = Math.max(-1, Math.min(1, currentOffset / (amp === 0 ? 1e-6 : amp)));
+
+      // Set bobPhase so Math.sin(bobPhase)*amp equals the current offset.
+      enemy.movement.bobPhase = Math.asin(ratio);
+    }
+
+    // Clear the start time to stop processing
+    delete enemy.spawnStartTime;
   }
 }
