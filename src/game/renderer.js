@@ -60,12 +60,9 @@ export function createRenderer(container) {
 
     updateUniforms(uniforms, time);
     
-    // Sync Three.js scene fog with raymarching environment fog to ensure projectiles and tracers fade out
-    if (!particleScene.fog) {
-      particleScene.fog = new THREE.FogExp2(uniforms.uFogColor.value, uniforms.uFogDensity.value);
-    } else {
-      particleScene.fog.color.copy(uniforms.uFogColor.value);
-      particleScene.fog.density = uniforms.uFogDensity.value;
+    // Ensure particle scene doesn't use fog for a cleaner, consistent look
+    if (particleScene.fog) {
+      particleScene.fog = null;
     }
 
     // Sync near/far uniforms for depth buffer integration

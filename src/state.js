@@ -3,11 +3,11 @@ import * as THREE from 'three';
 export const worldState = {};
 
 export const settings = {
-  renderScale: 0.5,
+  renderScale: 1.0,
   targetFPS: 60,
   dynamicRes: true,
-  minScale: 0.25,
-  maxScale: 1.0,
+  minScale: 0.5,
+  maxScale: 2.0,
   maxSteps: 100,
   drawDistance: 150,
   flatLighting: false,

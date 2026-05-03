@@ -105,14 +105,6 @@ void main() {
       col = skyBase;
     }
   }
-  // Apply fog based on distance t relative to uDrawDist
-  // We use a combination of exponential and distance-clamped fog for a thick horizon
-  float fogExp = 1.0 - exp(-t * env.fogDensity);
-  float fogDist = clamp((t - uDrawDist * 0.5) / (uDrawDist * 0.5), 0.0, 1.0);
-  float fogAmount = max(fogExp, pow(fogDist, 2.0));
-  
-  col = mix(col, env.fogColor, fogAmount);
-
   // Depth buffer integration: Write Perspective-correct depth
   float viewZ = t * dot(rd, uCamFwd);
   float ndcDepth = ((uFar + uNear) / (uFar - uNear)) + (1.0 / viewZ) * ((-2.0 * uFar * uNear) / (uFar - uNear));
@@ -130,8 +122,9 @@ void main() {
     }
   }
 
-  col = col / (col + 0.5);
-  col = pow(col, vec3(0.85));
+  // Improved Tonemapping & Contrast
+  col = col / (col + 0.8);
+  col = pow(col, vec3(1.1));
   gl_FragColor = vec4(col, 1.0);
 }
 `;

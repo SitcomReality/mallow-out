@@ -51,8 +51,8 @@ export class PostProcessor {
       fragmentShader: postFragmentShader,
       uniforms: {
         tDiffuse: { value: this.renderTarget.texture },
-        uVignetteStrength: { value: 0.3 },
-        uBrightness: { value: 1.05 },
+        uVignetteStrength: { value: 0.2 },
+        uBrightness: { value: 1.1 },
       },
     });
     
