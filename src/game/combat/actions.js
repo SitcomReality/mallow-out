@@ -6,7 +6,7 @@ import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
 import { rollCriticalHit, getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
 import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
-import { getSceneDistanceAt, getSceneDistanceIgnoreMarshmallows, rebuildObjectList } from './scene.js';
+import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
 import { healMarshmallow } from '../marshmallow.js';
 
@@ -44,56 +44,35 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
   if (result.hit) {
     const hitMarshmallow = gameState.currentMarshmallow && getEnemyDistanceAt(gameState.currentMarshmallow, result.point) < 0.1;
     
+    // Always check for a floor hit (the marsh) to support "piercing" through the marshmallow
+    const floorResult = castRay(origin, direction, (p) => {
+      const dx = Math.sqrt(p.x * p.x + p.z * p.z) - 5.5;
+      const dy = Math.abs(p.y + 0.1) - 0.1;
+      return Math.min(Math.max(dx, dy), 0.0) + Math.sqrt(Math.max(dx, 0) ** 2 + Math.max(dy, 0) ** 2);
+    });
+
+    if (floorResult.hit) {
+      // Floor hit logic - execute regardless of whether a marshmallow was also hit
+      const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
+      gameState.currencies.marsh += marshReward;
+      
+      if (usedAmmo === 'treat') {
+        import('../manager.js').then(m => m.spawnNextMarshmallowAt(floorResult.point));
+      }
+
+      if (session.floatingTextSystem) {
+        session.floatingTextSystem.createDamageText(floorResult.point, marshReward, false);
+      }
+      createRippleFX(floorResult.point);
+      particleSystem.createFloorSplash(floorResult.point);
+    }
+
     if (!hitMarshmallow) {
-      // Floor hit - award marsh currency
-      const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
-      gameState.currencies.marsh += marshReward;
-      
-      if (usedAmmo === 'treat') {
-        import('../manager.js').then(m => m.spawnNextMarshmallowAt(result.point));
-      }
-
-      if (session.floatingTextSystem) {
-        session.floatingTextSystem.createDamageText(result.point, marshReward, false);
-      }
-      createRippleFX(result.point);
-      particleSystem.createFloorSplash(result.point);
-      rebuildObjectList();
-      return;
-    }
-    
-    // If the shot hit a marshmallow, check whether the same ray would have hit the floor if marshmallows weren't blocking.
-    // If so, treat the shot as a floor impact (piercing through the marshmallow).
-    let piercedToFloor = false;
-    try {
-      const behindResult = castRay(origin, direction, getSceneDistanceIgnoreMarshmallows);
-      // Consider it piercing if the "floor-only" ray hits and the hit distance is greater than the marshmallow hit distance (i.e., behind)
-      if (behindResult.hit && behindResult.distance > result.distance + 0.01) {
-        piercedToFloor = true;
-      }
-    } catch (e) {
-      // If the ignore function fails for any reason, do not change behaviour.
-      piercedToFloor = false;
-    }
-    
-    if (piercedToFloor) {
-      // Treat like floor hit: award marsh, ripple, splash. Consume treat ammo if used.
-      const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
-      gameState.currencies.marsh += marshReward;
-      
-      if (usedAmmo === 'treat') {
-        import('../manager.js').then(m => m.spawnNextMarshmallowAt(behindResult.point));
-      }
-
-      if (session.floatingTextSystem) {
-        session.floatingTextSystem.createDamageText(behindResult.point, marshReward, false);
-      }
-      createRippleFX(behindResult.point);
-      particleSystem.createFloorSplash(behindResult.point);
       rebuildObjectList();
       return;
     }
 
+    // Marshmallow hit logic
     const isCritical = rollCriticalHit();
     const baseHeal = 3.0;
     const healBonus = getUpgradeEffect('mallow_heal', gameState.upgrades.mallow_heal || 0);

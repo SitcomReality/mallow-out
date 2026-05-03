@@ -51,29 +51,3 @@ export function getSceneDistanceAt(p) {
 
   return dist;
 }
-
-/**
- * A variant of the scene distance function that ignores active marshmallows and only considers the world (floor + active FX).
- * This is used to detect whether a shot that hit a marshmallow would have reached the floor behind it.
- */
-export function getSceneDistanceIgnoreMarshmallows(p) {
-  let dist = 1e10;
-
-  // Floor distance only (matching shader floor)
-  const floorDist = sdCylinder({ x: p.x, y: p.y + 0.1, z: p.z }, 5.5, 0.1);
-  dist = Math.min(dist, floorDist);
-
-  // Include active visual FX (they may be important for visual collisions)
-  if (activeFX && activeFX.length > 0) {
-    for (const fx of activeFX) {
-      // Use same getEnemyDistanceAt for FX objects shaped like enemies; if they don't match signature, skip safely
-      try {
-        dist = Math.min(dist, getEnemyDistanceAt(fx, p));
-      } catch (e) {
-        // ignore incompatible FX items
-      }
-    }
-  }
-
-  return dist;
-}
