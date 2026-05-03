@@ -63,10 +63,51 @@ export function createNotificationSystem() {
     const existing = notifications.find(n => n.id === id);
     
     if (existing) {
+      // Update aggregated data without re-triggering full arrival animation
       existing.value += value;
       existing.count += 1;
       existing.timer = NOTIFICATION_DURATION;
       existing.leaving = false;
+
+      // Update the existing DOM element in-place to avoid re-running slide-in.
+      const el = document.getElementById('notif-' + existing.internalId);
+      if (el) {
+        // Update multiplier badge and body text
+        const mult = el.querySelector('.notification-multiplier');
+        if (existing.count > 1) {
+          if (mult) {
+            mult.textContent = `x${existing.count}`;
+          } else {
+            const header = el.querySelector('.notification-header');
+            if (header) {
+              const m = document.createElement('div');
+              m.className = 'notification-multiplier';
+              m.textContent = `x${existing.count}`;
+              header.insertAdjacentElement('beforeend', m);
+            }
+          }
+        } else if (mult) {
+          mult.remove();
+        }
+        const body = el.querySelector('.notification-body');
+        if (body) {
+          body.innerHTML = existing.text.replace('{v}', Math.floor(existing.value));
+        }
+
+        // Brief pulsate/flash to indicate stacking (no slide-in)
+        const content = el.querySelector('.notification-content');
+        if (content) {
+          content.classList.remove('pulsate');
+          // force reflow to restart animation
+          void content.offsetWidth;
+          content.classList.add('pulsate');
+          // remove pulsate class after animation completes
+          setTimeout(() => content.classList.remove('pulsate'), 600);
+        }
+      }
+
+      // No need to fully re-render; updated DOM handled above.
+      return;
     } else {
       notifications.push({
         internalId: Math.random().toString(36).substr(2, 9),

@@ -61,6 +61,17 @@
   transform: rotate(5deg);
 }
 
+/* Subtle pulsate used when an existing notification stacks (avoids re-running slide-in) */
+@keyframes notifPulsate {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); filter: brightness(1); }
+  40% { transform: scale(1.05); box-shadow: 0 6px 12px rgba(0,0,0,0.08); filter: brightness(1.08); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); filter: brightness(1); }
+}
+
+.notification-content.pulsate {
+  animation: notifPulsate 0.6s ease-out;
+}
+
 .notification-body {
   font-size: 9px;
   color: #333333;
