@@ -24,8 +24,10 @@ function generateMarshmallowName() {
  * Creates the marshmallow pet.
  */
 export function createMarshmallow(totalDestroyed) {
-  const angle = Math.random() * Math.PI * 2;
-  const distance = Math.random() * MARSHMALLOW_SPAWN_RADIUS;
+  // Only spawn on the far side of the floor (opposite the camera at z=8.5)
+  // To ensure z is negative, we pick an angle between PI and 2*PI
+  const angle = Math.PI + Math.random() * Math.PI;
+  const distance = 0.5 + Math.random() * (MARSHMALLOW_SPAWN_RADIUS - 0.5);
   const x = Math.cos(angle) * distance;
   const z = Math.sin(angle) * distance;
   
