@@ -7,4 +7,4 @@ export const MELT_NOISE_SCALE_START = 1.0;
 export const MELT_NOISE_SCALE_END = 0.2;
 export const MELT_NOISE_SPEED = 2; // downwards speed for noise offset
 export const MELT_BLEND_START = 1;
-export const MELT_BLEND_END = 5;
+export const MELT_BLEND_END = 0.1;
