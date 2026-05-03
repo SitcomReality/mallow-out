@@ -30,12 +30,11 @@ export function updateMeltingMarshmallows(currentTime) {
     if (marshmallow.meltStartY === undefined) {
       marshmallow.meltStartY = marshmallow.marshmallow.position.y;
       
-      // Capture the starting scale so we can shrink from that value. 
-      // Ensure z is at least a small positive number to avoid shader division issues.
+      // Capture the starting scale so we can shrink from that value
       marshmallow.meltStartScale = {
-        x: Math.max(0.1, marshmallow.marshmallow.scale.x),
-        y: Math.max(0.1, marshmallow.marshmallow.scale.y),
-        z: Math.max(0.1, marshmallow.marshmallow.scale.z !== undefined ? marshmallow.marshmallow.scale.z : marshmallow.marshmallow.scale.x)
+        x: marshmallow.marshmallow.scale.x,
+        y: marshmallow.marshmallow.scale.y,
+        z: marshmallow.marshmallow.scale.z !== undefined ? marshmallow.marshmallow.scale.z : marshmallow.marshmallow.scale.x
       };
       
       marshmallow.holes.forEach(hole => {

@@ -41,6 +41,10 @@ export function updateMarshmallows(delta) {
         }
         
         // Move to melting state
+        marshmallow.meltStartTime = performance.now() * 0.001;
+        if (gameState.meltingMarshmallows.length >= 2) {
+          gameState.meltingMarshmallows.shift();
+        }
         gameState.meltingMarshmallows.push(marshmallow);
         gameState.currentMarshmallow = null;
       }
