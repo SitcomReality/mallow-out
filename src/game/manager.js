@@ -3,6 +3,7 @@ import { stopShooting } from './combat.js';
 import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { awardCaramel } from './economy.js';
+import { saveGame } from './persistence.js';
 import * as THREE from 'three';
 
 export const session = {
