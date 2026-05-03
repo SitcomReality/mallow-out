@@ -1,0 +1,117 @@
+#notificationContainer {
+  position: fixed;
+  top: 100px;
+  right: 24px;
+  width: 280px;
+  max-width: 80vw;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 400;
+  pointer-events: none;
+}
+
+.notification-clear-all {
+  align-self: flex-end;
+  font-size: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  pointer-events: auto;
+  margin-bottom: 8px;
+  color: #000000;
+  text-transform: uppercase;
+}
+
+.notification-item {
+  position: relative;
+  width: 100%;
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.notification-content {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-title {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #000000;
+}
+
+.notification-multiplier {
+  background: var(--pollen-gold);
+  color: #000000;
+  font-size: 9px;
+  padding: 2px 6px;
+  border: 2px solid #000000;
+  font-weight: 900;
+  box-shadow: 2px 2px 0 #000000;
+  transform: rotate(5deg);
+}
+
+.notification-body {
+  font-size: 9px;
+  color: #333333;
+  transition: opacity 0.3s, max-height 0.3s;
+  max-height: 100px;
+  opacity: 1;
+}
+
+.notification-item.collapsed .notification-body {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  overflow: hidden;
+}
+
+.notification-item.collapsed .notification-content {
+  padding: 8px 12px;
+}
+
+.notification-close {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 20px;
+  height: 20px;
+  background: var(--jam-red);
+  color: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.notification-item.slippery {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-item.slippery.leaving {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}

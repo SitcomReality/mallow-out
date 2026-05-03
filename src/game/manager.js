@@ -28,7 +28,7 @@ export function spawnNextMarshmallow() {
   
   if (session.marshmallowHUD) session.marshmallowHUD.update(marshmallow);
   
-  // Show spawn text
+  // Show spawn text and notification
   if (session.floatingTextSystem && marshmallow.type) {
     const pos = new THREE.Vector3(
       marshmallow.marshmallow.position.x,
@@ -36,6 +36,17 @@ export function spawnNextMarshmallow() {
       marshmallow.marshmallow.position.z
     );
     session.floatingTextSystem.createInfoText(pos, marshmallow.type.name, 'info');
+    
+    if (session.notifications) {
+      const isRare = marshmallow.type.rarity === 'rare';
+      session.notifications.add({
+        id: `spawn_${marshmallow.type.id}`,
+        sticky: true,
+        title: isRare ? '✨ RARE SPAWN ✨' : 'Marshmallow Spawned',
+        text: isRare ? `A ${marshmallow.type.name} appeared!` : `A new standard marshmallow arrived.`,
+        color: isRare ? '#ffd700' : '#ffffff'
+      });
+    }
   }
   
   rebuildObjectList();

@@ -20,6 +20,7 @@ import { session, quitToMenu, togglePause, spawnNextMarshmallow } from './src/ga
 import { runGameLoop } from './src/game/loop.js';
 import { shoot } from './src/game/combat.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
+import { createNotificationSystem } from './src/ui/notifications.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
 import { applyWonkyUI } from './src/ui/wonky.js';
 applyWonkyUI();
@@ -111,6 +112,8 @@ function startGame() {
   
   session.mobileControls = createMobileControls();
   session.mobileControls.show();
+
+  session.notifications = createNotificationSystem();
   
   // Keyboard Bindings
   document.addEventListener('keydown', (e) => {
