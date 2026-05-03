@@ -1,4 +1,4 @@
-import { gameState } from './state.js';
+import { gameState, updateWeaponCooldowns } from './state.js';
 import { session, spawnNextMarshmallow } from './manager.js';
 import { updateControls } from './controls.js';
 import { updateMeltingMarshmallows } from './melting.js';
@@ -20,6 +20,7 @@ export function runGameLoop(time) {
   if (!session.isPaused) {
     updateDynamicResolution(delta);
     updateControls(delta);
+    updateWeaponCooldowns(delta);
     updateMarshmallows(delta);
     
     session.particleSystem.update(delta);

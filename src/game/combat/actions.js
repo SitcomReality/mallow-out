@@ -4,7 +4,7 @@ import { castRay, getEnemyDistanceAt } from '../shooting.js';
 import { applyHolepunch } from '../damage/actions.js';
 import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
-import { rollCriticalHit } from '../upgrades/weapon-modifiers.js';
+import { rollCriticalHit, getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
 import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
@@ -13,8 +13,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
   const ws = gameState.weaponStates;
   if (ws.skewerCooldown > 0) return;
   
-  // Set a small base cooldown for now
-  ws.skewerCooldown = 0.2;
+  // Base cooldown with upgrade reduction
+  const baseCooldown = 5.0;
+  const cooldownReduction = getUpgradeEffect('shot_cooldown', gameState.upgrades.shot_cooldown || 0);
+  ws.skewerCooldown = Math.max(0.5, baseCooldown * (1 - cooldownReduction));
 
   // Unproject screen coordinates to find world ray
   const vec = new THREE.Vector3(screenX, screenY, 0.5);
@@ -39,21 +41,22 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     const hitMarshmallow = gameState.currentMarshmallow && getEnemyDistanceAt(gameState.currentMarshmallow, result.point) < 0.1;
     
     if (!hitMarshmallow) {
-      // Floor hit
-      gameState.currencies.caramel += 1;
+      // Floor hit - award marsh currency
+      const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
+      gameState.currencies.marsh += marshReward;
       if (session.floatingTextSystem) {
-        session.floatingTextSystem.createDamageText(result.point, 1, false);
+        session.floatingTextSystem.createDamageText(result.point, marshReward, false);
       }
       createRippleFX(result.point);
-      // New floor splash particles
       particleSystem.createFloorSplash(result.point);
       rebuildObjectList();
       return;
     }
 
     const isCritical = rollCriticalHit();
-    let damage = BASE_DAMAGE_HOLEPUNCH;
-    if (isCritical) damage *= 2;
+    const baseHeal = 3.0;
+    const healBonus = getUpgradeEffect('mallow_heal', gameState.upgrades.mallow_heal || 0);
+    const healAmount = baseHeal * (1 + healBonus);
 
     applyHolepunch(gameState.currentMarshmallow, result.point, direction);
     
@@ -61,7 +64,18 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     const hitNormal = direction.clone().multiplyScalar(-1);
     particleSystem.createMallowSplatter(result.point, hitNormal);
     
-    handleMarshmallowHit(result.point, damage, isCritical, particleSystem, marshmallowHUD);
+    // Heal instead of damage
+    const { healMarshmallow } = await import('../marshmallow.js');
+    healMarshmallow(gameState.currentMarshmallow, healAmount);
+    
+    if (session.floatingTextSystem) {
+      session.floatingTextSystem.createDamageText(result.point, healAmount, false);
+    }
+    
+    if (marshmallowHUD) {
+      marshmallowHUD.update(gameState.currentMarshmallow);
+    }
+    
     rebuildObjectList();
   }
 }

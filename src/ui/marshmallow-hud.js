@@ -8,15 +8,17 @@ export function createMarshmallowHUD() {
     }
     
     const healthPercent = (marshmallow.currentHealth / marshmallow.maxHealth) * 100;
-    const typeName = marshmallow.type ? marshmallow.type.name : 'Marshmallow';
     const isDanger = healthPercent < 25;
     
     hud.innerHTML = `
       <div class="boss-info">
-        <h2 class="boss-name wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">${typeName} #${marshmallow.totalIndex + 1}</h2>
+        <h2 class="boss-name wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">${marshmallow.name}</h2>
       </div>
       <div class="boss-health-bar wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4">
         <div class="boss-health-fill ${isDanger ? 'danger' : ''}" style="width: ${healthPercent}%; background: #32cd32;"></div>
+      </div>
+      <div class="health-text" style="text-align: center; font-size: 8px; color: #000; margin-top: 4px;">
+        ${Math.ceil(marshmallow.currentHealth)} / ${marshmallow.maxHealth} HP
       </div>
     `;
     

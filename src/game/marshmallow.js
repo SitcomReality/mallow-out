@@ -7,6 +7,18 @@ import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
 
 let nextId = 1;
 
+const NAME_PARTS = ['Mallow', 'Marsh', 'Mellow', 'Munch', 'Fellow'];
+
+function generateMarshmallowName() {
+  const part1 = NAME_PARTS[Math.floor(Math.random() * NAME_PARTS.length)];
+  let part2 = NAME_PARTS[Math.floor(Math.random() * NAME_PARTS.length)];
+  // Ensure different parts
+  while (part2 === part1) {
+    part2 = NAME_PARTS[Math.floor(Math.random() * NAME_PARTS.length)];
+  }
+  return part1 + part2.toLowerCase();
+}
+
 /**
  * Creates the marshmallow pet.
  */
@@ -54,6 +66,9 @@ export function createMarshmallow(totalDestroyed) {
     totalIndex: totalDestroyed,
     id: marshmallowId,
     type: type,
+    name: generateMarshmallowName(),
+    lastHitTime: performance.now() * 0.001,
+    isDying: false,
     movement: {
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: BASE_BOB_AMPLITUDE * (0.8 + Math.random() * 0.4),
@@ -62,6 +77,21 @@ export function createMarshmallow(totalDestroyed) {
   };
   
   return entity;
+}
+
+export function healMarshmallow(marshmallow, amount) {
+  const healBonus = 1.0; // Can be upgraded later
+  marshmallow.currentHealth = Math.min(marshmallow.maxHealth, marshmallow.currentHealth + amount * healBonus);
+  marshmallow.lastHitTime = performance.now() * 0.001;
+  
+  // Update expression based on health
+  if (marshmallow.currentHealth >= marshmallow.maxHealth * 0.8) {
+    marshmallow.marshmallow.targetExpression = EXPRESSION_DEFAULT;
+  } else if (marshmallow.currentHealth >= marshmallow.maxHealth * 0.5) {
+    marshmallow.marshmallow.targetExpression = EXPRESSION_DEFAULT;
+  } else {
+    marshmallow.marshmallow.targetExpression = EXPRESSION_ANGRY;
+  }
 }
 
 export function damageMarshmallow(marshmallow, damage, particleSystem = null) {

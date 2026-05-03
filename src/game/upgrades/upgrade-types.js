@@ -21,6 +21,51 @@ export const UPGRADE_TYPES = {
     icon: '🍯',
     description: 'Increase caramel earned from kills',
     shortDesc: '+20% caramel per level'
+  },
+
+  MARSH_REWARD: {
+    id: 'marsh_reward',
+    category: UPGRADE_CATEGORIES.ECONOMY,
+    name: 'Marsh Bounty',
+    icon: '💧',
+    description: 'Increase marsh currency from floor shots',
+    shortDesc: '+1 marsh per level'
+  },
+
+  SHOT_COOLDOWN: {
+    id: 'shot_cooldown',
+    category: UPGRADE_CATEGORIES.ECONOMY,
+    name: 'Quick Shot',
+    icon: '⚡',
+    description: 'Reduce cooldown between shots',
+    shortDesc: '-10% cooldown per level'
+  },
+
+  MALLOW_HEAL: {
+    id: 'mallow_heal',
+    category: UPGRADE_CATEGORIES.ECONOMY,
+    name: 'Love Boost',
+    icon: '💖',
+    description: 'Increase health restored when shooting marshmallow',
+    shortDesc: '+25% heal per level'
+  },
+
+  HIT_PROTECTION: {
+    id: 'hit_protection',
+    category: UPGRADE_CATEGORIES.ECONOMY,
+    name: 'Hit Protection',
+    icon: '🛡️',
+    description: 'Increase time before marshmallow loses health after being shot',
+    shortDesc: '+0.5s protection per level'
+  },
+
+  HEALTH_REGEN: {
+    id: 'health_regen',
+    category: UPGRADE_CATEGORIES.ECONOMY,
+    name: 'Slow Melt',
+    icon: '❄️',
+    description: 'Reduce marshmallow health loss rate',
+    shortDesc: '+50% slower loss per level'
   }
 };
 

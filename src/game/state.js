@@ -17,17 +17,30 @@ export const gameState = {
   currencies: {
     pollen: 0,
     caramel: 0,
+    marsh: 0, // New currency from shooting the marsh
   },
   upgrades: {
     pollen_multiplier: 0,
     caramel_bonus: 0,
+    shot_cooldown: 0,
+    marsh_reward: 0,
+    mallow_heal: 0,
+    hit_protection: 0,
+    health_regen: 0,
   },
 
   // Weapon state used by shooting/combat logic (prevents undefined accesses)
   weaponStates: {
     skewerCooldown: 0,
-    // future weapon-related flags can go here
+    maxCooldown: 5.0,
   },
 };
+
+export function updateWeaponCooldowns(delta) {
+  const ws = gameState.weaponStates;
+  if (ws.skewerCooldown > 0) {
+    ws.skewerCooldown = Math.max(0, ws.skewerCooldown - delta);
+  }
+}
 
 export { settings, worldState };

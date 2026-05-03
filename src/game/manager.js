@@ -14,36 +14,58 @@ export const session = {
   pauseMenu: null,
   particleSystem: null,
   mobileControls: null,
-  renderFn: null
+  renderFn: null,
+  hasShownSpawnNotification: false,
 };
+
+const MARSHMALLOW_SPAWN_COST = 50; // Marsh currency needed
+
+export function canSpawnMarshmallow() {
+  return !gameState.currentMarshmallow && 
+         gameState.meltingMarshmallows.length <= 1 && 
+         gameState.currencies.marsh >= MARSHMALLOW_SPAWN_COST;
+}
 
 export function spawnNextMarshmallow() {
   if (gameState.currentMarshmallow) return;
   if (gameState.meltingMarshmallows.length > 1) return;
   
+  // Check if player can afford
+  if (gameState.currencies.marsh < MARSHMALLOW_SPAWN_COST) {
+    if (session.notifications && !session.hasShownSpawnNotification) {
+      session.hasShownSpawnNotification = true;
+      session.notifications.add({
+        id: 'need_marsh',
+        sticky: true,
+        title: 'Marshmallow Treat Needed!',
+        text: `Shoot the marsh to gather ${MARSHMALLOW_SPAWN_COST} marsh currency, then your friend will emerge!`,
+        color: '#8afdff'
+      });
+    }
+    return;
+  }
+  
+  // Deduct cost
+  gameState.currencies.marsh -= MARSHMALLOW_SPAWN_COST;
+  session.hasShownSpawnNotification = false;
+  
   const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed);
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
   
-  if (session.marshmallowHUD) session.marshmallowHUD.update(marshmallow);
+  if (session.marshmallowHUD) {
+    session.marshmallowHUD.update(marshmallow);
+    session.marshmallowHUD.show();
+  }
   
-  if (session.floatingTextSystem && marshmallow.type) {
-    const pos = new THREE.Vector3(
-      marshmallow.marshmallow.position.x,
-      marshmallow.marshmallow.position.y + 2,
-      marshmallow.marshmallow.position.z
-    );
-    session.floatingTextSystem.createInfoText(pos, marshmallow.type.name, 'info');
-    
-    if (session.notifications) {
-      session.notifications.add({
-        id: `spawn_${marshmallow.type.id}`,
-        sticky: true,
-        title: 'Marshmallow Ready!',
-        text: `Your marshmallow friend has emerged from the marsh.`,
-        color: '#ffffff'
-      });
-    }
+  if (session.notifications) {
+    session.notifications.add({
+      id: `spawn_${marshmallow.name}`,
+      sticky: true,
+      title: `${marshmallow.name} Emerged!`,
+      text: `Your marshmallow friend has come out to play!`,
+      color: '#ff69b4'
+    });
   }
   
   rebuildObjectList();

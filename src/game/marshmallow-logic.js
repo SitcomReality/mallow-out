@@ -1,9 +1,10 @@
 import { gameState } from './state.js';
 import { updateMarshmallowMovement } from './marshmallow-movement.js';
 import { session } from './manager.js';
+import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
 
 /**
- * Handles per-frame logic for the active marshmallow, including movement and the popping sequence.
+ * Handles per-frame logic for the active marshmallow, including movement and health degeneration.
  */
 export function updateMarshmallows(delta) {
   const marshmallow = gameState.currentMarshmallow;
@@ -11,5 +12,42 @@ export function updateMarshmallows(delta) {
 
   if (marshmallow.movement) {
     updateMarshmallowMovement(marshmallow, delta);
+  }
+
+  // Health degeneration system
+  if (marshmallow.lastHitTime !== undefined) {
+    const timeSinceHit = performance.now() * 0.001 - marshmallow.lastHitTime;
+    const hitProtectionDuration = 0.5 + getUpgradeEffect('hit_protection', gameState.upgrades.hit_protection || 0);
+    
+    if (timeSinceHit > hitProtectionDuration) {
+      // Start losing health
+      const baseHealthLossRate = 2.0; // HP per second
+      const healthLossRate = baseHealthLossRate / (1 + getUpgradeEffect('health_regen', gameState.upgrades.health_regen || 0));
+      
+      marshmallow.currentHealth = Math.max(0, marshmallow.currentHealth - healthLossRate * delta);
+      
+      if (marshmallow.currentHealth <= 0 && !marshmallow.isDying) {
+        marshmallow.isDying = true;
+        // Marshmallow retreats to marsh
+        if (session.marshmallowHUD) session.marshmallowHUD.hide();
+        if (session.notifications) {
+          session.notifications.add({
+            id: 'mallow_retreat',
+            sticky: true,
+            title: `${marshmallow.name} Retreated!`,
+            text: 'Your marshmallow friend needs rest. Purchase a Marshmallow Treat to call them back!',
+            color: '#ff69b4'
+          });
+        }
+        
+        // Move to melting state
+        gameState.meltingMarshmallows.push(marshmallow);
+        gameState.currentMarshmallow = null;
+      }
+      
+      if (session.marshmallowHUD && marshmallow === gameState.currentMarshmallow) {
+        session.marshmallowHUD.update(marshmallow);
+      }
+    }
   }
 }

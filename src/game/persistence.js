@@ -7,6 +7,7 @@ export function saveGame() {
     totalMarshmallowsDestroyed: gameState.totalMarshmallowsDestroyed,
     currencies: { ...gameState.currencies },
     upgrades: { ...gameState.upgrades },
+    hasShownSpawnNotification: false,
   };
   
   try {
