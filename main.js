@@ -4,7 +4,7 @@
  * Keep this file simple! Business logic should be refactored into discrete files.
  */
 
-import { gameState } from './src/game/state.js';
+import { gameState, applyGraphicsPreset } from './src/game/state.js';
 import { createRenderer } from './src/game/renderer.js';
 import { initControls } from './src/game/controls.js';
 import { createHUD } from './src/ui/hud.js';
@@ -41,6 +41,9 @@ function updateMenuUI() {
 }
 
 mainBtn.addEventListener('click', () => {
+  const selectedQuality = document.querySelector('input[name="graphicsQuality"]:checked').value;
+  applyGraphicsPreset(selectedQuality);
+  
   if (hasSaveGame()) {
     loadGame();
   }

@@ -29,6 +29,16 @@ export function createPauseMenu(onResume, onQuit) {
           <label>Dynamic Resolution</label>
           <input type="checkbox" id="dynamicRes" ${settings.dynamicRes ? 'checked' : ''}>
         </div>
+        
+        <div class="setting-row slider-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Max Resolution Scale: <span id="maxScaleVal">${settings.maxScale}</span></label>
+          <input type="range" id="maxScale" min="0.1" max="4.0" step="0.1" value="${settings.maxScale}">
+        </div>
+        
+        <div class="setting-row slider-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" id="minScaleContainer">
+          <label>Min Resolution Scale: <span id="minScaleVal">${settings.minScale}</span></label>
+          <input type="range" id="minScale" min="0.05" max="1.0" step="0.05" value="${settings.minScale}">
+        </div>
       </div>
       
       <div class="pause-buttons">
@@ -61,6 +71,27 @@ export function createPauseMenu(onResume, onQuit) {
   
   document.getElementById('dynamicRes').addEventListener('change', (e) => {
     settings.dynamicRes = e.target.checked;
+    document.getElementById('minScaleContainer').style.opacity = settings.dynamicRes ? '1' : '0.4';
+    if (!settings.dynamicRes) {
+      settings.renderScale = settings.maxScale;
+    }
+  });
+
+  const maxSlider = document.getElementById('maxScale');
+  const maxVal = document.getElementById('maxScaleVal');
+  maxSlider.addEventListener('input', (e) => {
+    settings.maxScale = parseFloat(e.target.value);
+    maxVal.textContent = settings.maxScale.toFixed(1);
+    if (!settings.dynamicRes) {
+      settings.renderScale = settings.maxScale;
+    }
+  });
+
+  const minSlider = document.getElementById('minScale');
+  const minVal = document.getElementById('minScaleVal');
+  minSlider.addEventListener('input', (e) => {
+    settings.minScale = parseFloat(e.target.value);
+    minVal.textContent = settings.minScale.toFixed(1);
   });
   
   return {

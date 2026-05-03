@@ -48,6 +48,40 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 20px;
+}
+
+.graphics-preset-selector {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.graphics-note {
+  font-size: 8px;
+  margin-bottom: 12px;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.radio-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.radio-option input {
+  cursor: pointer;
 }
 
 .continue-btn {
