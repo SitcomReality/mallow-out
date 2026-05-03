@@ -117,8 +117,7 @@ function startGame() {
     session.upgradeScreen.show();
   });
 
-  spawnNextMarshmallow();
-  
+  // Removed automatic spawn on game start; player must purchase a treat to summon the marshmallow.
   if (session.renderFn) {
     session.renderFn(performance.now(), session.particleSystem, session.floatingTextSystem);
   }

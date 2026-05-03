@@ -35,9 +35,7 @@ export function runGameLoop(time) {
     
     if (session.hud) session.hud.update();
     
-    if (!gameState.currentMarshmallow && gameState.meltingMarshmallows.length <= 1) {
-       spawnNextMarshmallow();
-    }
+    // Automatic spawning removed — marshmallows now require manual purchase via Buy Treat.
   }
   
   if (session.renderFn) {
