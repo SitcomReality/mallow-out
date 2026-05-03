@@ -106,7 +106,7 @@ float sdArc(vec2 p, float r, float thickness, float angle) {
     return ((scb*p.x - sca*p.y) > 0.0) ? length(p - vec2(sca, scb)*r) - thickness : abs(length(p) - r) - thickness;
 }
 
-float sdCapsule(vec2 p, vec2 a, vec2 b, float r) {
+float sdCapsule2D(vec2 p, vec2 a, vec2 b, float r) {
     vec2 pa = p - a, ba = b - a;
     float h = clamp(dot(pa, ba)/dot(ba, ba), 0.0, 1.0);
     return length(pa - ba*h) - r;
@@ -118,7 +118,9 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   float capDist = scale.y - localP.y;
   if (capDist > 0.1) return baseCol;
   
-  vec2 uv = vec2(localP.z, localP.x) / scale.x;
+  // Guard against division by zero or extremely small scales during melting
+  float safeScaleX = max(scale.x, 0.01);
+  vec2 uv = vec2(localP.z, localP.x) / safeScaleX;
   
   FaceParams p1 = getDefaultFace();
   FaceParams p2 = getDefaultFace();
@@ -174,7 +176,7 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   float sa = sin(p.browAngle), ca = cos(p.browAngle);
   mat2 rot = mat2(ca, -sa, sa, ca);
   vec2 browUV = (uvMirrored - p.browPos) * rot;
-  float browDist = sdCapsule(browUV, browA, browB, p.browSize.y);
+  float browDist = sdCapsule2D(browUV, browA, browB, p.browSize.y);
   col = mix(col, vec3(0.05), smoothstep(aa, -aa, browDist));
   
   // 3. Eyes

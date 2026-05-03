@@ -14,7 +14,7 @@ struct Object {
 
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
-  // Simplified flat circular disk at y=0
+  // Flat circular disk at y=0. Using the sdCylinder from sdf.js
   return sdCylinder(p + vec3(0.0, 0.1, 0.0), 5.5, 0.1);
 }
 
@@ -32,6 +32,8 @@ vec3 getFloorColorAt(vec3 p) {
 }
 
 uniform sampler2D uFontTex;
+
+// Ensure we don't redefine sdCylinder here since it's already in sdf.js
 
 float sdText(vec3 p, vec3 scale, float charCode) {
   float idx = charCode - 32.0;
@@ -136,7 +138,7 @@ vec4 map(vec3 p) {
   vec4 worldRes = vec4(fD, fCol);
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
-  bool worldFirst = false;
+  bool worldFirst = true; // Track if we've initialized worldRes with the first real geometry hit
 
   for (int i = 0; i < 32; i++) {
     if (float(i) >= uNumObjects) break;
@@ -188,12 +190,9 @@ vec4 map(vec3 p) {
         groupRes = vec4(d, col);
       } else {
         // Single object
-        if (worldFirst) {
-          worldRes = vec4(d, col);
-          worldFirst = false;
-        } else {
-          worldRes = blendOp(worldRes, d, col, op, blend);
-        }
+        // Always blend single objects with worldRes (which starts with the floor)
+        worldRes = blendOp(worldRes, d, col, op, blend);
+        worldFirst = false;
       }
     } else {
       // Continue same state (group or no group)
@@ -215,11 +214,7 @@ vec4 map(vec3 p) {
     int gIdx = int(lastGid - 1.0);
     float gOp = uGroupData[gIdx].x;
     float gBlend = uGroupData[gIdx].y;
-    if (worldFirst) {
-      worldRes = groupRes;
-    } else {
-      worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
-    }
+    worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
   }
   
   return worldRes;

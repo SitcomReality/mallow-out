@@ -43,7 +43,8 @@ export function handleMarshmallowHit(hitPoint, damage, isCritical, particleSyste
   const defeated = damageMarshmallow(marshmallow, damage, particleSystem);
   if (marshmallowHUD) marshmallowHUD.update(marshmallow);
   
-  if (defeated) {
+  if (defeated && !marshmallow.isDying) {
+    marshmallow.isDying = true;
     if (gameState.meltingMarshmallows.length >= 2) {
       gameState.meltingMarshmallows.shift();
     }
