@@ -6,7 +6,7 @@ import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
 import { rollCriticalHit, getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
 import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
-import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
+import { getSceneDistanceAt, getSceneDistanceIgnoreMarshmallows, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
 import { healMarshmallow } from '../marshmallow.js';
 
@@ -58,6 +58,38 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
       }
       createRippleFX(result.point);
       particleSystem.createFloorSplash(result.point);
+      rebuildObjectList();
+      return;
+    }
+    
+    // If the shot hit a marshmallow, check whether the same ray would have hit the floor if marshmallows weren't blocking.
+    // If so, treat the shot as a floor impact (piercing through the marshmallow).
+    let piercedToFloor = false;
+    try {
+      const behindResult = castRay(origin, direction, getSceneDistanceIgnoreMarshmallows);
+      // Consider it piercing if the "floor-only" ray hits and the hit distance is greater than the marshmallow hit distance (i.e., behind)
+      if (behindResult.hit && behindResult.distance > result.distance + 0.01) {
+        piercedToFloor = true;
+      }
+    } catch (e) {
+      // If the ignore function fails for any reason, do not change behaviour.
+      piercedToFloor = false;
+    }
+    
+    if (piercedToFloor) {
+      // Treat like floor hit: award marsh, ripple, splash. Consume treat ammo if used.
+      const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
+      gameState.currencies.marsh += marshReward;
+      
+      if (usedAmmo === 'treat') {
+        import('../manager.js').then(m => m.spawnNextMarshmallowAt(behindResult.point));
+      }
+
+      if (session.floatingTextSystem) {
+        session.floatingTextSystem.createDamageText(behindResult.point, marshReward, false);
+      }
+      createRippleFX(behindResult.point);
+      particleSystem.createFloorSplash(behindResult.point);
       rebuildObjectList();
       return;
     }
