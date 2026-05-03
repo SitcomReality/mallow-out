@@ -54,12 +54,14 @@ export function applyHolepunch(marshmallowEntity, hitPoint, rayDirection) {
   
   // Center the hole halfway along its penetration depth, adding a tiny overlap for clean CSG
   const padding = 0.1;
+  // Absolute extra buffer (in world units) to ensure a small consistent over-penetration
+  const EXTRA_PENETRATION_BUFFER = 0.2;
   const halfLen = exitT / 2;
   const holePosWorld = hitPoint.clone().add(rayDirection.clone().multiplyScalar(halfLen));
   
   const up = new THREE.Vector3(0, 1, 0);
   const axis = new THREE.Vector3().crossVectors(up, rayDirection).normalize();
-  const angle = Math.acos(up.dot(rayDirection));
+  const angle = Math.acos(Math.max(-1, Math.min(1, up.dot(rayDirection))));
   
   const worldQuat = new THREE.Quaternion();
   if (axis.length() > 0.001) {
@@ -68,12 +70,15 @@ export function applyHolepunch(marshmallowEntity, hitPoint, rayDirection) {
 
   const local = getLocalTransform(holePosWorld, worldQuat, marshmallow);
   
+  // Apply the extra absolute buffer to the hole length so even short penetrations get the same small extra margin
+  const holeHalfExtent = halfLen + padding + EXTRA_PENETRATION_BUFFER;
+
   const hole = {
     id: nextId++,
     type: 'cylinder',
     position: local.position,
     rotation: local.rotation,
-    scale: { x: HOLE_RADIUS, y: halfLen + padding, z: 0 },
+    scale: { x: HOLE_RADIUS, y: holeHalfExtent, z: 0 },
     color: '#ff00ff',
     operation: 'subtract',
     blendRadius: 0.05,
@@ -89,7 +94,7 @@ export function applyHolepunch(marshmallowEntity, hitPoint, rayDirection) {
       type: DAMAGE_TYPES.HOLEPUNCH,
       startTime: performance.now() * 0.001,
       initialRadius: HOLE_RADIUS,
-      initialHeight: halfLen + padding
+      initialHeight: holeHalfExtent
     }
   };
   
