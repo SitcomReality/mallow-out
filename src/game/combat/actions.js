@@ -8,6 +8,7 @@ import { rollCriticalHit, getUpgradeEffect } from '../upgrades/weapon-modifiers.
 import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
+import { healMarshmallow } from '../marshmallow.js';
 
 export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) {
   const ws = gameState.weaponStates;
@@ -65,7 +66,6 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     particleSystem.createMallowSplatter(result.point, hitNormal);
     
     // Heal instead of damage
-    const { healMarshmallow } = await import('../marshmallow.js');
     healMarshmallow(gameState.currentMarshmallow, healAmount);
     
     if (session.floatingTextSystem) {
