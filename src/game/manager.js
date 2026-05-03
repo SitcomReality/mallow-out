@@ -30,32 +30,54 @@ export function canSpawnMarshmallow() {
          gameState.currencies.marsh >= cost;
 }
 
-export function spawnNextMarshmallow() {
-  if (gameState.currentMarshmallow) return;
-  if (gameState.meltingMarshmallows.length > 1) return;
-  
-  // Check if player can afford current treat cost
+export function buyMarshmallowTreat() {
   const cost = gameState.marshmallowTreatCost || 1;
   if (gameState.currencies.marsh < cost) {
-    if (session.notifications && !session.hasShownSpawnNotification) {
-      session.hasShownSpawnNotification = true;
+    if (session.notifications) {
       session.notifications.add({
-        id: 'need_marsh',
-        sticky: true,
-        title: 'Marshmallow Treat Needed!',
-        text: `Shoot the marsh to gather ${cost} marsh currency, then your friend will emerge!`,
+        id: 'need_marsh_buy',
+        sticky: false,
+        title: 'Cannot Afford',
+        text: `You need ${cost} marsh currency for a treat!`,
         color: '#8afdff'
       });
     }
     return;
   }
 
-  // Deduct cost and increase the cost for next purchase by 1
   gameState.currencies.marsh -= cost;
-  gameState.marshmallowTreatCost = (gameState.marshmallowTreatCost || 1) + 1;
-  session.hasShownSpawnNotification = false;
+  gameState.currencies.treats = (gameState.currencies.treats || 0) + 1;
+  gameState.marshmallowTreatCost++;
+  saveGame();
+}
 
+export function equipMarshmallowTreat() {
+  if ((gameState.currencies.treats || 0) <= 0) return;
+  if (gameState.weaponStates.activeAmmo === 'treat') return;
+
+  gameState.weaponStates.activeAmmo = 'treat';
+  gameState.currencies.treats--;
+  
+  if (session.notifications) {
+    session.notifications.add({
+      id: 'treat_equipped',
+      sticky: false,
+      title: 'Treat Loaded!',
+      text: 'Next shot will deploy the marshmallow treat!',
+      color: '#ff69b4'
+    });
+  }
+}
+
+export function spawnNextMarshmallowAt(point) {
+  if (gameState.currentMarshmallow) return;
+  if (gameState.meltingMarshmallows.length > 1) return;
+  
   const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed);
+  // Set the spawn point to where the treat hit
+  marshmallow.marshmallow.position.x = point.x;
+  marshmallow.marshmallow.position.z = point.z;
+  
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
 
@@ -75,6 +97,11 @@ export function spawnNextMarshmallow() {
   }
 
   rebuildObjectList();
+}
+
+// Deprecated alias for compatibility if needed, but we prefer the specific ones above
+export function spawnNextMarshmallow() {
+  equipMarshmallowTreat();
 }
 
 export function onMarshmallowDefeated() {

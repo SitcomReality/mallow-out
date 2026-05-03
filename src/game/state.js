@@ -17,7 +17,8 @@ export const gameState = {
   currencies: {
     pollen: 0,
     caramel: 0,
-    marsh: 0, // New currency from shooting the marsh
+    marsh: 0,
+    treats: 0, // Stackable inventory items
   },
   upgrades: {
     pollen_multiplier: 0,
@@ -34,10 +35,11 @@ export const gameState = {
   // Persisted player marshmallow identity (keeps name across respawns / savegames)
   playerMarshmallowName: null,
 
-  // Weapon state used by shooting/combat logic (prevents undefined accesses)
+  // Weapon state used by shooting/combat logic
   weaponStates: {
     skewerCooldown: 0,
     maxCooldown: 5.0,
+    activeAmmo: 'standard', // 'standard' or 'treat'
   },
 };
 

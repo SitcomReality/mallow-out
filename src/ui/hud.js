@@ -22,7 +22,10 @@ export function createHUD() {
       </div>
       <div class="nav-buttons">
          <button id="navUpgrades" class="nav-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="3">Upgrades</button>
-         <button id="buyTreat" class="nav-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Buy Treat (💧1)</button>
+         <div id="treatControls" style="display: flex; gap: 4px;">
+           <button id="buyTreat" class="nav-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Buy Treat (💧1)</button>
+           <button id="equipTreat" class="nav-btn wonky" data-fill="#ffd700" data-stroke="#000000" data-stroke-width="3">Equip (0)</button>
+         </div>
          <button id="navSettings" class="nav-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">Settings</button>
       </div>
     </div>
@@ -48,12 +51,15 @@ export function createHUD() {
   if (buyTreatBtn) {
     buyTreatBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      // Attempt to spawn/purchase a marshmallow immediately
-      spawnNextMarshmallow();
-      // Update HUD to reflect new currency/cost
-      document.getElementById('pollenDisplay') && (document.getElementById('pollenDisplay').textContent = Math.floor(gameState.currencies.pollen));
-      document.getElementById('caramelDisplay') && (document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel));
-      document.getElementById('marshDisplay') && (document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh));
+      import('../game/manager.js').then(m => m.buyMarshmallowTreat());
+    });
+  }
+
+  const equipTreatBtn = hud.querySelector('#equipTreat');
+  if (equipTreatBtn) {
+    equipTreatBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      import('../game/manager.js').then(m => m.equipMarshmallowTreat());
     });
   }
 
@@ -75,12 +81,21 @@ export function createHUD() {
       if (buyBtn) {
         const cost = gameState.marshmallowTreatCost || 1;
         buyBtn.textContent = `Buy Treat (💧${cost})`;
-        if (gameState.currencies.marsh >= cost) {
-          buyBtn.disabled = false;
-          buyBtn.style.opacity = '1';
+        buyBtn.disabled = gameState.currencies.marsh < cost;
+        buyBtn.style.opacity = buyBtn.disabled ? '0.6' : '1';
+      }
+
+      const equipBtn = document.getElementById('equipTreat');
+      if (equipBtn) {
+        const treats = gameState.currencies.treats || 0;
+        const isActive = gameState.weaponStates.activeAmmo === 'treat';
+        equipBtn.textContent = isActive ? 'LOADED!' : `Equip (${treats})`;
+        equipBtn.disabled = treats <= 0 || isActive;
+        equipBtn.style.opacity = equipBtn.disabled && !isActive ? '0.4' : '1';
+        if (isActive) {
+          equipBtn.style.filter = 'hue-rotate(90deg)';
         } else {
-          buyBtn.disabled = true;
-          buyBtn.style.opacity = '0.6';
+          equipBtn.style.filter = 'none';
         }
       }
       

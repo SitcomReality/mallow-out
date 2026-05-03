@@ -7,7 +7,7 @@ export function saveGame() {
     totalMarshmallowsDestroyed: gameState.totalMarshmallowsDestroyed,
     currencies: { ...gameState.currencies },
     upgrades: { ...gameState.upgrades },
-    // Persist player's marshmallow identity and current treat cost
+    // Persist player's marshmallow identity, current treat cost, and inventory
     playerMarshmallowName: gameState.playerMarshmallowName || null,
     marshmallowTreatCost: gameState.marshmallowTreatCost || 1,
     hasShownSpawnNotification: false,
@@ -29,8 +29,8 @@ export function loadGame() {
     const data = JSON.parse(saved);
     
     gameState.totalMarshmallowsDestroyed = data.totalMarshmallowsDestroyed || 0;
-    // Ensure marsh currency is restored (defaults include marsh)
-    gameState.currencies = data.currencies || { pollen: 0, caramel: 0, marsh: 0 };
+    // Ensure currencies are restored
+    gameState.currencies = data.currencies || { pollen: 0, caramel: 0, marsh: 0, treats: 0 };
     gameState.upgrades = data.upgrades || {};
     // Restore persisted marshmallow identity and treat cost if present
     gameState.playerMarshmallowName = data.playerMarshmallowName || null;

@@ -38,6 +38,9 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     session.tracerSystem.createTracer(visualOrigin, effectEnd, 0xffff00);
   }
 
+  const usedAmmo = ws.activeAmmo || 'standard';
+  ws.activeAmmo = 'standard';
+
   if (result.hit) {
     const hitMarshmallow = gameState.currentMarshmallow && getEnemyDistanceAt(gameState.currentMarshmallow, result.point) < 0.1;
     
@@ -45,6 +48,11 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
       // Floor hit - award marsh currency
       const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
       gameState.currencies.marsh += marshReward;
+      
+      if (usedAmmo === 'treat') {
+        import('../manager.js').then(m => m.spawnNextMarshmallowAt(result.point));
+      }
+
       if (session.floatingTextSystem) {
         session.floatingTextSystem.createDamageText(result.point, marshReward, false);
       }
