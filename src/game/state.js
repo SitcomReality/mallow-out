@@ -9,6 +9,7 @@ export const gameState = {
     yaw: 0,
     pitch: 0,
   },
+  // Current active marshmallow and melting queue
   currentMarshmallow: null,
   meltingMarshmallows: [],
   objects: [],
@@ -20,6 +21,12 @@ export const gameState = {
   upgrades: {
     pollen_multiplier: 0,
     caramel_bonus: 0,
+  },
+
+  // Weapon state used by shooting/combat logic (prevents undefined accesses)
+  weaponStates: {
+    skewerCooldown: 0,
+    // future weapon-related flags can go here
   },
 };
 
