@@ -1,6 +1,9 @@
 import { gameState } from '../state.js';
 import { getUpgradeEffect } from './upgrade-calculator.js';
 
+// Re-export getUpgradeEffect so other modules can import it from this facade.
+export { getUpgradeEffect };
+
 export function getWeaponDamageBonus() {
   return 0; // Removed from upgrades
 }
