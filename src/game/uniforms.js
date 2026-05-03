@@ -45,14 +45,20 @@ export function updateUniforms(uniforms, time) {
   // Clear old group data to prevent stale values
   uniforms.uGroupData.value.forEach(v => v.set(0, 0, 0, 0));
   
-  // First pass: identify groups and assign their group data
+  // First pass: identify groups and assign their group data.
+  // We treat anything that has a parent as being part of a group owned by that parent.
   gameState.objects.forEach(obj => {
-    if (obj.type === 'group') {
+    // If it's explicitly a group, or if it's a root object that has children (like a marshmallow with holes)
+    const isParent = gameState.objects.some(other => other.parentId === obj.id);
+    if (obj.type === 'group' || isParent) {
       if (!groupMap.has(obj.id)) {
         groupMap.set(obj.id, nextGid++);
         const gIdx = groupMap.get(obj.id) - 1;
         if (gIdx < 32) {
-          uniforms.uGroupData.value[gIdx].set(opMap[obj.operation] || 0, obj.blendRadius || 0, 0, 0);
+          // Standard marshmallows use union (0) to join with the world.
+          const op = obj.type === 'group' ? (opMap[obj.operation] || 0) : 0;
+          const blend = obj.blendRadius || 0.1;
+          uniforms.uGroupData.value[gIdx].set(op, blend, 0, 0);
         }
       }
     }

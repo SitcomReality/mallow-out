@@ -104,19 +104,20 @@ float getObjectDist(vec3 p, int idx) {
 }
 
 vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
+  float safeBlend = max(blend, 0.0);
   if (op < 0.5) {
-    if (blend > 0.01) {
-      float h = clamp(0.5 + 0.5 * (res.x - d) / blend, 0.0, 1.0);
+    if (safeBlend > 0.001) {
+      float h = clamp(0.5 + 0.5 * (res.x - d) / safeBlend, 0.0, 1.0);
       vec3 finalCol = mix(res.yzw, col, h);
-      return vec4(mix(res.x, d, h) - blend * h * (1.0 - h), finalCol);
+      return vec4(mix(res.x, d, h) - safeBlend * h * (1.0 - h), finalCol);
     } else {
       return (d < res.x) ? vec4(d, col) : res;
     }
   } else if (op < 1.5) {
-    float newD = smax(res.x, -d, blend);
+    float newD = smax(res.x, -d, safeBlend);
     float h = 0.0;
-    if (blend > 0.001) {
-      h = clamp(0.5 + 0.5 * (-d - res.x) / blend, 0.0, 1.0);
+    if (safeBlend > 0.001) {
+      h = clamp(0.5 + 0.5 * (-d - res.x) / safeBlend, 0.0, 1.0);
     } else {
       h = (-d > res.x) ? 1.0 : 0.0;
     }

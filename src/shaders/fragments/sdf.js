@@ -22,10 +22,12 @@ float sdRoundBox(vec3 p, vec3 b, float r) {
   return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0) - r;
 }
 float smin(float a, float b, float k) {
+  if (k <= 0.0001) return min(a, b);
   float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
   return mix(b, a, h) - k * h * (1.0 - h);
 }
 float smax(float a, float b, float k) {
+  if (k <= 0.0001) return max(a, b);
   return -smin(-a, -b, k);
 }
 `;
