@@ -1,7 +1,8 @@
-import { UPGRADES_PER_SCREEN } from '../game/wave-constants.js';
 import { gameState } from '../game/state.js';
 import { ALL_UPGRADES } from '../game/upgrades/upgrade-types.js';
-import { getUpgradeCost, getUpgradeEffect, isMaxLevel } from '../game/upgrades/upgrade-calculator.js';
+import { getUpgradeCost, isMaxLevel } from '../game/upgrades/upgrade-calculator.js';
+
+const UPGRADES_PER_SCREEN = 3;
 
 export function createUpgradeScreen() {
   const screen = document.getElementById('upgradeScreen');
@@ -56,7 +57,6 @@ export function createUpgradeScreen() {
     
     screen.classList.add('active');
     
-    // Add click handlers
     const cards = screen.querySelectorAll('.upgrade-card');
     
     cards.forEach(card => {
@@ -68,11 +68,9 @@ export function createUpgradeScreen() {
         if (card.classList.contains('disabled') || card.classList.contains('maxed') || card.classList.contains('purchased')) return;
         if (gameState.currencies.caramel < cost) return;
         
-        // Purchase upgrade
         gameState.currencies.caramel -= cost;
         gameState.upgrades[upgradeId] = currentLevel + 1;
         
-        // Re-render the same options
         show();
       });
     });

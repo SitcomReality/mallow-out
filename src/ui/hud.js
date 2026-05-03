@@ -17,14 +17,12 @@ export function createHUD() {
         </div>
       </div>
       <div class="nav-buttons">
-         <button id="navShop" class="nav-btn wonky" data-fill="#00ff7f" data-stroke="#000000" data-stroke-width="3">Shop</button>
          <button id="navUpgrades" class="nav-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="3">Upgrades</button>
          <button id="navSettings" class="nav-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">Settings</button>
       </div>
     </div>
   `;
   
-  // Wire up the settings button to open the pause/change menu (same action as pressing Esc)
   const settingsBtn = hud.querySelector('#navSettings');
   if (settingsBtn) {
     settingsBtn.addEventListener('click', (e) => {

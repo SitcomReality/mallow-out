@@ -17,9 +17,6 @@ export function saveGame() {
   }
 }
 
-/**
- * Loads game progression from localStorage into the gameState.
- */
 export function loadGame() {
   try {
     const saved = localStorage.getItem(SAVE_KEY);
@@ -27,11 +24,9 @@ export function loadGame() {
     
     const data = JSON.parse(saved);
     
-    // Merge data into state
     gameState.totalMarshmallowsDestroyed = data.totalMarshmallowsDestroyed || 0;
     gameState.currencies = data.currencies || { pollen: 0, caramel: 0 };
     gameState.upgrades = data.upgrades || {};
-    gameState.equippedPetals = data.equippedPetals || [null, null, null, null, null];
     
     console.log('[Persistence] Game loaded successfully');
     return true;
@@ -41,16 +36,10 @@ export function loadGame() {
   }
 }
 
-/**
- * Checks if a save exists.
- */
 export function hasSaveGame() {
   return localStorage.getItem(SAVE_KEY) !== null;
 }
 
-/**
- * Deletes the save data.
- */
 export function clearSaveGame() {
   localStorage.removeItem(SAVE_KEY);
   console.log('[Persistence] Save data cleared.');

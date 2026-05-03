@@ -3,14 +3,12 @@ import { MARSHMALLOW_CYLINDER_RADIUS, MARSHMALLOW_CYLINDER_HEIGHT, MARSHMALLOW_H
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
-import { BASE_MOVEMENT_SPEED, BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
+import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
 
 let nextId = 1;
 
 /**
- * Creates a marshmallow entity.
- * Distinctions between types are now purely visual (color/name) and reward-based.
- * Size and movement properties are unified with minor random variance for flavor.
+ * Creates the marshmallow pet.
  */
 export function createMarshmallow(totalDestroyed) {
   const angle = Math.random() * Math.PI * 2;
@@ -20,13 +18,11 @@ export function createMarshmallow(totalDestroyed) {
   
   const type = selectMarshmallowType();
   
-  // Minor visual variation (Hue/Sat/Light)
   const hue = type.color.hue + (Math.random() - 0.5) * 0.04;
   const sat = type.color.satMin + Math.random() * (type.color.satMax - type.color.satMin);
   const light = type.color.lightMin + Math.random() * (type.color.lightMax - type.color.lightMin);
   const color = new THREE.Color().setHSL(hue, sat, light);
   
-  // Minor size variation for all types
   const sizeMultiplier = 0.95 + Math.random() * 0.1;
   const heightMultiplier = 0.95 + Math.random() * 0.1;
   
@@ -49,7 +45,6 @@ export function createMarshmallow(totalDestroyed) {
     expression: EXPRESSION_DEFAULT,
   };
   
-  // Unified movement parameters for all types
   const entity = {
     marshmallow,
     holes: [],
@@ -60,17 +55,9 @@ export function createMarshmallow(totalDestroyed) {
     id: marshmallowId,
     type: type,
     movement: {
-      speed: BASE_MOVEMENT_SPEED * (0.9 + Math.random() * 0.2),
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: BASE_BOB_AMPLITUDE * (0.8 + Math.random() * 0.4),
       baseY: MARSHMALLOW_HEIGHT,
-      currentDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
-      targetDirection: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
-      moveTimer: 0,
-      changeDirectionInterval: 2.0 + Math.random() * 3.0,
-      boundTimer: 0,
-      boundInterval: 3.0 + Math.random() * 4.0,
-      spawnDistance: distance,
     },
   };
   
