@@ -18,46 +18,52 @@ export const session = {
   hasShownSpawnNotification: false,
 };
 
-const MARSHMALLOW_SPAWN_COST = 50; // Marsh currency needed
+/**
+ * Treat cost is stored in gameState.marshmallowTreatCost and increments by 1 after each purchase.
+ * Default starting cost is 1.
+ */
 
 export function canSpawnMarshmallow() {
-  return !gameState.currentMarshmallow && 
-         gameState.meltingMarshmallows.length <= 1 && 
-         gameState.currencies.marsh >= MARSHMALLOW_SPAWN_COST;
+  const cost = gameState.marshmallowTreatCost || 1;
+  return !gameState.currentMarshmallow &&
+         gameState.meltingMarshmallows.length <= 1 &&
+         gameState.currencies.marsh >= cost;
 }
 
 export function spawnNextMarshmallow() {
   if (gameState.currentMarshmallow) return;
   if (gameState.meltingMarshmallows.length > 1) return;
   
-  // Check if player can afford
-  if (gameState.currencies.marsh < MARSHMALLOW_SPAWN_COST) {
+  // Check if player can afford current treat cost
+  const cost = gameState.marshmallowTreatCost || 1;
+  if (gameState.currencies.marsh < cost) {
     if (session.notifications && !session.hasShownSpawnNotification) {
       session.hasShownSpawnNotification = true;
       session.notifications.add({
         id: 'need_marsh',
         sticky: true,
         title: 'Marshmallow Treat Needed!',
-        text: `Shoot the marsh to gather ${MARSHMALLOW_SPAWN_COST} marsh currency, then your friend will emerge!`,
+        text: `Shoot the marsh to gather ${cost} marsh currency, then your friend will emerge!`,
         color: '#8afdff'
       });
     }
     return;
   }
-  
-  // Deduct cost
-  gameState.currencies.marsh -= MARSHMALLOW_SPAWN_COST;
+
+  // Deduct cost and increase the cost for next purchase by 1
+  gameState.currencies.marsh -= cost;
+  gameState.marshmallowTreatCost = (gameState.marshmallowTreatCost || 1) + 1;
   session.hasShownSpawnNotification = false;
-  
+
   const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed);
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
-  
+
   if (session.marshmallowHUD) {
     session.marshmallowHUD.update(marshmallow);
     session.marshmallowHUD.show();
   }
-  
+
   if (session.notifications) {
     session.notifications.add({
       id: `spawn_${marshmallow.name}`,
@@ -67,7 +73,7 @@ export function spawnNextMarshmallow() {
       color: '#ff69b4'
     });
   }
-  
+
   rebuildObjectList();
 }
 

@@ -1,5 +1,5 @@
 import { gameState } from '../game/state.js';
-import { togglePause } from '../game/manager.js';
+import { togglePause, spawnNextMarshmallow } from '../game/manager.js';
 
 export function createHUD() {
   const hud = document.getElementById('hud');
@@ -22,6 +22,7 @@ export function createHUD() {
       </div>
       <div class="nav-buttons">
          <button id="navUpgrades" class="nav-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="3">Upgrades</button>
+         <button id="buyTreat" class="nav-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Buy Treat (💧1)</button>
          <button id="navSettings" class="nav-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">Settings</button>
       </div>
     </div>
@@ -43,6 +44,19 @@ export function createHUD() {
     });
   }
 
+  const buyTreatBtn = hud.querySelector('#buyTreat');
+  if (buyTreatBtn) {
+    buyTreatBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Attempt to spawn/purchase a marshmallow immediately
+      spawnNextMarshmallow();
+      // Update HUD to reflect new currency/cost
+      document.getElementById('pollenDisplay') && (document.getElementById('pollenDisplay').textContent = Math.floor(gameState.currencies.pollen));
+      document.getElementById('caramelDisplay') && (document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel));
+      document.getElementById('marshDisplay') && (document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh));
+    });
+  }
+
   return {
     show() {
       hud.style.display = 'block';
@@ -55,6 +69,20 @@ export function createHUD() {
       document.getElementById('pollenDisplay').textContent = Math.floor(gameState.currencies.pollen);
       document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel);
       document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh);
+
+      // Update Buy Treat button to show current cost and afford state
+      const buyBtn = document.getElementById('buyTreat');
+      if (buyBtn) {
+        const cost = gameState.marshmallowTreatCost || 1;
+        buyBtn.textContent = `Buy Treat (💧${cost})`;
+        if (gameState.currencies.marsh >= cost) {
+          buyBtn.disabled = false;
+          buyBtn.style.opacity = '1';
+        } else {
+          buyBtn.disabled = true;
+          buyBtn.style.opacity = '0.6';
+        }
+      }
       
       // Update cooldown indicator
       const ws = gameState.weaponStates;
