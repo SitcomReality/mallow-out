@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { MARSHMALLOW_CYLINDER_RADIUS, MARSHMALLOW_CYLINDER_HEIGHT, MARSHMALLOW_HEIGHT, MARSHMALLOW_SPAWN_RADIUS } from './marshmallow-constants.js';
+import { SPAWN_START_Y, SPAWN_END_Y } from './spawn-constants.js';
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
 import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
@@ -43,7 +44,8 @@ export function createMarshmallow(totalDestroyed) {
   const marshmallow = {
     id: marshmallowId,
     type: 'cylinder',
-    position: { x, y: MARSHMALLOW_HEIGHT, z },
+    // Start below the floor to avoid a single-frame flash at the final Y before the spawn animation runs
+    position: { x, y: SPAWN_START_Y, z },
     rotation: { x: 0, y: 0, z: Math.PI / 2 },
     scale: { 
       x: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier, 
@@ -72,7 +74,7 @@ export function createMarshmallow(totalDestroyed) {
     movement: {
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: BASE_BOB_AMPLITUDE * (0.8 + Math.random() * 0.4),
-      baseY: MARSHMALLOW_HEIGHT,
+      baseY: SPAWN_END_Y,
     },
   };
   
