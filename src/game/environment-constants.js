@@ -11,5 +11,5 @@ export const ENV_COLORS = {
 export const ENV_SETTINGS = {
   fogDensity: 0.0,
   floorTextured: 1.0,
-  skyTextured: 1.0,
+  skyTextured: 0.0,
 };
