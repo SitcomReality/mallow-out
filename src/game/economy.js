@@ -29,6 +29,7 @@ export function awardMarsh() {
     }
   }
   
+  saveGame();
   return marsh;
 }
 
@@ -62,4 +63,33 @@ export function awardPollen() {
   
   saveGame();
   return pollen;
+}
+
+/**
+ * Awards caramel when a marshmallow is defeated.
+ * This was added so manager.onMarshmallowDefeated can import awardCaramel().
+ * The amount is derived from upgrades and a base reward tied to total destroyed.
+ */
+export function awardCaramel() {
+  // Base caramel reward for defeating a marshmallow (scaled mildly by progression)
+  const baseCaramel = 1;
+  const progressBonus = Math.floor(gameState.totalMarshmallowsDestroyed / 10); // small milestone bonus
+  const upgradeBonus = getUpgradeEffect('caramel_bonus', gameState.upgrades.caramel_bonus || 0);
+  
+  const caramel = Math.max(1, Math.floor((baseCaramel + progressBonus) * (1 + upgradeBonus)));
+  gameState.currencies.caramel += caramel;
+  
+  if (session.notifications && caramel > 0) {
+    session.notifications.add({
+      id: 'caramel_from_defeat',
+      sticky: false,
+      title: 'Caramel Reward',
+      text: `You gained ${caramel} caramel for defeating a marshmallow!`,
+      value: caramel,
+      color: '#ff8c00'
+    });
+  }
+  
+  saveGame();
+  return caramel;
 }
