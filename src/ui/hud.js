@@ -21,15 +21,19 @@ export function createHUD() {
         </div>
       </div>
       <div class="nav-buttons">
+         <button id="navShop" class="nav-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Shop</button>
          <button id="navUpgrades" class="nav-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="3">Upgrades</button>
          <div id="treatControls" style="display: flex; gap: 4px;">
-           <button id="buyTreat" class="nav-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Buy Treat (💧1)</button>
            <button id="equipTreat" class="nav-btn wonky" data-fill="#ffd700" data-stroke="#000000" data-stroke-width="3">Equip (0)</button>
          </div>
          <button id="navSettings" class="nav-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">Settings</button>
       </div>
     </div>
     <div class="hud-bottom">
+      <div id="comboMeter" class="combo-meter" style="display: none;">
+        <div class="combo-text">COMBO x<span id="comboCount">0</span></div>
+        <div class="combo-multiplier">+<span id="comboMultiplier">0</span>%</div>
+      </div>
       <div id="cooldownIndicator" class="cooldown-indicator" style="display: none;">
         <div class="cooldown-bar wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
           <div class="cooldown-fill" style="width: 0%; background: #ffd700;"></div>
@@ -47,11 +51,16 @@ export function createHUD() {
     });
   }
 
-  const buyTreatBtn = hud.querySelector('#buyTreat');
-  if (buyTreatBtn) {
-    buyTreatBtn.addEventListener('click', (e) => {
+  const shopBtn = hud.querySelector('#navShop');
+  if (shopBtn) {
+    shopBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      import('../game/manager.js').then(m => m.buyMarshmallowTreat());
+      import('./shop.js').then(m => {
+        if (!window._shopInstance) {
+          window._shopInstance = m.createShop();
+        }
+        window._shopInstance.show();
+      });
     });
   }
 
@@ -76,15 +85,6 @@ export function createHUD() {
       document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel);
       document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh);
 
-      // Update Buy Treat button to show current cost and afford state
-      const buyBtn = document.getElementById('buyTreat');
-      if (buyBtn) {
-        const cost = gameState.marshmallowTreatCost || 1;
-        buyBtn.textContent = `Buy Treat (💧${cost})`;
-        buyBtn.disabled = gameState.currencies.marsh < cost;
-        buyBtn.style.opacity = buyBtn.disabled ? '0.6' : '1';
-      }
-
       const equipBtn = document.getElementById('equipTreat');
       if (equipBtn) {
         const treats = gameState.currencies.treats || 0;
@@ -96,6 +96,23 @@ export function createHUD() {
           equipBtn.style.filter = 'hue-rotate(90deg)';
         } else {
           equipBtn.style.filter = 'none';
+        }
+      }
+      
+      // Update combo meter
+      const comboEl = document.getElementById('comboMeter');
+      if (comboEl) {
+        if (gameState.combo.count > 1 && gameState.combo.timer > 0) {
+          comboEl.style.display = 'block';
+          const countSpan = comboEl.querySelector('#comboCount');
+          const multSpan = comboEl.querySelector('#comboMultiplier');
+          if (countSpan) countSpan.textContent = gameState.combo.count;
+          if (multSpan) {
+            const mult = ((gameState.combo.count - 1) * 10);
+            multSpan.textContent = mult;
+          }
+        } else {
+          comboEl.style.display = 'none';
         }
       }
       

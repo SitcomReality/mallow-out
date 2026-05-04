@@ -9,6 +9,7 @@ import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { handleMarshmallowHit } from './logic.js';
 import { healMarshmallow } from '../marshmallow.js';
+import { registerHit, getComboMultiplier } from '../combo-system.js';
 
 export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) {
   const ws = gameState.weaponStates;
@@ -53,7 +54,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
 
     if (floorResult.hit) {
       // Floor hit logic - execute regardless of whether a marshmallow was also hit
-      const marshReward = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
+      registerHit('marsh');
+      const baseMarsh = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
+      const comboMult = getComboMultiplier();
+      const marshReward = Math.floor(baseMarsh * comboMult);
       gameState.currencies.marsh += marshReward;
       
       if (usedAmmo === 'treat') {
@@ -73,10 +77,12 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     }
 
     // Marshmallow hit logic
+    registerHit('marshmallow');
     const isCritical = rollCriticalHit();
     const baseHeal = 3.0;
     const healBonus = getUpgradeEffect('mallow_heal', gameState.upgrades.mallow_heal || 0);
-    const healAmount = baseHeal * (1 + healBonus);
+    const comboMult = getComboMultiplier();
+    const healAmount = baseHeal * (1 + healBonus) * comboMult;
 
     applyHolepunch(gameState.currentMarshmallow, result.point, direction);
     

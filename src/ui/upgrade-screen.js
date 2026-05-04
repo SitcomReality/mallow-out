@@ -1,37 +1,39 @@
 import { gameState } from '../game/state.js';
-import { ALL_UPGRADES } from '../game/upgrades/upgrade-types.js';
-import { getUpgradeCost, isMaxLevel } from '../game/upgrades/upgrade-calculator.js';
+import { UPGRADE_CATEGORIES, getUpgradesByCategory } from '../game/upgrades/upgrade-types.js';
+import { getUpgradeCost, isMaxLevel, canPurchaseUpgrade } from '../game/upgrades/upgrade-calculator.js';
+import { saveGame } from '../game/persistence.js';
 
-const UPGRADES_PER_SCREEN = 3;
+const CATEGORY_NAMES = {
+  [UPGRADE_CATEGORIES.PLAYER]: 'Player',
+  [UPGRADE_CATEGORIES.MARSHMALLOW]: 'Marshmallow',
+  [UPGRADE_CATEGORIES.ECONOMY]: 'Economy',
+  [UPGRADE_CATEGORIES.AUTOMATION]: 'Automation',
+};
 
 export function createUpgradeScreen() {
   const screen = document.getElementById('upgradeScreen');
-  let currentOptions = [];
   
-  function show() {
-    if (currentOptions.length === 0) {
-      const availableUpgrades = ALL_UPGRADES.filter(upgrade => 
-        !isMaxLevel(upgrade.id, gameState.upgrades[upgrade.id] || 0)
-      );
-      
-      const shuffled = [...availableUpgrades].sort(() => Math.random() - 0.5);
-      currentOptions = shuffled.slice(0, Math.min(UPGRADES_PER_SCREEN, shuffled.length));
-    }
-    
-    const optionsHTML = currentOptions.map(upgrade => {
+  function renderCategory(category) {
+    const upgrades = getUpgradesByCategory(category);
+    const upgradeHTML = upgrades.map(upgrade => {
       const currentLevel = gameState.upgrades[upgrade.id] || 0;
       const cost = getUpgradeCost(upgrade.id, currentLevel);
       const maxed = isMaxLevel(upgrade.id, currentLevel);
-      const canAfford = !maxed && gameState.currencies.caramel >= cost;
+      const canAfford = canPurchaseUpgrade(upgrade.id, currentLevel, gameState.currencies.caramel);
+      const locked = upgrade.prerequisite && !(gameState.upgrades[upgrade.prerequisite] > 0);
       
       return `
-        <div class="upgrade-card wonky ${canAfford ? '' : 'disabled'} ${maxed ? 'maxed' : ''}" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" data-id="${upgrade.id}" data-cost="${cost}">
+        <div class="upgrade-card wonky ${canAfford && !locked ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${locked ? 'locked' : ''}" 
+             data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" 
+             data-id="${upgrade.id}" data-cost="${cost}">
           <div class="upgrade-card-icon" style="font-size: 32px;">${upgrade.icon}</div>
           <h3 class="upgrade-card-name" style="font-size: 10px; color: #000000; margin: 8px 0;">${upgrade.name}</h3>
-          <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">${maxed ? 'MAX LEVEL' : 'Level ' + currentLevel}</div>
+          <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+            ${maxed ? 'MAX' : locked ? '🔒 LOCKED' : 'Lv ' + currentLevel}
+          </div>
           <p class="upgrade-card-desc" style="font-size: 8px; color: #000000; margin: 8px 0;">${upgrade.description}</p>
           <div class="upgrade-effect">${upgrade.shortDesc}</div>
-          ${!maxed ? `
+          ${!maxed && !locked ? `
             <div class="upgrade-cost">
               <span class="currency-icon">🍯</span>
               <span>${cost}</span>
@@ -41,6 +43,21 @@ export function createUpgradeScreen() {
       `;
     }).join('');
     
+    return `
+      <div class="upgrade-category">
+        <h3 class="category-title">${CATEGORY_NAMES[category]}</h3>
+        <div class="category-upgrades">
+          ${upgradeHTML}
+        </div>
+      </div>
+    `;
+  }
+  
+  function show() {
+    const categoriesHTML = Object.values(UPGRADE_CATEGORIES)
+      .map(cat => renderCategory(cat))
+      .join('');
+    
     screen.innerHTML = `
       <div class="upgrade-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
         <h2 class="upgrade-title">Permanent Upgrades</h2>
@@ -48,8 +65,8 @@ export function createUpgradeScreen() {
           <span class="currency-icon">🍯</span> 
           ${gameState.currencies.caramel} Caramel Available
         </p>
-        <div class="upgrade-options">
-          ${optionsHTML}
+        <div class="upgrade-categories-container">
+          ${categoriesHTML}
         </div>
         <button class="continue-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="4" id="upgradeClose">Close</button>
       </div>
@@ -58,19 +75,20 @@ export function createUpgradeScreen() {
     screen.classList.add('active');
     
     const cards = screen.querySelectorAll('.upgrade-card');
-    
     cards.forEach(card => {
       card.addEventListener('click', () => {
+        if (card.classList.contains('locked') || card.classList.contains('maxed')) return;
+        
         const upgradeId = card.dataset.id;
         const currentLevel = gameState.upgrades[upgradeId] || 0;
         const cost = getUpgradeCost(upgradeId, currentLevel);
         
-        if (card.classList.contains('disabled') || card.classList.contains('maxed') || card.classList.contains('purchased')) return;
+        if (card.classList.contains('disabled')) return;
         if (gameState.currencies.caramel < cost) return;
         
         gameState.currencies.caramel -= cost;
         gameState.upgrades[upgradeId] = currentLevel + 1;
-        
+        saveGame();
         show();
       });
     });

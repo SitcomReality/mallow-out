@@ -21,13 +21,36 @@ export const gameState = {
     treats: 0, // Stackable inventory items
   },
   upgrades: {
-    pollen_multiplier: 0,
-    caramel_bonus: 0,
+    // Player
     shot_cooldown: 0,
-    marsh_reward: 0,
+    combo_duration: 0,
+    // Marshmallow
     mallow_heal: 0,
     hit_protection: 0,
     health_regen: 0,
+    mallow_max_health: 0,
+    // Economy
+    pollen_multiplier: 0,
+    caramel_bonus: 0,
+    marsh_reward: 0,
+    // Automation
+    auto_shooter_unlock: 0,
+    auto_shooter_rate: 0,
+    auto_shooter_value: 0,
+  },
+
+  // Automation timers
+  automationTimers: {
+    auto_shooter: 0,
+    comet: 0,
+    laser: 0,
+  },
+  
+  // Combo tracking
+  combo: {
+    count: 0,
+    timer: 0,
+    type: null,
   },
 
   // Dynamic cost for marshmallow treats (starts at 1 and increases by 1 each purchase)

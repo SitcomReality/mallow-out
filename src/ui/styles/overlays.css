@@ -52,11 +52,35 @@
   font-weight: 400;
 }
 
-.upgrade-options {
+.upgrade-categories-container {
+  max-height: 60vh;
+  overflow-y: auto;
+  margin-bottom: 24px;
+}
+
+.upgrade-category {
+  margin-bottom: 32px;
+}
+
+.category-title {
+  font-size: 14px;
+  color: #000000;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  text-align: center;
+  letter-spacing: 2px;
+}
+
+.category-upgrades {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.upgrade-card.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.7);
 }
 
 @media (max-width: 600px) {
@@ -74,7 +98,7 @@
     font-size: 8px;
     margin-bottom: 12px;
   }
-  .upgrade-options {
+  .category-upgrades {
     grid-template-columns: 1fr;
     gap: 12px;
   }

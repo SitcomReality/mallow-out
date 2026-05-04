@@ -8,6 +8,8 @@ import { rebuildObjectList } from './combat.js';
 import { updateFX } from './fx.js';
 import { updateDynamicResolution } from './render-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
+import { updateAutomations } from './automations/automation-logic.js';
+import { updateComboSystem } from './combo-system.js';
 
 let lastTime = 0;
 
@@ -22,6 +24,8 @@ export function runGameLoop(time) {
     updateControls(delta);
     updateWeaponCooldowns(delta);
     updateMarshmallows(delta);
+    updateAutomations(delta);
+    updateComboSystem(delta);
     
     session.particleSystem.update(delta);
     session.floatingTextSystem.update(delta);
@@ -34,8 +38,6 @@ export function runGameLoop(time) {
     rebuildObjectList();
     
     if (session.hud) session.hud.update();
-    
-    // Automatic spawning removed — marshmallows now require manual purchase via Buy Treat.
   }
   
   if (session.renderFn) {
