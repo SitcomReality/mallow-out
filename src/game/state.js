@@ -53,8 +53,18 @@ export const gameState = {
     type: null,
   },
 
-  // Dynamic cost for marshmallow treats (starts at 1 and increases by 1 each purchase)
-  marshmallowTreatCost: 1,
+  // Dynamic cost for marshmallow treats (starts at 10 and increases by 20% each purchase)
+  marshmallowTreatCost: 10,
+  
+  // Tutorial state
+  tutorial: {
+    completed: false,
+    currentStep: 0,
+    hasShot: false,
+    hasBoughtTreat: false,
+    hasShotMarshmallow: false,
+    hasUpgraded: false,
+  },
   // Persisted player marshmallow identity (keeps name across respawns / savegames)
   playerMarshmallowName: null,
 

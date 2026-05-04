@@ -9,8 +9,9 @@ export function createShop() {
   document.body.appendChild(overlay);
   
   function show() {
-    const treatCost = gameState.marshmallowTreatCost || 1;
-    const canAffordTreat = gameState.currencies.marsh >= treatCost;
+    const treatCost = import('../game/manager.js').then(m => m.getTreatCost());
+    Promise.resolve(treatCost).then(cost => {
+      const canAffordTreat = gameState.currencies.marsh >= cost;
     
     overlay.innerHTML = `
       <div class="shop-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
@@ -32,7 +33,7 @@ export function createShop() {
             </div>
             <div class="shop-item-cost">
               <span class="currency-icon">💧</span>
-              <span>${treatCost}</span>
+              <span>${cost}</span>
             </div>
           </div>
         </div>
@@ -57,6 +58,7 @@ export function createShop() {
     if (closeBtn) {
       closeBtn.addEventListener('click', () => hide());
     }
+    });
   }
   
   function hide() {

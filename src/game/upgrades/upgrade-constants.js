@@ -2,46 +2,46 @@
 
 export const UPGRADE_COSTS = {
   // Player
-  shot_cooldown: { baseCost: 150, multiplier: 1.8 },
-  combo_duration: { baseCost: 100, multiplier: 1.6 },
+  shot_cooldown: { baseCost: 50, multiplier: 1.5 },
+  combo_duration: { baseCost: 40, multiplier: 1.4 },
   
   // Marshmallow
-  mallow_heal: { baseCost: 200, multiplier: 1.6 },
-  hit_protection: { baseCost: 180, multiplier: 1.7 },
-  health_regen: { baseCost: 250, multiplier: 1.8 },
-  mallow_max_health: { baseCost: 300, multiplier: 1.7 },
+  mallow_heal: { baseCost: 30, multiplier: 1.4 },
+  hit_protection: { baseCost: 35, multiplier: 1.4 },
+  health_regen: { baseCost: 40, multiplier: 1.5 },
+  mallow_max_health: { baseCost: 25, multiplier: 1.3 },
   
   // Economy
-  pollen_multiplier: { baseCost: 20, multiplier: 1.6 },
-  caramel_bonus: { baseCost: 35, multiplier: 1.7 },
-  marsh_reward: { baseCost: 100, multiplier: 1.5 },
+  pollen_multiplier: { baseCost: 5, multiplier: 1.5 },
+  caramel_bonus: { baseCost: 10, multiplier: 1.6 },
+  marsh_reward: { baseCost: 15, multiplier: 1.4 },
   
   // Automation
-  auto_shooter_unlock: { baseCost: 500, multiplier: 1.0 },
-  auto_shooter_rate: { baseCost: 200, multiplier: 1.6 },
-  auto_shooter_value: { baseCost: 150, multiplier: 1.5 },
+  auto_shooter_unlock: { baseCost: 100, multiplier: 1.0 },
+  auto_shooter_rate: { baseCost: 50, multiplier: 1.5 },
+  auto_shooter_value: { baseCost: 35, multiplier: 1.4 },
 };
 
 export const UPGRADE_EFFECTS = {
   // Player
-  shot_cooldown: { perLevel: 0.1 }, // -10% cooldown
+  shot_cooldown: { perLevel: 0.15 }, // -15% cooldown
   combo_duration: { perLevel: 0.5 }, // +0.5s combo window
   
   // Marshmallow
-  mallow_heal: { perLevel: 0.25 }, // +25% healing
-  hit_protection: { perLevel: 0.5 }, // +0.5s protection
+  mallow_heal: { perLevel: 0.3 }, // +30% healing
+  hit_protection: { perLevel: 1.0 }, // +1s protection
   health_regen: { perLevel: 0.5 }, // 50% slower health loss
-  mallow_max_health: { perLevel: 0.2 }, // +20% max HP
+  mallow_max_health: { perLevel: 0.25 }, // +25% max HP
   
-  // Economy
-  pollen_multiplier: { perLevel: 0.2 }, // +20% pollen
-  caramel_bonus: { perLevel: 0.2 }, // +20% caramel
-  marsh_reward: { perLevel: 1.0 }, // +1 marsh per shot
+  // Economy (with diminishing returns built in via cost scaling)
+  pollen_multiplier: { perLevel: 0.25 }, // +25% pollen
+  caramel_bonus: { perLevel: 0.15 }, // +15% caramel
+  marsh_reward: { perLevel: 0.5 }, // +50% marsh per shot
   
   // Automation
   auto_shooter_unlock: { perLevel: 1.0 }, // Unlock flag
-  auto_shooter_rate: { perLevel: 0.2 }, // +20% fire rate
-  auto_shooter_value: { perLevel: 0.1 }, // +10% value
+  auto_shooter_rate: { perLevel: 0.25 }, // +25% fire rate
+  auto_shooter_value: { perLevel: 0.2 }, // +20% value
 };
 
 export const MAX_UPGRADE_LEVELS = {

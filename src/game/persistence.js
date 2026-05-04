@@ -9,8 +9,9 @@ export function saveGame() {
     upgrades: { ...gameState.upgrades },
     // Persist player's marshmallow identity, current treat cost, and inventory
     playerMarshmallowName: gameState.playerMarshmallowName || null,
-    marshmallowTreatCost: gameState.marshmallowTreatCost || 1,
+    marshmallowTreatCost: gameState.marshmallowTreatCost || 10,
     hasShownSpawnNotification: false,
+    tutorial: { ...gameState.tutorial },
   };
   
   try {
@@ -34,7 +35,15 @@ export function loadGame() {
     gameState.upgrades = data.upgrades || {};
     // Restore persisted marshmallow identity and treat cost if present
     gameState.playerMarshmallowName = data.playerMarshmallowName || null;
-    gameState.marshmallowTreatCost = data.marshmallowTreatCost || (gameState.marshmallowTreatCost || 1);
+    gameState.marshmallowTreatCost = data.marshmallowTreatCost || 10;
+    gameState.tutorial = data.tutorial || {
+      completed: false,
+      currentStep: 0,
+      hasShot: false,
+      hasBoughtTreat: false,
+      hasShotMarshmallow: false,
+      hasUpgraded: false,
+    };
     
     console.log('[Persistence] Game loaded successfully');
     return true;

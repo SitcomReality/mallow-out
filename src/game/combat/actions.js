@@ -55,10 +55,13 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     if (floorResult.hit) {
       // Floor hit logic - execute regardless of whether a marshmallow was also hit
       registerHit('marsh');
-      const baseMarsh = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
-      const comboMult = getComboMultiplier();
-      const marshReward = Math.floor(baseMarsh * comboMult);
-      gameState.currencies.marsh += marshReward;
+      const marshReward = import('../../game/economy.js').then(m => m.awardMarsh());
+      
+      // Tutorial progress
+      if (!gameState.tutorial.hasShot) {
+        gameState.tutorial.hasShot = true;
+        gameState.tutorial.currentStep = 1;
+      }
       
       if (usedAmmo === 'treat') {
         import('../manager.js').then(m => m.spawnNextMarshmallowAt(floorResult.point));
@@ -78,8 +81,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
 
     // Marshmallow hit logic
     registerHit('marshmallow');
-    const isCritical = rollCriticalHit();
-    const baseHeal = 3.0;
+    const baseHeal = 10.0;
     const healBonus = getUpgradeEffect('mallow_heal', gameState.upgrades.mallow_heal || 0);
     const comboMult = getComboMultiplier();
     const healAmount = baseHeal * (1 + healBonus) * comboMult;
@@ -90,11 +92,18 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     const hitNormal = direction.clone().multiplyScalar(-1);
     particleSystem.createMallowSplatter(result.point, hitNormal);
     
-    // Heal instead of damage
+    // Heal and award pollen
     healMarshmallow(gameState.currentMarshmallow, healAmount);
+    const pollenEarned = import('../../game/economy.js').then(m => m.awardPollen());
     
     if (session.floatingTextSystem) {
       session.floatingTextSystem.createDamageText(result.point, healAmount, false);
+    }
+    
+    // Tutorial progress
+    if (!gameState.tutorial.hasShotMarshmallow) {
+      gameState.tutorial.hasShotMarshmallow = true;
+      gameState.tutorial.currentStep = 3;
     }
     
     if (marshmallowHUD) {

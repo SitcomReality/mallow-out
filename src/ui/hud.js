@@ -5,8 +5,19 @@ export function createHUD() {
   const hud = document.getElementById('hud');
   
   hud.innerHTML = `
+    <div id="tutorialOverlay" class="tutorial-overlay" style="display: none;">
+      <div class="tutorial-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="6">
+        <div class="tutorial-text" id="tutorialText"></div>
+        <button id="tutorialNext" class="tutorial-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Got it!</button>
+      </div>
+    </div>
+    
     <div class="hud-top">
       <div class="currency-display">
+        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
+          <span class="currency-icon">💧</span>
+          <span class="currency-value" id="marshDisplay">0</span>
+        </div>
         <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
           <span class="currency-icon">🌼</span>
           <span class="currency-value" id="pollenDisplay">0</span>
@@ -14,10 +25,6 @@ export function createHUD() {
         <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
           <span class="currency-icon">🍯</span>
           <span class="currency-value" id="caramelDisplay">0</span>
-        </div>
-        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
-          <span class="currency-icon">💧</span>
-          <span class="currency-value" id="marshDisplay">0</span>
         </div>
       </div>
       <div class="nav-buttons">
@@ -72,6 +79,45 @@ export function createHUD() {
     });
   }
 
+  // Tutorial system
+  const tutorialMessages = [
+    "Welcome! Click anywhere on the glowing marsh floor to collect marsh currency (💧).",
+    "Great! Now use your marsh to buy a Marshmallow Treat from the Shop. This will summon your marshmallow friend!",
+    "Perfect! Now click on your marshmallow friend to give it love and collect pollen (🌼).",
+    "Excellent! Pollen automatically converts to caramel (🍯) which you can spend on permanent upgrades. Click the Upgrades button to see what's available!",
+    "You've got the basics! Keep shooting to earn resources, buy upgrades to increase your earning rates, and unlock automations for idle progress. Have fun!"
+  ];
+
+  function showTutorialStep() {
+    const step = gameState.tutorial.currentStep;
+    if (step >= tutorialMessages.length || gameState.tutorial.completed) {
+      document.getElementById('tutorialOverlay').style.display = 'none';
+      if (!gameState.tutorial.completed) {
+        gameState.tutorial.completed = true;
+        import('../game/persistence.js').then(m => m.saveGame());
+      }
+      return;
+    }
+    
+    const overlay = document.getElementById('tutorialOverlay');
+    const textEl = document.getElementById('tutorialText');
+    
+    textEl.textContent = tutorialMessages[step];
+    overlay.style.display = 'flex';
+  }
+
+  const tutorialNextBtn = hud.querySelector('#tutorialNext');
+  if (tutorialNextBtn) {
+    tutorialNextBtn.addEventListener('click', () => {
+      document.getElementById('tutorialOverlay').style.display = 'none';
+    });
+  }
+
+  // Show first tutorial message on load if not completed
+  if (!gameState.tutorial.completed) {
+    setTimeout(() => showTutorialStep(), 500);
+  }
+
   return {
     show() {
       hud.style.display = 'block';
@@ -81,9 +127,22 @@ export function createHUD() {
     },
 
     update() {
+      document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh);
       document.getElementById('pollenDisplay').textContent = Math.floor(gameState.currencies.pollen);
       document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel);
-      document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh);
+      
+      // Update tutorial
+      if (!gameState.tutorial.completed) {
+        const lastStep = gameState.tutorial.currentStep;
+        
+        if (gameState.tutorial.hasUpgraded && lastStep < 4) {
+          gameState.tutorial.currentStep = 4;
+        }
+        
+        if (gameState.tutorial.currentStep !== lastStep) {
+          showTutorialStep();
+        }
+      }
 
       const equipBtn = document.getElementById('equipTreat');
       if (equipBtn) {

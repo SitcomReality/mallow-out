@@ -14,14 +14,14 @@ export function updateMarshmallows(delta) {
     updateMarshmallowMovement(marshmallow, delta);
   }
 
-  // Health degeneration system
+  // Health degeneration system (much slower base rate)
   if (marshmallow.lastHitTime !== undefined) {
     const timeSinceHit = performance.now() * 0.001 - marshmallow.lastHitTime;
-    const hitProtectionDuration = 0.5 + getUpgradeEffect('hit_protection', gameState.upgrades.hit_protection || 0);
+    const hitProtectionDuration = 3.0 + getUpgradeEffect('hit_protection', gameState.upgrades.hit_protection || 0);
     
     if (timeSinceHit > hitProtectionDuration) {
-      // Start losing health
-      const baseHealthLossRate = 2.0; // HP per second
+      // Start losing health (much slower than before)
+      const baseHealthLossRate = 0.5; // HP per second (was 2.0)
       const healthLossRate = baseHealthLossRate / (1 + getUpgradeEffect('health_regen', gameState.upgrades.health_regen || 0));
       
       marshmallow.currentHealth = Math.max(0, marshmallow.currentHealth - healthLossRate * delta);

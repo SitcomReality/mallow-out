@@ -20,19 +20,23 @@ export const session = {
 };
 
 /**
- * Treat cost is stored in gameState.marshmallowTreatCost and increments by 1 after each purchase.
- * Default starting cost is 1.
+ * Treat cost increases by 20% each purchase but has diminishing returns built in.
+ * Cost = baseCost * (1.2 ^ purchases), starting at 10 marsh.
  */
 
+export function getTreatCost() {
+  return Math.floor(gameState.marshmallowTreatCost);
+}
+
 export function canSpawnMarshmallow() {
-  const cost = gameState.marshmallowTreatCost || 1;
+  const cost = getTreatCost();
   return !gameState.currentMarshmallow &&
          gameState.meltingMarshmallows.length <= 1 &&
          gameState.currencies.marsh >= cost;
 }
 
 export function buyMarshmallowTreat() {
-  const cost = gameState.marshmallowTreatCost || 1;
+  const cost = getTreatCost();
   if (gameState.currencies.marsh < cost) {
     if (session.notifications) {
       session.notifications.add({
@@ -48,7 +52,16 @@ export function buyMarshmallowTreat() {
 
   gameState.currencies.marsh -= cost;
   gameState.currencies.treats = (gameState.currencies.treats || 0) + 1;
-  gameState.marshmallowTreatCost++;
+  
+  // Increase cost by 20% with diminishing returns
+  gameState.marshmallowTreatCost = Math.floor(gameState.marshmallowTreatCost * 1.2);
+  
+  // Tutorial progress
+  if (!gameState.tutorial.hasBoughtTreat) {
+    gameState.tutorial.hasBoughtTreat = true;
+    gameState.tutorial.currentStep = 2;
+  }
+  
   saveGame();
 }
 

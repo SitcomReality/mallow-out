@@ -88,6 +88,13 @@ export function createUpgradeScreen() {
         
         gameState.currencies.caramel -= cost;
         gameState.upgrades[upgradeId] = currentLevel + 1;
+        
+        // Tutorial progress
+        if (!gameState.tutorial.hasUpgraded) {
+          gameState.tutorial.hasUpgraded = true;
+          gameState.tutorial.currentStep = 4;
+        }
+        
         saveGame();
         show();
       });
