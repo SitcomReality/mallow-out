@@ -4,12 +4,12 @@ import { castRay, getEnemyDistanceAt } from '../shooting.js';
 import { applyHolepunch } from '../damage/actions.js';
 import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
-import { rollCriticalHit, getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
-import { BASE_DAMAGE_HOLEPUNCH } from '../combat-constants.js';
+import { getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
-import { handleMarshmallowHit } from './logic.js';
 import { healMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
+import { awardMarsh, awardPollen } from '../economy.js';
+import { spawnNextMarshmallowAt } from '../manager.js';
 
 export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) {
   const ws = gameState.weaponStates;
@@ -55,7 +55,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     if (floorResult.hit) {
       // Floor hit logic - execute regardless of whether a marshmallow was also hit
       registerHit('marsh');
-      const marshReward = import('../../game/economy.js').then(m => m.awardMarsh());
+      const marshReward = awardMarsh();
       
       // Tutorial progress
       if (!gameState.tutorial.hasShot) {
@@ -64,7 +64,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
       }
       
       if (usedAmmo === 'treat') {
-        import('../manager.js').then(m => m.spawnNextMarshmallowAt(floorResult.point));
+        spawnNextMarshmallowAt(floorResult.point);
       }
 
       if (session.floatingTextSystem) {
@@ -94,7 +94,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     
     // Heal and award pollen
     healMarshmallow(gameState.currentMarshmallow, healAmount);
-    const pollenEarned = import('../../game/economy.js').then(m => m.awardPollen());
+    const pollenEarned = awardPollen();
     
     if (session.floatingTextSystem) {
       session.floatingTextSystem.createDamageText(result.point, healAmount, false);
@@ -113,6 +113,3 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     rebuildObjectList();
   }
 }
-
-export function stopShooting() {}
-export function releaseCleaver() {}

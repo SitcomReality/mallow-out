@@ -1,10 +1,8 @@
 import { gameState } from './state.js';
-import { stopShooting } from './combat.js';
 import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { awardCaramel } from './economy.js';
 import { saveGame } from './persistence.js';
-import * as THREE from 'three';
 
 export const session = {
   isPlaying: false,
@@ -126,7 +124,6 @@ export function onMarshmallowDefeated() {
 export function togglePause() {
   session.isPaused = !session.isPaused;
   if (session.isPaused) {
-    stopShooting();
     session.pauseMenu.show();
   } else {
     session.pauseMenu.hide();
@@ -134,7 +131,6 @@ export function togglePause() {
 }
 
 export function quitToMenu() {
-  stopShooting();
   session.isPlaying = false;
   session.isPaused = false;
   document.getElementById('menu').style.display = 'flex';

@@ -2,6 +2,8 @@ import { gameState } from '../game/state.js';
 import { buyMarshmallowTreat } from '../game/manager.js';
 import { saveGame } from '../game/persistence.js';
 
+import { getTreatCost } from '../game/manager.js';
+
 export function createShop() {
   const overlay = document.createElement('div');
   overlay.id = 'shopOverlay';
@@ -9,9 +11,8 @@ export function createShop() {
   document.body.appendChild(overlay);
   
   function show() {
-    const treatCost = import('../game/manager.js').then(m => m.getTreatCost());
-    Promise.resolve(treatCost).then(cost => {
-      const canAffordTreat = gameState.currencies.marsh >= cost;
+    const cost = getTreatCost();
+    const canAffordTreat = gameState.currencies.marsh >= cost;
     
     overlay.innerHTML = `
       <div class="shop-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
@@ -58,7 +59,6 @@ export function createShop() {
     if (closeBtn) {
       closeBtn.addEventListener('click', () => hide());
     }
-    });
   }
   
   function hide() {

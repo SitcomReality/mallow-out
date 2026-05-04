@@ -15,7 +15,7 @@ import { FloatingTextSystem } from './src/effects/floating-text.js';
 import { FloatingTextRenderer } from './src/effects/floating-text-renderer.js';
 import { session, quitToMenu, togglePause, spawnNextMarshmallow } from './src/game/manager.js';
 import { runGameLoop } from './src/game/loop.js';
-import { shoot } from './src/game/combat.js';
+import { shoot } from './src/game/combat/actions.js';
 import { createMobileControls } from './src/ui/mobile-controls.js';
 import { createNotificationSystem } from './src/ui/notifications.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';

@@ -62,12 +62,14 @@ export function createHUD() {
   if (shopBtn) {
     shopBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      import('./shop.js').then(m => {
-        if (!window._shopInstance) {
+      if (!window._shopInstance) {
+        import('./shop.js').then(m => {
           window._shopInstance = m.createShop();
-        }
+          window._shopInstance.show();
+        });
+      } else {
         window._shopInstance.show();
-      });
+      }
     });
   }
 
