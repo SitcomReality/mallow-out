@@ -2,6 +2,10 @@ export const world = `
 uniform float uFloorEnabled;
 uniform vec3 uFloorColor;
 uniform float uFloorTextured;
+uniform float uWorldBoundsEnabled;
+uniform float uWorldBoundsRadius;
+uniform float uWorldBoundsCenterY;
+uniform float uWorldBoundsOutline;
 
 struct Object {
   float type;      // 0=sphere, 1=box, 2=cylinder, 3=torus
@@ -137,6 +141,22 @@ vec4 map(vec3 p) {
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
   bool worldFirst = false;
+  
+  // World bounding sphere for underground culling
+  float boundingSphereD = 1e10;
+  if (uWorldBoundsEnabled > 0.5) {
+    vec3 sphereCenter = vec3(0.0, uWorldBoundsCenterY, 0.0);
+    boundingSphereD = length(p - sphereCenter) - uWorldBoundsRadius;
+    
+    // Debug outline visualization
+    if (uWorldBoundsOutline > 0.5) {
+      float thickness = 0.05;
+      float outlineDist = abs(boundingSphereD) - thickness;
+      if (outlineDist < worldRes.x) {
+        worldRes = vec4(outlineDist, vec3(1.0, 0.0, 1.0));
+      }
+    }
+  }
 
   for (int i = 0; i < 32; i++) {
     if (float(i) >= uNumObjects) break;
@@ -220,6 +240,11 @@ vec4 map(vec3 p) {
     } else {
       worldRes = blendOp(worldRes, groupRes.x, groupRes.yzw, gOp, gBlend);
     }
+  }
+  
+  // Apply world bounds as final intersection to cull underground geometry
+  if (uWorldBoundsEnabled > 0.5 && uWorldBoundsOutline < 0.5) {
+    worldRes.x = max(worldRes.x, boundingSphereD);
   }
   
   return worldRes;

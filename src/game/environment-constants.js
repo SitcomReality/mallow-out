@@ -13,3 +13,13 @@ export const ENV_SETTINGS = {
   floorTextured: 1.0,
   skyTextured: 0.0,
 };
+
+// World bounding sphere (intersects all geometry to hide underground objects)
+// Radius: 2x ground disc radius (11 units)
+// Center Y: 9.5 (so ground disc edges touch sphere's bottom)
+export const WORLD_BOUNDS = {
+  enabled: true,
+  radius: 11.0,
+  centerY: 9.5,
+  showOutline: true, // Set to false once positioning is verified
+};

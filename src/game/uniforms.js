@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
 import { settings, worldState } from '../state.js';
-import { ENV_COLORS, ENV_SETTINGS } from './environment-constants.js';
+import { ENV_COLORS, ENV_SETTINGS, WORLD_BOUNDS } from './environment-constants.js';
 import { PLAYER_HEIGHT } from './controls-constants.js';
 
 export function updateUniforms(uniforms, time) {
@@ -143,6 +143,12 @@ export function updateUniforms(uniforms, time) {
   uniforms.uFloorEnabled.value = 1;
   uniforms.uFloorTextured.value = ENV_SETTINGS.floorTextured;
   uniforms.uSkyTextured.value = ENV_SETTINGS.skyTextured;
+  
+  // World bounding sphere
+  uniforms.uWorldBoundsEnabled.value = WORLD_BOUNDS.enabled ? 1.0 : 0.0;
+  uniforms.uWorldBoundsRadius.value = WORLD_BOUNDS.radius;
+  uniforms.uWorldBoundsCenterY.value = WORLD_BOUNDS.centerY;
+  uniforms.uWorldBoundsOutline.value = WORLD_BOUNDS.showOutline ? 1.0 : 0.0;
   
   // Selection/outline - controlled by settings.outlinesEnabled
   uniforms.uSelectionInfo.value.set(0, 0);

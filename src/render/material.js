@@ -49,6 +49,10 @@ export function createMainMaterial() {
       uFogDensity: { value: 0.04 },
       uNear: { value: 0.1 },
       uFar: { value: 1000.0 },
+      uWorldBoundsEnabled: { value: 1.0 },
+      uWorldBoundsRadius: { value: 11.0 },
+      uWorldBoundsCenterY: { value: 9.5 },
+      uWorldBoundsOutline: { value: 1.0 },
     },
     vertexShader,
     fragmentShader
