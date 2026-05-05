@@ -33,9 +33,9 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   mov.yaw += yawDiff * Math.min(1.0, delta * turnSpeed);
   marsh.rotation.y = mov.yaw;
 
-  // 2. Move forward in the direction we are facing
+  // 2. Move forward in the direction we are facing (forward = +sin(x) on X, -cos(x) on Z)
   const vx = Math.sin(mov.yaw) * mov.speed;
-  const vz = Math.cos(mov.yaw) * mov.speed;
+  const vz = -Math.cos(mov.yaw) * mov.speed;
   
   marsh.position.x += vx * delta;
   marsh.position.z += vz * delta;
