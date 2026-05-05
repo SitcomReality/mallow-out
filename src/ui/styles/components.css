@@ -191,3 +191,7 @@
   gap: 12px;
   padding: 10px 24px 10px 16px;
 }
+
+.currency-svg {
+  filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.5));
+}

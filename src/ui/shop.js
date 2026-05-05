@@ -1,7 +1,7 @@
 import { gameState } from '../game/state.js';
 import { buyMarshmallowTreat } from '../game/manager.js';
 import { saveGame } from '../game/persistence.js';
-
+import { getCurrencySVG } from './currency-symbols.js';
 import { getTreatCost } from '../game/manager.js';
 
 export function createShop() {
@@ -18,7 +18,7 @@ export function createShop() {
       <div class="shop-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
         <h2 class="shop-title">Shop</h2>
         <p class="shop-subtitle">
-          <span class="currency-icon">💧</span> 
+          ${getCurrencySVG('marsh', 14)} 
           ${gameState.currencies.marsh} Marsh Available
         </p>
         
@@ -26,14 +26,14 @@ export function createShop() {
           <div class="shop-item wonky ${canAffordTreat ? '' : 'disabled'}" 
                data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4"
                data-action="buy-treat">
-            <div class="shop-item-icon">🎁</div>
+            <div class="shop-item-icon">${getCurrencySVG('treat', 48)}</div>
             <div class="shop-item-info">
               <h3 class="shop-item-name">Marshmallow Treat</h3>
               <p class="shop-item-desc">Summon your marshmallow friend</p>
               <div class="shop-item-stock">Stock: ${gameState.currencies.treats || 0}</div>
             </div>
             <div class="shop-item-cost">
-              <span class="currency-icon">💧</span>
+              ${getCurrencySVG('marsh', 18)}
               <span>${cost}</span>
             </div>
           </div>

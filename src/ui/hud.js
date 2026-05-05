@@ -15,15 +15,15 @@ export function createHUD() {
     <div class="hud-top">
       <div class="currency-display">
         <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
-          <span class="currency-icon">💧</span>
+          <span class="currency-icon" id="icon-marsh"></span>
           <span class="currency-value" id="marshDisplay">0</span>
         </div>
         <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
-          <span class="currency-icon">🌼</span>
+          <span class="currency-icon" id="icon-pollen"></span>
           <span class="currency-value" id="pollenDisplay">0</span>
         </div>
         <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
-          <span class="currency-icon">🍯</span>
+          <span class="currency-icon" id="icon-caramel"></span>
           <span class="currency-value" id="caramelDisplay">0</span>
         </div>
       </div>
@@ -114,6 +114,16 @@ export function createHUD() {
       document.getElementById('tutorialOverlay').style.display = 'none';
     });
   }
+
+  // Inject canonical icons
+  import('./currency-symbols.js').then(m => {
+    const marshIcon = hud.querySelector('#icon-marsh');
+    const pollenIcon = hud.querySelector('#icon-pollen');
+    const caramelIcon = hud.querySelector('#icon-caramel');
+    if (marshIcon) marshIcon.innerHTML = m.getCurrencySVG('marsh', 20);
+    if (pollenIcon) pollenIcon.innerHTML = m.getCurrencySVG('pollen', 20);
+    if (caramelIcon) caramelIcon.innerHTML = m.getCurrencySVG('caramel', 20);
+  });
 
   // Show first tutorial message on load if not completed
   if (!gameState.tutorial.completed) {

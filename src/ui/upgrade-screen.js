@@ -2,6 +2,7 @@ import { gameState } from '../game/state.js';
 import { UPGRADE_CATEGORIES, getUpgradesByCategory } from '../game/upgrades/upgrade-types.js';
 import { getUpgradeCost, isMaxLevel, canPurchaseUpgrade } from '../game/upgrades/upgrade-calculator.js';
 import { saveGame } from '../game/persistence.js';
+import { getCurrencySVG } from './currency-symbols.js';
 
 const CATEGORY_NAMES = {
   [UPGRADE_CATEGORIES.PLAYER]: 'Player',
@@ -35,7 +36,7 @@ export function createUpgradeScreen() {
           <div class="upgrade-effect">${upgrade.shortDesc}</div>
           ${!maxed && !locked ? `
             <div class="upgrade-cost">
-              <span class="currency-icon">🍯</span>
+              ${getCurrencySVG('caramel', 14)}
               <span>${cost}</span>
             </div>
           ` : ''}
@@ -62,7 +63,7 @@ export function createUpgradeScreen() {
       <div class="upgrade-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
         <h2 class="upgrade-title">Permanent Upgrades</h2>
         <p class="upgrade-subtitle">
-          <span class="currency-icon">🍯</span> 
+          ${getCurrencySVG('caramel', 16)} 
           ${gameState.currencies.caramel} Caramel Available
         </p>
         <div class="upgrade-categories-container">
