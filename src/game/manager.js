@@ -18,8 +18,8 @@ export const session = {
 };
 
 /**
- * Treat cost increases by 20% each purchase but has diminishing returns built in.
- * Cost = baseCost * (1.2 ^ purchases), starting at 10 marsh.
+ * Treat cost increases by 10% each purchase with simple compounding.
+ * Cost = baseCost * (1.1 ^ purchases), starting at 10 marsh.
  */
 
 export function getTreatCost() {
@@ -51,8 +51,8 @@ export function buyMarshmallowTreat() {
   gameState.currencies.marsh -= cost;
   gameState.currencies.treats = (gameState.currencies.treats || 0) + 1;
   
-  // Increase cost by 20% with diminishing returns
-  gameState.marshmallowTreatCost = Math.floor(gameState.marshmallowTreatCost * 1.2);
+  // Increase cost by 10% (compounded)
+  gameState.marshmallowTreatCost = Math.floor(gameState.marshmallowTreatCost * 1.1);
   
   // Tutorial progress
   if (!gameState.tutorial.hasBoughtTreat) {
