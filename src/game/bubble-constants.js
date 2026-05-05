@@ -12,5 +12,5 @@ export const BUBBLE_POP_NOISE_SCALE = 5.0;
 export const BUBBLE_INITIAL_VELOCITY = 0.2;
 export const BUBBLE_ACCELERATION = 0.5;
 
-export const BUBBLE_SPAWN_MIN_DELAY = 15.0;
-export const BUBBLE_SPAWN_MAX_DELAY = 30.0;
+export const BUBBLE_SPAWN_MIN_DELAY = 3.0;
+export const BUBBLE_SPAWN_MAX_DELAY = 6.0;
