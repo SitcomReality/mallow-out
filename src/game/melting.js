@@ -60,6 +60,12 @@ export function updateMeltingMarshmallows(currentTime) {
       marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
       marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_START, MELT_NOISE_SCALE_END, ease);
       
+      if (marshmallow.goo) {
+        marshmallow.goo.blendRadius = marshmallow.marshmallow.blendRadius;
+        marshmallow.goo.noiseAmount = marshmallow.marshmallow.noiseAmount;
+        marshmallow.goo.noiseScale = marshmallow.marshmallow.noiseScale;
+      }
+
       // Maintain scale during sinking
       marshmallow.marshmallow.scale.x = marshmallow.meltStartScale.x;
       marshmallow.marshmallow.scale.y = marshmallow.meltStartScale.y;
@@ -76,6 +82,12 @@ export function updateMeltingMarshmallows(currentTime) {
       marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_END, 0.0, p);
       marshmallow.marshmallow.noiseScale = lerp(MELT_NOISE_SCALE_END, 0.0, p);
       
+      if (marshmallow.goo) {
+        marshmallow.goo.blendRadius = marshmallow.marshmallow.blendRadius;
+        marshmallow.goo.noiseAmount = marshmallow.marshmallow.noiseAmount;
+        marshmallow.goo.noiseScale = marshmallow.marshmallow.noiseScale;
+      }
+
       // Shrink away
       const finalScaleFactor = 0.01;
       const factor = lerp(1.0, finalScaleFactor, p);

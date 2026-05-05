@@ -61,6 +61,23 @@ export function createMarshmallow(totalDestroyed) {
     parentId: null,
     expression: EXPRESSION_DEFAULT,
   };
+
+  // Internal goo object to provide "blood" color when pierced
+  const goo = {
+    id: nextId++,
+    type: 'sphere',
+    position: { x: 0, y: 0, z: 0 },
+    rotation: { x: 0, y: 0, z: 0 },
+    scale: { 
+      x: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier * 1.5, 
+      y: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier * 1.5, 
+      z: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier * 1.5 
+    },
+    color: '#ff1493', // Deep Pink Goo
+    operation: 'intersect',
+    blendRadius: 0.1,
+    parentId: marshmallowId,
+  };
   
   // Determine name: reuse persisted player name if present, otherwise generate and persist it
   let mName = gameState.playerMarshmallowName;
@@ -71,6 +88,7 @@ export function createMarshmallow(totalDestroyed) {
   
   const entity = {
     marshmallow,
+    goo,
     holes: [],
     hitCount: 0,
     maxHealth: getMarshmallowHealth(totalDestroyed),

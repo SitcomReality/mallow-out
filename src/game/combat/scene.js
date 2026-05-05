@@ -9,10 +9,12 @@ export function rebuildObjectList() {
   gameState.objects = [];
   if (gameState.currentMarshmallow) {
     gameState.objects.push(gameState.currentMarshmallow.marshmallow);
+    if (gameState.currentMarshmallow.goo) gameState.objects.push(gameState.currentMarshmallow.goo);
     gameState.objects.push(...gameState.currentMarshmallow.holes);
   }
   for (const melting of gameState.meltingMarshmallows) {
     gameState.objects.push(melting.marshmallow);
+    if (melting.goo) gameState.objects.push(melting.goo);
     gameState.objects.push(...melting.holes);
   }
 

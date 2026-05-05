@@ -35,6 +35,12 @@ export function updateSpawningMarshmallows(currentTime) {
   
   // Update noise (requested to be less noisy/static)
   enemy.marshmallow.noiseAmount = lerp(SPAWN_NOISE_START, SPAWN_NOISE_END, ease);
+
+  // Sync internal goo properties
+  if (enemy.goo) {
+    enemy.goo.blendRadius = enemy.marshmallow.blendRadius;
+    enemy.goo.noiseAmount = enemy.marshmallow.noiseAmount;
+  }
   
   // Ensure noise offset is initialized but not animated
   if (!enemy.marshmallow.noiseOffset) {

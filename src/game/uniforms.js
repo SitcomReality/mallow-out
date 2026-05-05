@@ -77,6 +77,10 @@ export function updateUniforms(uniforms, time) {
       if (groupMap.has(obj.parentId)) {
         gid = groupMap.get(obj.parentId);
       }
+    } else if (groupMap.has(obj.id)) {
+      // This is a parent object - it should also belong to its own group
+      gid = groupMap.get(obj.id);
+    }
       
       // Transform local to world space if parent is found
       const parent = gameState.objects.find(o => o.id === obj.parentId);
