@@ -93,9 +93,11 @@ export function updateFX(currentTime) {
       }
       fx.blendRadius = lerp(HOLE_SPRAY_INITIAL_BLEND, HOLE_SPRAY_FINAL_BLEND, t);
     } else if (fx.fxData.type === 'ripple') {
-      const radius = lerp(RIPPLE_INITIAL_RADIUS, RIPPLE_FINAL_RADIUS, t);
+      const finalR = fx.fxData.finalRadius || RIPPLE_FINAL_RADIUS;
+      const radius = lerp(RIPPLE_INITIAL_RADIUS, finalR, t);
       fx.scale.x = radius;
-      const thickness = RIPPLE_THICKNESS * (1.0 - t * t);
+      const baseThickness = fx.fxData.thickness || RIPPLE_THICKNESS;
+      const thickness = baseThickness * (1.0 - t * t);
       fx.scale.y = thickness;
       fx.blendRadius = lerp(RIPPLE_INITIAL_BLEND, RIPPLE_FINAL_BLEND, t);
       const sy = (fx.fxData.startY !== undefined) ? fx.fxData.startY : fx.position.y;

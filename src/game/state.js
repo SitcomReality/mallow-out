@@ -74,8 +74,11 @@ export const gameState = {
   // Weapon state used by shooting/combat logic
   weaponStates: {
     skewerCooldown: 0,
-    maxCooldown: 5.0,
+    maxCooldown: 1.0,
     activeAmmo: 'standard', // 'standard' or 'treat'
+    isCharging: false,
+    chargeTimer: 0,
+    maxChargeTime: 3.0,
   },
 };
 
@@ -83,6 +86,12 @@ export function updateWeaponCooldowns(delta) {
   const ws = gameState.weaponStates;
   if (ws.skewerCooldown > 0) {
     ws.skewerCooldown = Math.max(0, ws.skewerCooldown - delta);
+  }
+
+  if (ws.isCharging && ws.skewerCooldown <= 0) {
+    ws.chargeTimer = Math.min(ws.maxChargeTime, ws.chargeTimer + delta);
+  } else {
+    ws.chargeTimer = 0;
   }
 }
 

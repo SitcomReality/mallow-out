@@ -6,14 +6,34 @@ export class TracerSystem {
     this.tracers = [];
   }
 
-  createTracer(start, end, color = 0xffff00) {
+  createTracer(start, end, color = 0xffff00, isCharged = false) {
     const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+    
+    // linewidth is only supported in specific browsers/drivers, but we can try to differentiate
     const material = new THREE.LineBasicMaterial({ 
-      color,
+      color: isCharged ? 0xffffff : color,
       transparent: true,
       opacity: 1,
-      linewidth: 2
+      linewidth: isCharged ? 4 : 2
     });
+
+    if (isCharged) {
+       // Make charged tracer white with yellow core (simulated by adding two lines)
+       const materialGlow = new THREE.LineBasicMaterial({ 
+         color: 0xffff00,
+         transparent: true,
+         opacity: 0.6,
+         linewidth: 8
+       });
+       const lineGlow = new THREE.Line(geometry, materialGlow);
+       lineGlow.renderOrder = 9998;
+       this.scene.add(lineGlow);
+       this.tracers.push({
+         line: lineGlow,
+         life: 0.25,
+         maxLife: 0.25
+       });
+    }
     
     // Ensure tracers always render on top of the SDF by disabling depth testing/writing
     material.depthTest = false;

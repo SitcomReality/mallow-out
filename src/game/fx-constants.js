@@ -21,3 +21,8 @@ export const RIPPLE_FINAL_RADIUS = 1.5;
 export const RIPPLE_THICKNESS = 0.08;
 export const RIPPLE_INITIAL_BLEND = 0.5;
 export const RIPPLE_FINAL_BLEND = 0.3;
+
+// Charged Ripple Effect
+export const CHARGED_RIPPLE_DURATION = 1.4; // 2x as long for same speed feel
+export const CHARGED_RIPPLE_FINAL_RADIUS = 3.0; // 2x as far
+export const CHARGED_RIPPLE_THICKNESS = 0.16; // 2x as thick

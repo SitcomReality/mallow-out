@@ -39,10 +39,12 @@ export function updateRepairs(currentTime, delta) {
       
       const elapsed = currentTime - hole.repairData.startTime;
       
+      const delay = hole.repairData.noDelay ? 0 : REPAIR_DELAY;
+
       // Delay repair start
-      if (elapsed < REPAIR_DELAY) continue;
+      if (elapsed < delay) continue;
       
-      const t = Math.min((elapsed - REPAIR_DELAY) / REPAIR_DURATION, 1.0);
+      const t = Math.min((elapsed - delay) / REPAIR_DURATION, 1.0);
       
       if (t >= 1.0) {
         toRemove.push(hole);

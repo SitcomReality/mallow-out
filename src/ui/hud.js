@@ -196,12 +196,28 @@ export function createHUD() {
           const percent = ((ws.maxCooldown - ws.skewerCooldown) / ws.maxCooldown) * 100;
           const fill = cooldownEl.querySelector('.cooldown-fill');
           const text = cooldownEl.querySelector('.cooldown-text');
-          if (fill) fill.style.width = `${percent}%`;
+          if (fill) {
+            fill.style.width = `${percent}%`;
+            fill.style.background = '#ffd700';
+          }
           if (text) text.textContent = `Cooldown: ${ws.skewerCooldown.toFixed(1)}s`;
+        } else if (ws.isCharging) {
+          cooldownEl.style.display = 'block';
+          const chargePercent = (ws.chargeTimer / ws.maxChargeTime) * 100;
+          const fill = cooldownEl.querySelector('.cooldown-fill');
+          const text = cooldownEl.querySelector('.cooldown-text');
+          if (fill) {
+             fill.style.width = `${chargePercent}%`;
+             fill.style.background = chargePercent >= 100 ? '#ff1493' : '#32cd32';
+          }
+          if (text) text.textContent = chargePercent >= 100 ? 'FULLY CHARGED!' : 'Charging...';
         } else {
           const fill = cooldownEl.querySelector('.cooldown-fill');
           const text = cooldownEl.querySelector('.cooldown-text');
-          if (fill) fill.style.width = '100%';
+          if (fill) {
+            fill.style.width = '100%';
+            fill.style.background = '#ffd700';
+          }
           if (text) text.textContent = 'Ready!';
         }
       }

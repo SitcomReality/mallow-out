@@ -104,8 +104,15 @@ function startGame() {
   
   container.addEventListener('mousedown', (e) => {
     if (session.isPaused) return;
+    gameState.weaponStates.isCharging = true;
+  });
+
+  window.addEventListener('mouseup', (e) => {
+    if (!gameState.weaponStates.isCharging || session.isPaused) return;
+    gameState.weaponStates.isCharging = false;
     
     const rect = container.getBoundingClientRect();
+    // Using current mouse position for final shot location
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     
