@@ -14,30 +14,29 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   // 1. Smooth Meandering Logic
   if (mov.yawVelocity === undefined) mov.yawVelocity = 0;
 
-  // Add random "wobble" to the angular velocity (Brownian motion style)
-  const wobbleAmount = 1.5; 
+  // Add random "wobble" to the angular velocity
+  const wobbleAmount = 2.0; 
   mov.yawVelocity += (Math.random() - 0.5) * wobbleAmount * delta;
   
-  // Apply friction/damping to keep turns from spiraling out of control
-  mov.yawVelocity *= Math.pow(0.2, delta);
+  // Apply friction/damping to keep turns smooth
+  mov.yawVelocity *= Math.pow(0.1, delta);
 
   // 2. Boundary Avoidance (Soft Steering)
   const dist = Math.sqrt(marsh.position.x * marsh.position.x + marsh.position.z * marsh.position.z);
-  const boundaryThreshold = 3.8; // Start turning back before hitting the edge
+  const boundaryThreshold = 3.2; // Turn back earlier
   const hardBoundary = 4.8;
 
   if (dist > boundaryThreshold) {
-    // Calculate angle towards the center of the marsh
-    const angleToCenter = Math.atan2(-marsh.position.x, -marsh.position.z);
+    // Corrected target angle towards center (0,0)
+    const angleToCenter = Math.atan2(-marsh.position.z, -marsh.position.x);
     
     // Calculate the difference between current yaw and angle to center
-    // We treat yaw=0 as facing +X because of the rotation.z=PI/2 base.
     let angleDiff = angleToCenter - mov.yaw;
     while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
     while (angleDiff > Math.PI) angleDiff -= Math.PI * 2;
 
-    // Steering force: increases as we get closer to the edge
-    const steeringStrength = (dist - boundaryThreshold) * 12.0;
+    // Stronger steering force to ensure it turns inward
+    const steeringStrength = (dist - boundaryThreshold) * 15.0;
     mov.yawVelocity += angleDiff * steeringStrength * delta;
   }
 
@@ -46,11 +45,10 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   marsh.rotation.y = mov.yaw;
 
   // 3. Movement Execution
-  // Face orientation alignment: 
-  // Base rotation.z=PI/2 puts the "face" (Local +Y) at World +X when yaw is 0.
-  // Standard rotation around Y maps World X to (cos, 0, -sin).
-  const vx = Math.cos(mov.yaw) * mov.speed;
-  const vz = -Math.sin(mov.yaw) * mov.speed;
+  // Inverting original math to fix "walking backwards"
+  // Based on rotation.z=PI/2 and the shader's face placement:
+  const vx = -Math.cos(mov.yaw) * mov.speed;
+  const vz = Math.sin(mov.yaw) * mov.speed;
   
   marsh.position.x += vx * delta;
   marsh.position.z += vz * delta;
