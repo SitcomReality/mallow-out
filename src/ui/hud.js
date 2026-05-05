@@ -1,5 +1,6 @@
 import { gameState } from '../game/state.js';
 import { togglePause, spawnNextMarshmallow } from '../game/manager.js';
+import { getCurrencySVG } from './currency-symbols.js';
 
 export function createHUD() {
   const hud = document.getElementById('hud');
@@ -81,13 +82,13 @@ export function createHUD() {
     });
   }
 
-  // Tutorial system
+  // Tutorial system using canonical SVG icons
   const tutorialMessages = [
-    "Welcome! Click anywhere on the glowing marsh floor to collect marsh currency (💧).",
-    "Great! Now use your marsh to buy a Marshmallow Treat from the Shop. This will summon your marshmallow friend!",
-    "Perfect! Now click on your marshmallow friend to give it love and collect pollen (🌼).",
-    "Excellent! Pollen automatically converts to caramel (🍯) which you can spend on permanent upgrades. Click the Upgrades button to see what's available!",
-    "You've got the basics! Keep shooting to earn resources, buy upgrades to increase your earning rates, and unlock automations for idle progress. Have fun!"
+    `Welcome! Click anywhere on the glowing marsh floor to collect marsh currency (${getCurrencySVG('marsh',14)}).`,
+    `Great! Now use your marsh to buy a Marshmallow Treat from the Shop. This will summon your marshmallow friend!`,
+    `Perfect! Now click on your marshmallow friend to give it love and collect pollen (${getCurrencySVG('pollen',14)}).`,
+    `Excellent! Pollen automatically converts to caramel (${getCurrencySVG('caramel',14)}) which you can spend on permanent upgrades. Click the Upgrades button to see what's available!`,
+    `You've got the basics! Keep shooting to earn resources, buy upgrades to increase your earning rates, and unlock automations for idle progress. Have fun!`
   ];
 
   function showTutorialStep() {
@@ -104,7 +105,8 @@ export function createHUD() {
     const overlay = document.getElementById('tutorialOverlay');
     const textEl = document.getElementById('tutorialText');
     
-    textEl.textContent = tutorialMessages[step];
+    // tutorialMessages now include inline SVG strings; set as innerHTML to render icons
+    textEl.innerHTML = tutorialMessages[step];
     overlay.style.display = 'flex';
   }
 
@@ -115,15 +117,13 @@ export function createHUD() {
     });
   }
 
-  // Inject canonical icons
-  import('./currency-symbols.js').then(m => {
-    const marshIcon = hud.querySelector('#icon-marsh');
-    const pollenIcon = hud.querySelector('#icon-pollen');
-    const caramelIcon = hud.querySelector('#icon-caramel');
-    if (marshIcon) marshIcon.innerHTML = m.getCurrencySVG('marsh', 20);
-    if (pollenIcon) pollenIcon.innerHTML = m.getCurrencySVG('pollen', 20);
-    if (caramelIcon) caramelIcon.innerHTML = m.getCurrencySVG('caramel', 20);
-  });
+  // Inject canonical icons (still populate the top-left currency icons)
+  const marshIcon = hud.querySelector('#icon-marsh');
+  const pollenIcon = hud.querySelector('#icon-pollen');
+  const caramelIcon = hud.querySelector('#icon-caramel');
+  if (marshIcon) marshIcon.innerHTML = getCurrencySVG('marsh', 20);
+  if (pollenIcon) pollenIcon.innerHTML = getCurrencySVG('pollen', 20);
+  if (caramelIcon) caramelIcon.innerHTML = getCurrencySVG('caramel', 20);
 
   // Show first tutorial message on load if not completed
   if (!gameState.tutorial.completed) {
