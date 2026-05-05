@@ -24,6 +24,11 @@ export class ParticleSystem {
   }
 
   createMallowSplatter(position, normal) {
+    // Normalize incoming position: accept either THREE.Vector3 or a plain {x,y,z} object
+    const origin = (position && typeof position.clone === 'function')
+      ? position.clone()
+      : new THREE.Vector3(position.x || 0, position.y || 0, position.z || 0);
+
     for (let i = 0; i < MALLOW_SPLAT_COUNT; i++) {
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.random() * Math.PI * 0.7; // Wider hemisphere
@@ -33,7 +38,7 @@ export class ParticleSystem {
       
       const speed = MALLOW_SPLAT_MIN_SPEED + Math.random() * (MALLOW_SPLAT_MAX_SPEED - MALLOW_SPLAT_MIN_SPEED);
       this.particles.push({
-        position: position.clone(),
+        position: origin.clone(),
         velocity: spread.multiplyScalar(speed),
         life: MALLOW_SPLAT_LIFETIME * (0.8 + Math.random() * 0.4),
         maxLife: MALLOW_SPLAT_LIFETIME,
@@ -48,13 +53,18 @@ export class ParticleSystem {
   }
 
   createFloorSplash(position) {
+    // Normalize incoming position: accept either THREE.Vector3 or a plain {x,y,z} object
+    const origin = (position && typeof position.clone === 'function')
+      ? position.clone()
+      : new THREE.Vector3(position.x || 0, position.y || 0, position.z || 0);
+
     for (let i = 0; i < FLOOR_SPLASH_COUNT; i++) {
       const angle = Math.random() * Math.PI * 2;
       const up = 0.5 + Math.random() * 0.5;
       const velocity = new THREE.Vector3(Math.cos(angle), up, Math.sin(angle)).normalize().multiplyScalar(FLOOR_SPLASH_SPEED * (0.5 + Math.random() * 0.5));
       
       this.particles.push({
-        position: position.clone(),
+        position: origin.clone(),
         velocity,
         life: FLOOR_SPLASH_LIFETIME * (0.7 + Math.random() * 0.6),
         maxLife: FLOOR_SPLASH_LIFETIME,
