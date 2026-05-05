@@ -19,10 +19,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
   
   const isCharged = ws.chargeTimer >= ws.maxChargeTime;
   
-  // Base cooldown with upgrade reduction
-  const baseCooldown = isCharged ? 3.0 : 1.0;
+  // Always use standard base cooldown after firing (charged shots no longer impose an extended cooldown)
+  const STANDARD_BASE_COOLDOWN = 1.0;
   const cooldownReduction = getUpgradeEffect('shot_cooldown', gameState.upgrades.shot_cooldown || 0);
-  ws.skewerCooldown = Math.max(0.2, baseCooldown * (1 - cooldownReduction));
+  ws.skewerCooldown = Math.max(0.2, STANDARD_BASE_COOLDOWN * (1 - cooldownReduction));
 
   // Reset charging
   ws.chargeTimer = 0;
