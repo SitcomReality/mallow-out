@@ -113,12 +113,12 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     const hitNormal = direction.clone().multiplyScalar(-1);
     particleSystem.createMallowSplatter(result.point, hitNormal);
     
-    // Heal and award pollen
+    // Heal and award pollen (use the same heal amount as the source so displayed value matches actual grant)
     healMarshmallow(gameState.currentMarshmallow, healAmount);
-    const pollenEarned = awardPollen();
+    const pollenEarned = awardPollen(healAmount);
     
     if (session.floatingTextSystem) {
-      session.floatingTextSystem.createDamageText(result.point, healAmount, false);
+      session.floatingTextSystem.createDamageText(result.point, pollenEarned, false);
     }
     
     // Tutorial progress

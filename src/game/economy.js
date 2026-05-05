@@ -39,11 +39,15 @@ export function awardMarsh() {
 /**
  * Awards pollen for shooting the marshmallow friend
  */
-export function awardPollen() {
+export function awardPollen(amount = null) {
+  // If an amount is provided, use that as the raw pollen source (e.g. damage/heal),
+  // otherwise fall back to the base per-shot pollen constant.
   const basePollen = BASE_POLLEN_PER_SHOT;
+  const raw = (amount !== null && !isNaN(amount)) ? Math.max(0, amount) : basePollen;
   const upgradeBonus = getUpgradeEffect('pollen_multiplier', gameState.upgrades.pollen_multiplier || 0);
   
-  const pollen = Math.floor(basePollen * (1 + upgradeBonus));
+  // Scale raw source by upgrade bonus and floor to integer pollen units
+  const pollen = Math.floor(raw * (1 + upgradeBonus));
   gameState.currencies.pollen += pollen;
   
   // Convert pollen to caramel at the conversion rate
