@@ -34,7 +34,8 @@ export function createBubble() {
     type: 'group',
     position: { x, y: BUBBLE_SPAWN_Y, z },
     rotation: { x: 0, y: 0, z: 0 },
-    scale: { x: 0.1, y: 0.1, z: 0.1 },
+    // Much smaller at spawn to create a subtle emergence
+    scale: { x: 0.02, y: 0.02, z: 0.02 },
     operation: 'union',
     blendRadius: BUBBLE_INITIAL_BLEND,
   };
@@ -105,11 +106,13 @@ export function updateBubbles(delta, currentTime) {
       const totalDist = targetY - BUBBLE_SPAWN_Y;
       const progress = Math.max(0, Math.min(1, (bubble.group.position.y - BUBBLE_SPAWN_Y) / totalDist));
       
-      const currentScale = 0.1 + progress * 0.9;
+      // Grow from much smaller start to full size over a longer ascent
+      const currentScale = 0.02 + progress * 0.98;
       bubble.group.scale.x = currentScale;
       bubble.group.scale.y = currentScale;
       bubble.group.scale.z = currentScale;
       
+      // Interpolate blend to the (now larger) final blend
       bubble.group.blendRadius = BUBBLE_INITIAL_BLEND - progress * (BUBBLE_INITIAL_BLEND - BUBBLE_FINAL_BLEND);
       
       if (bubble.group.position.y > BUBBLE_MAX_Y) {
