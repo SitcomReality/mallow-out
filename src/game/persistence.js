@@ -45,6 +45,17 @@ export function loadGame() {
       hasUpgraded: false,
     };
     
+    // Normalize tutorial.currentStep so it reflects completed milestones,
+    // preventing the UI from showing an upcoming step the player hasn't actually reached.
+    // Determine highest completed step (0..4)
+    let completedStep = 0;
+    if (gameState.tutorial.hasShot) completedStep = 1;
+    if (gameState.tutorial.hasBoughtTreat) completedStep = 2;
+    if (gameState.tutorial.hasShotMarshmallow) completedStep = 3;
+    if (gameState.tutorial.hasUpgraded) completedStep = 4;
+    // Clamp stored currentStep to the highest completed step to avoid advancing the tutorial prematurely.
+    gameState.tutorial.currentStep = Math.min(gameState.tutorial.currentStep || 0, completedStep);
+    
     console.log('[Persistence] Game loaded successfully');
     return true;
   } catch (e) {
