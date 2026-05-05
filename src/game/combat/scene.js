@@ -1,6 +1,6 @@
 import { gameState } from '../state.js';
 import { activeFX } from '../fx.js';
-import { getEnemyDistanceAt } from '../shooting.js';
+import { getEnemyDistanceAt, getBubbleDistanceAt } from '../shooting.js';
 
 /**
  * Syncs the visual object list for the raymarching renderer with the current game state.
@@ -16,6 +16,11 @@ export function rebuildObjectList() {
     gameState.objects.push(melting.marshmallow);
     if (melting.goo) gameState.objects.push(melting.goo);
     gameState.objects.push(...melting.holes);
+  }
+
+  // Add bubbles
+  for (const bubble of gameState.bubbles) {
+    gameState.objects.push(bubble.group, bubble.skin, bubble.voidObj);
   }
 
   // Add active visual effects to the raymarching scene
@@ -49,6 +54,13 @@ export function getSceneDistanceAt(p) {
   // 3. Melting marshmallows (optional, but improves collision consistency)
   for (const melting of gameState.meltingMarshmallows) {
     dist = Math.min(dist, getEnemyDistanceAt(melting, p));
+  }
+
+  // 4. Bubbles (only if rising)
+  for (const bubble of gameState.bubbles) {
+    if (bubble.state === 'rising') {
+      dist = Math.min(dist, getBubbleDistanceAt(bubble, p));
+    }
   }
 
   return dist;

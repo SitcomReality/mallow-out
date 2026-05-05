@@ -10,6 +10,7 @@ import { updateDynamicResolution } from './render-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
 import { updateAutomations } from './automations/automation-logic.js';
 import { updateComboSystem } from './combo-system.js';
+import { updateBubbles } from './bubble.js';
 
 let lastTime = 0;
 
@@ -26,6 +27,7 @@ export function runGameLoop(time) {
     updateMarshmallows(delta);
     updateAutomations(delta);
     updateComboSystem(delta);
+    updateBubbles(delta, time * 0.001);
     
     session.particleSystem.update(delta);
     session.floatingTextSystem.update(delta);

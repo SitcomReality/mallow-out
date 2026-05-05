@@ -68,6 +68,9 @@ export const gameState = {
   // Persisted player marshmallow identity (keeps name across respawns / savegames)
   playerMarshmallowName: null,
 
+  bubbles: [],
+  nextBubbleSpawnTime: 0,
+
   // Weapon state used by shooting/combat logic
   weaponStates: {
     skewerCooldown: 0,

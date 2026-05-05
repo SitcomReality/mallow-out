@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
-import { castRay, getEnemyDistanceAt } from '../shooting.js';
+import { castRay, getEnemyDistanceAt, getBubbleDistanceAt } from '../shooting.js';
 import { applyHolepunch } from '../damage/actions.js';
 import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
@@ -8,7 +8,7 @@ import { getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
 import { getSceneDistanceAt, rebuildObjectList } from './scene.js';
 import { healMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
-import { awardMarsh, awardPollen } from '../economy.js';
+import { awardMarsh, awardPollen, awardMarshMultiplier } from '../economy.js';
 import { spawnNextMarshmallowAt } from '../manager.js';
 
 export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) {
@@ -43,6 +43,27 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
   ws.activeAmmo = 'standard';
 
   if (result.hit) {
+    // Check for bubble hit
+    let hitBubble = null;
+    for (const bubble of gameState.bubbles) {
+      if (bubble.state === 'rising' && getBubbleDistanceAt(bubble, result.point) < 0.1) {
+        hitBubble = bubble;
+        break;
+      }
+    }
+
+    if (hitBubble) {
+      hitBubble.state = 'popping';
+      const bubbleReward = awardMarshMultiplier(10);
+      if (session.floatingTextSystem) {
+        session.floatingTextSystem.createDamageText(result.point, bubbleReward, true);
+      }
+      createRippleFX(result.point);
+      particleSystem.createFloorSplash(result.point);
+      rebuildObjectList();
+      return;
+    }
+
     const hitMarshmallow = gameState.currentMarshmallow && getEnemyDistanceAt(gameState.currentMarshmallow, result.point) < 0.1;
     
     // Always check for a floor hit (the marsh) to support "piercing" through the marshmallow

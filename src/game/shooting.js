@@ -20,6 +20,13 @@ export function castRay(origin, direction, distanceFunction, maxDistance = 100) 
   return { hit: false, point: null, distance: maxDistance };
 }
 
+export function getBubbleDistanceAt(bubble, point) {
+  const localP = point.clone().sub(new THREE.Vector3(bubble.group.position.x, bubble.group.position.y, bubble.group.position.z));
+  return localP.length() - bubble.group.scale.x * BUBBLE_OUTER_RADIUS;
+}
+
+import { BUBBLE_OUTER_RADIUS } from './bubble-constants.js';
+
 export function getEnemyDistanceAt(enemy, point) {
   // Transform point to local space of marshmallow
   const localP = point.clone().sub(new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z));

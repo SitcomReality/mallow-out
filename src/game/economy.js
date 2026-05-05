@@ -11,12 +11,11 @@ const CARAMEL_CONVERSION_RATE = 100; // 100 pollen = 1 caramel
 /**
  * Awards marsh currency for shooting the marsh floor
  */
-export function awardMarsh() {
+export function awardMarshMultiplier(multiplier = 1.0) {
   const baseMarsh = BASE_MARSH_PER_SHOT;
   const upgradeBonus = getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);
-  const comboMult = 1; // Could add combo system later
   
-  const marsh = Math.floor(baseMarsh * (1 + upgradeBonus) * comboMult);
+  const marsh = Math.floor(baseMarsh * (1 + upgradeBonus) * multiplier);
   gameState.currencies.marsh += marsh;
   
   // Auto-convert excess marsh to caramel at a very high threshold for late game
@@ -31,6 +30,10 @@ export function awardMarsh() {
   
   saveGame();
   return marsh;
+}
+
+export function awardMarsh() {
+  return awardMarshMultiplier(1.0);
 }
 
 /**
