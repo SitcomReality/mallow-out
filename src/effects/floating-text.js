@@ -5,9 +5,22 @@ export class FloatingTextSystem {
     this.texts = [];
   }
 
+  _normalizePosition(position) {
+    // Accept THREE.Vector3 or plain {x,y,z}
+    if (position && typeof position.clone === 'function') {
+      return position.clone();
+    }
+    return new THREE.Vector3(
+      (position && position.x) || 0,
+      (position && position.y) || 0,
+      (position && position.z) || 0
+    );
+  }
+
   createDamageText(position, damage, isCritical = false) {
+    const origin = this._normalizePosition(position);
     this.texts.push({
-      position: position.clone(),
+      position: origin,
       text: Math.floor(damage).toString(),
       velocity: new THREE.Vector3(
         (Math.random() - 0.5) * 0.5,
@@ -22,8 +35,9 @@ export class FloatingTextSystem {
   }
 
   createInfoText(position, text, type = 'info') {
+    const origin = this._normalizePosition(position);
     this.texts.push({
-      position: position.clone(),
+      position: origin,
       text,
       velocity: new THREE.Vector3(0, 1.5, 0),
       life: 1.5,
