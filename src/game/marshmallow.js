@@ -104,9 +104,9 @@ export function createMarshmallow(totalDestroyed) {
       bobAmplitude: BASE_BOB_AMPLITUDE * (0.8 + Math.random() * 0.4),
       baseY: SPAWN_END_Y,
       yaw: Math.random() * Math.PI * 2,
-      targetYaw: Math.random() * Math.PI * 2,
+      wanderTargetYaw: Math.random() * Math.PI * 2,
+      wanderTimer: 2.0 + Math.random() * 3.0,
       speed: 0.3 + Math.random() * 0.4,
-      turnTimer: 2.0 + Math.random() * 3.0,
     },
   };
   
