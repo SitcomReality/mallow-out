@@ -120,16 +120,8 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
       applyHolepunch(gameState.currentMarshmallow, result.point, direction);
     } else {
       const chunk = applyRoundChunk(gameState.currentMarshmallow, result.point);
-      // Make default round chunk visibly smaller and slightly less blended/noisy
-      chunk.scale = { x: 0.12, y: 0.12, z: 0.12 }; // Reduced small chunk
-      chunk.blendRadius = 0.025; // reduce smoothing/blend so it's crisper
-      chunk.noiseAmount = 0.2; // lessen noisy perturbation for small chunk
-      if (chunk.repairData) {
-        chunk.repairData.noDelay = true; // Heals quickly
-        chunk.repairData.initialScale = 0.12;
-      } else {
-        chunk.repairData = { noDelay: true, initialScale: 0.12 };
-      }
+      chunk.scale = { x: 0.125, y: 0.125, z: 0.125 }; // Smaller chunk (half size)
+      chunk.repairData.noDelay = true; // Heals quickly
     }
     
     // Particles
