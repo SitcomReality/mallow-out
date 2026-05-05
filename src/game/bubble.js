@@ -103,7 +103,7 @@ export function updateBubbles(delta, currentTime) {
       
       const targetY = BUBBLE_MAX_Y;
       const totalDist = targetY - BUBBLE_SPAWN_Y;
-      const progress = Math.max(0, Math.min(1, (bubble.group.position.y - BUBBLE_SPAWY_Y) / totalDist));
+      const progress = Math.max(0, Math.min(1, (bubble.group.position.y - BUBBLE_SPAWN_Y) / totalDist));
       
       const currentScale = 0.1 + progress * 0.9;
       bubble.group.scale.x = currentScale;
