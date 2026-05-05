@@ -60,7 +60,6 @@ function enterGame() {
   
   setTimeout(() => {
     document.getElementById('gameContainer').style.display = 'block';
-    document.getElementById('crosshair').style.display = 'block';
     startGame();
   }, 50);
 }

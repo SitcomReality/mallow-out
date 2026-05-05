@@ -135,7 +135,6 @@ export function quitToMenu() {
   session.isPaused = false;
   document.getElementById('menu').style.display = 'flex';
   document.getElementById('gameContainer').style.display = 'none';
-  document.getElementById('crosshair').style.display = 'none';
   
   if (session.hud) session.hud.hide();
   if (session.marshmallowHUD) session.marshmallowHUD.hide();
