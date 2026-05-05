@@ -120,7 +120,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
       applyHolepunch(gameState.currentMarshmallow, result.point, direction);
     } else {
       const chunk = applyRoundChunk(gameState.currentMarshmallow, result.point);
-      chunk.scale = { x: 0.125, y: 0.125, z: 0.125 }; // Smaller chunk (half size)
+      chunk.scale = { x: 0.05, y: 0.05, z: 0.05 }; // Reduced size for default shot
       chunk.repairData.noDelay = true; // Heals quickly
     }
     
