@@ -121,6 +121,10 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     } else {
       const chunk = applyRoundChunk(gameState.currentMarshmallow, result.point);
       chunk.scale = { x: 0.05, y: 0.05, z: 0.05 }; // Reduced size for default shot
+      // Ensure repair animation uses the same small starting scale
+      if (chunk.repairData) {
+        chunk.repairData.initialScale = 0.05;
+      }
       chunk.repairData.noDelay = true; // Heals quickly
     }
     
