@@ -1,3 +1,4 @@
+import * as THREE from 'three';
 import { gameState } from '../state.js';
 import { getAutomationConfig, AUTOMATION_TYPES } from './automation-types.js';
 import { getUpgradeEffect } from '../upgrades/upgrade-calculator.js';
@@ -23,13 +24,24 @@ export function updateAutomations(delta) {
 }
 
 function fireAutoShooter() {
-  // Random position on the marsh floor
-  const angle = Math.random() * Math.PI * 2;
-  const radius = Math.random() * 4.5;
-  const x = Math.cos(angle) * radius;
-  const z = Math.sin(angle) * radius;
-  
-  const hitPoint = { x, y: 0, z };
+  // Use camera orientation to find a point on the "back wall" of the sphere relative to the player
+  const player = gameState.player;
+  const forward = new THREE.Vector3(
+    Math.sin(player.yaw) * Math.cos(player.pitch),
+    Math.sin(player.pitch),
+    -Math.cos(player.yaw) * Math.cos(player.pitch)
+  ).normalize();
+
+  // Constrain random spread to keep shots within the camera's view
+  const spread = 0.8;
+  const targetDir = forward.clone().add(new THREE.Vector3(
+    (Math.random() - 0.5) * spread,
+    (Math.random() - 0.5) * spread,
+    (Math.random() - 0.5) * spread
+  )).normalize();
+
+  // World sphere radius is 15.0
+  const hitPoint = targetDir.clone().multiplyScalar(15.0);
   
   // Calculate reward
   const baseMarsh = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);

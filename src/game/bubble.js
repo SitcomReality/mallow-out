@@ -21,19 +21,23 @@ import {
 let nextBubbleId = 20000;
 
 export function createBubble() {
-  const angle = Math.random() * Math.PI * 2;
-  // vertical angle (phi) small range for near-back-wall emergence
-  const vertical = (Math.random() - 0.5) * 0.6; // somewhat constrained vertical spread
-  
-  // Spawn just outside the world sphere so the bubble moves inward.
-  const WORLD_RADIUS = 15.0;
-  const spawnOffset = 0.5;
-  const spawnRadius = WORLD_RADIUS + spawnOffset;
-  
-  // Spherical coordinates -> world position at spawnRadius
-  const x = Math.cos(angle) * Math.cos(vertical) * spawnRadius;
-  const y = Math.sin(vertical) * spawnRadius;
-  const z = Math.sin(angle) * Math.cos(vertical) * spawnRadius;
+  // Use camera orientation to find a position on the "back wall" relative to the player
+  const player = gameState.player;
+  const forward = new THREE.Vector3(
+    Math.sin(player.yaw) * Math.cos(player.pitch),
+    Math.sin(player.pitch),
+    -Math.cos(player.yaw) * Math.cos(player.pitch)
+  ).normalize();
+
+  // Constrain spread to stay well within the camera's view
+  const spread = 0.7;
+  const targetDir = forward.clone().add(new THREE.Vector3(
+    (Math.random() - 0.5) * spread,
+    (Math.random() - 0.5) * spread,
+    (Math.random() - 0.5) * spread
+  )).normalize();
+
+  const spawnPos = targetDir.clone().multiplyScalar(BUBBLE_SPAWN_DISTANCE);
   
   const groupId = nextBubbleId++;
   const skinId = nextBubbleId++;
@@ -42,14 +46,12 @@ export function createBubble() {
   const group = {
     id: groupId,
     type: 'group',
-    position: { x, y, z },
+    position: { x: spawnPos.x, y: spawnPos.y, z: spawnPos.z },
     rotation: { x: 0, y: 0, z: 0 },
-    // Much smaller at spawn to create a subtle emergence
+    // Much smaller at spawn to create a subtle emergence from the wall
     scale: { x: 0.02, y: 0.02, z: 0.02 },
     operation: 'union',
     blendRadius: BUBBLE_INITIAL_BLEND,
-    // store spawn radius so the rise interpolation can reference the true start distance
-    _spawnRadius: spawnRadius,
   };
   
   const skin = {
@@ -122,23 +124,29 @@ export function updateBubbles(delta, currentTime) {
       bubble.group.position.y = currentPos.y;
       bubble.group.position.z = currentPos.z;
       
-      // Use stored spawn radius (if present) so growth/progress is computed from the actual spawn point
-      const startDist = bubble.group._spawnRadius || 15.0;
-      const targetDist = 5.0;
       const distFromCenter = currentPos.length();
-      const progress = Math.max(0, Math.min(1, (startDist - distFromCenter) / (startDist - targetDist)));
+      // Progress from spawn distance outside to pop distance just inside
+      const progress = Math.max(0, Math.min(1, (BUBBLE_SPAWN_DISTANCE - distFromCenter) / (BUBBLE_SPAWN_DISTANCE - BUBBLE_POP_DISTANCE)));
       
-      // Grow from much smaller start to full size over a longer ascent
+      // Grow from small at spawn to full size as it enters the sphere
       const currentScale = 0.02 + progress * 0.98;
       bubble.group.scale.x = currentScale;
       bubble.group.scale.y = currentScale;
       bubble.group.scale.z = currentScale;
+
+      // Update child scales directly for correct rendering
+      bubble.skin.scale.x = BUBBLE_OUTER_RADIUS * currentScale;
+      bubble.skin.scale.y = BUBBLE_OUTER_RADIUS * currentScale;
+      bubble.skin.scale.z = BUBBLE_OUTER_RADIUS * currentScale;
       
-      // Interpolate blend to the (now larger) final blend
+      bubble.voidObj.scale.x = BUBBLE_INNER_RADIUS * currentScale;
+      bubble.voidObj.scale.y = BUBBLE_INNER_RADIUS * currentScale;
+      bubble.voidObj.scale.z = BUBBLE_INNER_RADIUS * currentScale;
+      
       bubble.group.blendRadius = BUBBLE_INITIAL_BLEND - progress * (BUBBLE_INITIAL_BLEND - BUBBLE_FINAL_BLEND);
       
-      // If the bubble has moved past the visible apex, switch to popping
-      if (bubble.group.position.y > BUBBLE_MAX_Y) {
+      // Trigger pop once the bubble has fully transitioned into the sphere's interior
+      if (distFromCenter < BUBBLE_POP_DISTANCE) {
         bubble.state = 'popping';
       }
     } else if (bubble.state === 'popping') {

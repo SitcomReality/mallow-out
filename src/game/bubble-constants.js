@@ -1,6 +1,5 @@
-export const BUBBLE_SPAWN_Y = -1.0;
-export const BUBBLE_FLOOR_Y = 0.0;
-export const BUBBLE_MAX_Y = 0.8;
+export const BUBBLE_SPAWN_DISTANCE = 17.5;
+export const BUBBLE_POP_DISTANCE = 14.5;
 // Start more subtle
 export const BUBBLE_INITIAL_BLEND = 0.4;
 // Increase final blend by +0.5 for a stronger soft edge at apex
@@ -12,9 +11,9 @@ export const BUBBLE_COLOR = '#8afdff';
 export const BUBBLE_POP_DURATION = 1.0;
 export const BUBBLE_POP_NOISE_AMOUNT = 2.0;
 export const BUBBLE_POP_NOISE_SCALE = 5.0;
-// Slow the ascent (~2x longer by halving velocity and acceleration)
-export const BUBBLE_INITIAL_VELOCITY = 0.1;
-export const BUBBLE_ACCELERATION = 0.25;
+// Velocity of the bubble moving from outside the sphere towards the center
+export const BUBBLE_INITIAL_VELOCITY = 0.5;
+export const BUBBLE_ACCELERATION = 0.5;
 
 export const BUBBLE_SPAWN_MIN_DELAY = 0.0;
 export const BUBBLE_SPAWN_MAX_DELAY = 2.0;
