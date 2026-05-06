@@ -35,6 +35,8 @@ import {
   RIPPLE_FINAL_BLEND,
 } from '../fx-constants.js';
 
+import * as THREE from 'three';
+
 function lerp(a, b, t) {
   return a + (b - a) * t;
 }
