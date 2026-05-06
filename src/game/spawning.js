@@ -60,9 +60,8 @@ export function updateSpawningMarshmallows(currentTime) {
   marsh.rotation.y = euler.y;
   marsh.rotation.z = euler.z;
 
-  const padding = marsh.scale.x + 0.3;
   const startPos = enemy.spawnPosWorld.clone().add(inwardNormal.clone().multiplyScalar(-2.0)); // Deep inside wall
-  const endPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(mov.radius - padding);
+  const endPos = mov.currentPos.clone(); // The logical start of the floating wander
 
   const posVec = startPos.clone().lerp(endPos, ease);
 
@@ -74,5 +73,7 @@ export function updateSpawningMarshmallows(currentTime) {
 
   if (t >= 1.0) {
     delete enemy.spawnStartTime;
+    // Ensure logical position matches where it ended spawning
+    mov.currentPos.copy(posVec);
   }
 }

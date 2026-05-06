@@ -108,12 +108,13 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
     isDying: false,
     movement: {
       bobPhase: Math.random() * Math.PI * 2,
-      bobAmplitude: 0.15,
-      radius: 15.0,
+      bobAmplitude: 0.25,
       wanderTimer: 0,
-      speed: 2.0,
-      velocity: null,
-      targetVelocity: null
+      speed: 1.5,
+      velocity: new THREE.Vector3(0, 0, 0),
+      targetPos: new THREE.Vector3(0, 3, 2),
+      currentPos: new THREE.Vector3(x, y, z),
+      noiseSeed: Math.random() * 1000
     },
   };
   
