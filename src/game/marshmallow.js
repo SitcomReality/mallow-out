@@ -107,14 +107,21 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
     lastHitTime: performance.now() * 0.001,
     isDying: false,
     movement: {
-      bobPhase: Math.random() * Math.PI * 2,
-      bobAmplitude: 0.25,
+      // Angular wander state (theta = azimuth, phi = elevation)
+      theta: 4.71,          // Start near the "back wall" center of the camera
+      phi: -0.5,
+      targetTheta: 4.71,
+      targetPhi: -0.5,
+      orbitRadius: 9.0,     // Preferred distance from the sphere center for floating
+      orbitRadiusTarget: 9.0,
+      radius: 15.0,         // Still used by spawn logic for initial emergence from the wall
       wanderTimer: 0,
-      speed: 1.5,
-      velocity: new THREE.Vector3(0, 0, 0),
-      targetPos: new THREE.Vector3(0, 3, 2),
-      currentPos: new THREE.Vector3(x, y, z),
-      noiseSeed: Math.random() * 1000
+      bobPhase: Math.random() * Math.PI * 2,
+      bobAmplitude: 0.2,
+      radialBobAmplitude: 0.6,
+      speed: 2.0,
+      lastPos: null,
+      time: 0
     },
   };
   
