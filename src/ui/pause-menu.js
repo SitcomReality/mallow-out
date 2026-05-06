@@ -50,22 +50,52 @@ export function createPauseMenu(onResume, onQuit) {
   document.getElementById('resumeBtn').addEventListener('click', onResume);
   document.getElementById('quitBtn').addEventListener('click', onQuit);
   
-  document.getElementById('celShading').addEventListener('change', (e) => {
-    settings.celShading = e.target.checked;
-  });
-  
-  document.getElementById('shadows').addEventListener('change', (e) => {
-    settings.shadowsEnabled = e.target.checked;
-  });
-  
-  document.getElementById('ao').addEventListener('change', (e) => {
-    settings.aoEnabled = e.target.checked;
-  });
+  // Wire advanced graphic controls
+  const celEl = document.getElementById('celShading');
+  const shadowsEl = document.getElementById('shadows');
+  const aoEl = document.getElementById('ao');
+  const outlinesEl = document.getElementById('outlines');
+  const maxSlider = document.getElementById('maxScale');
+  const maxVal = document.getElementById('maxScaleVal');
 
-  // Toggle global outlines for SDF objects
-  document.getElementById('outlines').addEventListener('change', (e) => {
-    settings.outlinesEnabled = e.target.checked;
-  });
+  if (celEl) {
+    celEl.addEventListener('change', (e) => { settings.celShading = e.target.checked; });
+  }
+  if (shadowsEl) {
+    shadowsEl.addEventListener('change', (e) => { settings.shadowsEnabled = e.target.checked; });
+  }
+  if (aoEl) {
+    aoEl.addEventListener('change', (e) => { settings.aoEnabled = e.target.checked; });
+  }
+  if (outlinesEl) {
+    outlinesEl.addEventListener('change', (e) => { settings.outlinesEnabled = e.target.checked; });
+  }
+
+  // Dynamic Graphics toggle: enable/disable advanced controls when toggled
+  const dynamicEl = document.getElementById('dynamicGraphics');
+  if (dynamicEl) {
+    dynamicEl.addEventListener('change', (e) => {
+      settings.dynamicGraphics = e.target.checked;
+      // When dynamic graphics is ON, individual advanced controls should be disabled (managed automatically).
+      // When OFF, allow the user to tweak them manually.
+      const shouldDisable = settings.dynamicGraphics;
+      if (celEl) celEl.disabled = shouldDisable;
+      if (shadowsEl) shadowsEl.disabled = shouldDisable;
+      if (aoEl) aoEl.disabled = shouldDisable;
+      if (maxSlider) maxSlider.disabled = shouldDisable;
+
+      // If dynamic graphics just turned off, sync the inputs to current settings values
+      if (!shouldDisable) {
+        if (celEl) celEl.checked = settings.celShading;
+        if (shadowsEl) shadowsEl.checked = settings.shadowsEnabled;
+        if (aoEl) aoEl.checked = settings.aoEnabled;
+        if (maxSlider && maxVal) {
+          maxSlider.value = settings.maxScale || settings.renderScale;
+          maxVal.textContent = (settings.maxScale || settings.renderScale).toFixed(1);
+        }
+      }
+    });
+  }
   
   // Optional controls: guard DOM access in case these inputs are not present in the template.
   const dynamicResEl = document.getElementById('dynamicRes');
@@ -80,8 +110,6 @@ export function createPauseMenu(onResume, onQuit) {
     });
   }
 
-  const maxSlider = document.getElementById('maxScale');
-  const maxVal = document.getElementById('maxScaleVal');
   if (maxSlider && maxVal) {
     maxSlider.addEventListener('input', (e) => {
       settings.maxScale = parseFloat(e.target.value);
