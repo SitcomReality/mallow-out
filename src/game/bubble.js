@@ -22,9 +22,18 @@ let nextBubbleId = 20000;
 
 export function createBubble() {
   const angle = Math.random() * Math.PI * 2;
-  const distance = 1.0 + Math.random() * 4.0; 
-  const x = Math.cos(angle) * distance;
-  const z = Math.sin(angle) * distance;
+  // vertical angle (phi) small range for near-back-wall emergence
+  const vertical = (Math.random() - 0.5) * 0.6; // somewhat constrained vertical spread
+  
+  // Spawn just outside the world sphere so the bubble moves inward.
+  const WORLD_RADIUS = 15.0;
+  const spawnOffset = 0.5;
+  const spawnRadius = WORLD_RADIUS + spawnOffset;
+  
+  // Spherical coordinates -> world position at spawnRadius
+  const x = Math.cos(angle) * Math.cos(vertical) * spawnRadius;
+  const y = Math.sin(vertical) * spawnRadius;
+  const z = Math.sin(angle) * Math.cos(vertical) * spawnRadius;
   
   const groupId = nextBubbleId++;
   const skinId = nextBubbleId++;
@@ -33,12 +42,14 @@ export function createBubble() {
   const group = {
     id: groupId,
     type: 'group',
-    position: { x, y: BUBBLE_SPAWN_Y, z },
+    position: { x, y, z },
     rotation: { x: 0, y: 0, z: 0 },
     // Much smaller at spawn to create a subtle emergence
     scale: { x: 0.02, y: 0.02, z: 0.02 },
     operation: 'union',
     blendRadius: BUBBLE_INITIAL_BLEND,
+    // store spawn radius so the rise interpolation can reference the true start distance
+    _spawnRadius: spawnRadius,
   };
   
   const skin = {
@@ -111,7 +122,8 @@ export function updateBubbles(delta, currentTime) {
       bubble.group.position.y = currentPos.y;
       bubble.group.position.z = currentPos.z;
       
-      const startDist = 15.0;
+      // Use stored spawn radius (if present) so growth/progress is computed from the actual spawn point
+      const startDist = bubble.group._spawnRadius || 15.0;
       const targetDist = 5.0;
       const distFromCenter = currentPos.length();
       const progress = Math.max(0, Math.min(1, (startDist - distFromCenter) / (startDist - targetDist)));
@@ -125,6 +137,7 @@ export function updateBubbles(delta, currentTime) {
       // Interpolate blend to the (now larger) final blend
       bubble.group.blendRadius = BUBBLE_INITIAL_BLEND - progress * (BUBBLE_INITIAL_BLEND - BUBBLE_FINAL_BLEND);
       
+      // If the bubble has moved past the visible apex, switch to popping
       if (bubble.group.position.y > BUBBLE_MAX_Y) {
         bubble.state = 'popping';
       }
