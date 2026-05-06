@@ -67,30 +67,39 @@ export function createPauseMenu(onResume, onQuit) {
     settings.outlinesEnabled = e.target.checked;
   });
   
-  document.getElementById('dynamicRes').addEventListener('change', (e) => {
-    settings.dynamicRes = e.target.checked;
-    document.getElementById('minScaleContainer').style.opacity = settings.dynamicRes ? '1' : '0.4';
-    if (!settings.dynamicRes) {
-      settings.renderScale = settings.maxScale;
-    }
-  });
+  // Optional controls: guard DOM access in case these inputs are not present in the template.
+  const dynamicResEl = document.getElementById('dynamicRes');
+  if (dynamicResEl) {
+    dynamicResEl.addEventListener('change', (e) => {
+      settings.dynamicRes = e.target.checked;
+      const minContainer = document.getElementById('minScaleContainer');
+      if (minContainer) minContainer.style.opacity = settings.dynamicRes ? '1' : '0.4';
+      if (!settings.dynamicRes) {
+        settings.renderScale = settings.maxScale;
+      }
+    });
+  }
 
   const maxSlider = document.getElementById('maxScale');
   const maxVal = document.getElementById('maxScaleVal');
-  maxSlider.addEventListener('input', (e) => {
-    settings.maxScale = parseFloat(e.target.value);
-    maxVal.textContent = settings.maxScale.toFixed(1);
-    if (!settings.dynamicRes) {
-      settings.renderScale = settings.maxScale;
-    }
-  });
+  if (maxSlider && maxVal) {
+    maxSlider.addEventListener('input', (e) => {
+      settings.maxScale = parseFloat(e.target.value);
+      maxVal.textContent = settings.maxScale.toFixed(1);
+      if (!settings.dynamicRes) {
+        settings.renderScale = settings.maxScale;
+      }
+    });
+  }
 
   const minSlider = document.getElementById('minScale');
   const minVal = document.getElementById('minScaleVal');
-  minSlider.addEventListener('input', (e) => {
-    settings.minScale = parseFloat(e.target.value);
-    minVal.textContent = settings.minScale.toFixed(1);
-  });
+  if (minSlider && minVal) {
+    minSlider.addEventListener('input', (e) => {
+      settings.minScale = parseFloat(e.target.value);
+      minVal.textContent = settings.minScale.toFixed(1);
+    });
+  }
   
   return {
     show() {
