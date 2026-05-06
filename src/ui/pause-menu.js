@@ -3,6 +3,8 @@ import { settings } from '../game/state.js';
 export function createPauseMenu(onResume, onQuit) {
   const menu = document.getElementById('pauseMenu');
   
+  const dynamicGraphicsEnabled = settings.dynamicGraphics;
+  
   menu.innerHTML = `
     <div class="pause-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
       <h2 class="pause-title">Paused</h2>
@@ -10,34 +12,30 @@ export function createPauseMenu(onResume, onQuit) {
       <div class="pause-section">
         <h3 style="font-size: 12px; color: #000000;">Graphics</h3>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Dynamic Graphics</label>
+          <input type="checkbox" id="dynamicGraphics" ${settings.dynamicGraphics ? 'checked' : ''}>
+        </div>
+        
+        <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Cel Shading</label>
-          <input type="checkbox" id="celShading" ${settings.celShading ? 'checked' : ''}>
+          <input type="checkbox" id="celShading" ${settings.celShading ? 'checked' : ''} ${dynamicGraphicsEnabled ? 'disabled' : ''}>
         </div>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Shadows</label>
-          <input type="checkbox" id="shadows" ${settings.shadowsEnabled ? 'checked' : ''}>
+          <input type="checkbox" id="shadows" ${settings.shadowsEnabled ? 'checked' : ''} ${dynamicGraphicsEnabled ? 'disabled' : ''}>
         </div>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Ambient Occlusion</label>
-          <input type="checkbox" id="ao" ${settings.aoEnabled ? 'checked' : ''}>
+          <input type="checkbox" id="ao" ${settings.aoEnabled ? 'checked' : ''} ${dynamicGraphicsEnabled ? 'disabled' : ''}>
         </div>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Outlines</label>
           <input type="checkbox" id="outlines" ${settings.outlinesEnabled ? 'checked' : ''}>
         </div>
-        <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-          <label>Dynamic Resolution</label>
-          <input type="checkbox" id="dynamicRes" ${settings.dynamicRes ? 'checked' : ''}>
-        </div>
         
         <div class="setting-row slider-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-          <label>Max Resolution Scale: <span id="maxScaleVal">${settings.maxScale}</span></label>
-          <input type="range" id="maxScale" min="0.1" max="4.0" step="0.1" value="${settings.maxScale}">
-        </div>
-        
-        <div class="setting-row slider-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" id="minScaleContainer">
-          <label>Min Resolution Scale: <span id="minScaleVal">${settings.minScale}</span></label>
-          <input type="range" id="minScale" min="0.05" max="1.0" step="0.05" value="${settings.minScale}">
+          <label>Resolution Scale: <span id="maxScaleVal">${settings.renderScale.toFixed(1)}</span></label>
+          <input type="range" id="maxScale" min="0.1" max="2.0" step="0.1" value="${settings.renderScale}" ${dynamicGraphicsEnabled ? 'disabled' : ''}>
         </div>
       </div>
       

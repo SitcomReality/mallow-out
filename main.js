@@ -3,7 +3,6 @@
  */
 
 import { gameState } from './src/game/state.js';
-import { applyGraphicsPreset } from './src/state.js';
 import { createRenderer } from './src/game/renderer.js';
 import { initControls } from './src/game/controls.js';
 import { createHUD } from './src/ui/hud.js';
@@ -37,9 +36,6 @@ function updateMenuUI() {
 }
 
 mainBtn.addEventListener('click', () => {
-  const selectedQuality = document.querySelector('input[name="graphicsQuality"]:checked').value;
-  applyGraphicsPreset(selectedQuality);
-  
   if (hasSaveGame()) {
     loadGame();
   }
