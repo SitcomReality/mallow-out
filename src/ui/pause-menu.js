@@ -3,8 +3,6 @@ import { settings } from '../game/state.js';
 export function createPauseMenu(onResume, onQuit) {
   const menu = document.getElementById('pauseMenu');
   
-  const dynamicGraphicsEnabled = settings.dynamicGraphics;
-  
   menu.innerHTML = `
     <div class="pause-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
       <h2 class="pause-title">Paused</h2>
@@ -13,29 +11,28 @@ export function createPauseMenu(onResume, onQuit) {
         <h3 style="font-size: 12px; color: #000000;">Graphics</h3>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Dynamic Graphics</label>
-          <input type="checkbox" id="dynamicGraphics" ${settings.dynamicGraphics ? 'checked' : ''}>
-        </div>
-        
-        <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-          <label>Cel Shading</label>
-          <input type="checkbox" id="celShading" ${settings.celShading ? 'checked' : ''} ${dynamicGraphicsEnabled ? 'disabled' : ''}>
-        </div>
-        <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-          <label>Shadows</label>
-          <input type="checkbox" id="shadows" ${settings.shadowsEnabled ? 'checked' : ''} ${dynamicGraphicsEnabled ? 'disabled' : ''}>
-        </div>
-        <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-          <label>Ambient Occlusion</label>
-          <input type="checkbox" id="ao" ${settings.aoEnabled ? 'checked' : ''} ${dynamicGraphicsEnabled ? 'disabled' : ''}>
+          <input type="checkbox" id="dynamicGraphics">
         </div>
         <div class="setting-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
           <label>Outlines</label>
-          <input type="checkbox" id="outlines" ${settings.outlinesEnabled ? 'checked' : ''}>
+          <input type="checkbox" id="outlines">
+        </div>
+        <div class="setting-row wonky" id="celRow" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Cel Shading</label>
+          <input type="checkbox" id="celShading">
+        </div>
+        <div class="setting-row wonky" id="shadowsRow" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Shadows</label>
+          <input type="checkbox" id="shadows">
+        </div>
+        <div class="setting-row wonky" id="aoRow" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Ambient Occlusion</label>
+          <input type="checkbox" id="ao">
         </div>
         
-        <div class="setting-row slider-row wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-          <label>Resolution Scale: <span id="maxScaleVal">${settings.renderScale.toFixed(1)}</span></label>
-          <input type="range" id="maxScale" min="0.1" max="2.0" step="0.1" value="${settings.renderScale}" ${dynamicGraphicsEnabled ? 'disabled' : ''}>
+        <div class="setting-row slider-row wonky" id="resRow" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
+          <label>Resolution Scale: <span id="resScaleVal">1.0</span></label>
+          <input type="range" id="resScale" min="0.1" max="2.0" step="0.05" value="1.0">
         </div>
       </div>
       
@@ -46,91 +43,63 @@ export function createPauseMenu(onResume, onQuit) {
     </div>
   `;
   
+  const updateDisabledStates = () => {
+    const isDyn = settings.dynamicGraphics;
+    document.getElementById('celShading').disabled = isDyn;
+    document.getElementById('shadows').disabled = isDyn;
+    document.getElementById('ao').disabled = isDyn;
+    document.getElementById('resScale').disabled = isDyn;
+    
+    const opacity = isDyn ? '0.4' : '1.0';
+    document.getElementById('celRow').style.opacity = opacity;
+    document.getElementById('shadowsRow').style.opacity = opacity;
+    document.getElementById('aoRow').style.opacity = opacity;
+    document.getElementById('resRow').style.opacity = opacity;
+  };
+
   // Event listeners
   document.getElementById('resumeBtn').addEventListener('click', onResume);
   document.getElementById('quitBtn').addEventListener('click', onQuit);
   
-  // Wire advanced graphic controls
-  const celEl = document.getElementById('celShading');
-  const shadowsEl = document.getElementById('shadows');
-  const aoEl = document.getElementById('ao');
-  const outlinesEl = document.getElementById('outlines');
-  const maxSlider = document.getElementById('maxScale');
-  const maxVal = document.getElementById('maxScaleVal');
-
-  if (celEl) {
-    celEl.addEventListener('change', (e) => { settings.celShading = e.target.checked; });
-  }
-  if (shadowsEl) {
-    shadowsEl.addEventListener('change', (e) => { settings.shadowsEnabled = e.target.checked; });
-  }
-  if (aoEl) {
-    aoEl.addEventListener('change', (e) => { settings.aoEnabled = e.target.checked; });
-  }
-  if (outlinesEl) {
-    outlinesEl.addEventListener('change', (e) => { settings.outlinesEnabled = e.target.checked; });
-  }
-
-  // Dynamic Graphics toggle: enable/disable advanced controls when toggled
-  const dynamicEl = document.getElementById('dynamicGraphics');
-  if (dynamicEl) {
-    dynamicEl.addEventListener('change', (e) => {
-      settings.dynamicGraphics = e.target.checked;
-      // When dynamic graphics is ON, individual advanced controls should be disabled (managed automatically).
-      // When OFF, allow the user to tweak them manually.
-      const shouldDisable = settings.dynamicGraphics;
-      if (celEl) celEl.disabled = shouldDisable;
-      if (shadowsEl) shadowsEl.disabled = shouldDisable;
-      if (aoEl) aoEl.disabled = shouldDisable;
-      if (maxSlider) maxSlider.disabled = shouldDisable;
-
-      // If dynamic graphics just turned off, sync the inputs to current settings values
-      if (!shouldDisable) {
-        if (celEl) celEl.checked = settings.celShading;
-        if (shadowsEl) shadowsEl.checked = settings.shadowsEnabled;
-        if (aoEl) aoEl.checked = settings.aoEnabled;
-        if (maxSlider && maxVal) {
-          maxSlider.value = settings.maxScale || settings.renderScale;
-          maxVal.textContent = (settings.maxScale || settings.renderScale).toFixed(1);
-        }
-      }
-    });
-  }
+  document.getElementById('celShading').addEventListener('change', (e) => {
+    settings.celShading = e.target.checked;
+  });
   
-  // Optional controls: guard DOM access in case these inputs are not present in the template.
-  const dynamicResEl = document.getElementById('dynamicRes');
-  if (dynamicResEl) {
-    dynamicResEl.addEventListener('change', (e) => {
-      settings.dynamicRes = e.target.checked;
-      const minContainer = document.getElementById('minScaleContainer');
-      if (minContainer) minContainer.style.opacity = settings.dynamicRes ? '1' : '0.4';
-      if (!settings.dynamicRes) {
-        settings.renderScale = settings.maxScale;
-      }
-    });
-  }
+  document.getElementById('shadows').addEventListener('change', (e) => {
+    settings.shadowsEnabled = e.target.checked;
+  });
+  
+  document.getElementById('ao').addEventListener('change', (e) => {
+    settings.aoEnabled = e.target.checked;
+  });
 
-  if (maxSlider && maxVal) {
-    maxSlider.addEventListener('input', (e) => {
-      settings.maxScale = parseFloat(e.target.value);
-      maxVal.textContent = settings.maxScale.toFixed(1);
-      if (!settings.dynamicRes) {
-        settings.renderScale = settings.maxScale;
-      }
-    });
-  }
+  document.getElementById('outlines').addEventListener('change', (e) => {
+    settings.outlinesEnabled = e.target.checked;
+  });
+  
+  document.getElementById('dynamicGraphics').addEventListener('change', (e) => {
+    settings.dynamicGraphics = e.target.checked;
+    updateDisabledStates();
+  });
 
-  const minSlider = document.getElementById('minScale');
-  const minVal = document.getElementById('minScaleVal');
-  if (minSlider && minVal) {
-    minSlider.addEventListener('input', (e) => {
-      settings.minScale = parseFloat(e.target.value);
-      minVal.textContent = settings.minScale.toFixed(1);
-    });
-  }
+  const resSlider = document.getElementById('resScale');
+  const resVal = document.getElementById('resScaleVal');
+  resSlider.addEventListener('input', (e) => {
+    settings.renderScale = parseFloat(e.target.value);
+    resVal.textContent = settings.renderScale.toFixed(2);
+  });
   
   return {
     show() {
+      document.getElementById('dynamicGraphics').checked = settings.dynamicGraphics;
+      document.getElementById('outlines').checked = settings.outlinesEnabled;
+      document.getElementById('celShading').checked = settings.celShading;
+      document.getElementById('shadows').checked = settings.shadowsEnabled;
+      document.getElementById('ao').checked = settings.aoEnabled;
+      document.getElementById('resScale').value = settings.renderScale;
+      document.getElementById('resScaleVal').textContent = settings.renderScale.toFixed(2);
+      updateDisabledStates();
+      
       menu.classList.add('active');
     },
     hide() {

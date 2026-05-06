@@ -6,7 +6,7 @@ import { updateSpawningMarshmallows } from './spawning.js';
 import { updateRepairs } from './repair.js';
 import { rebuildObjectList } from './combat.js';
 import { updateFX } from './fx.js';
-import { updateDynamicResolution } from './render-logic.js';
+import { updateDynamicGraphics } from './render-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
 import { updateAutomations } from './automations/automation-logic.js';
 import { updateComboSystem } from './combo-system.js';
@@ -21,7 +21,7 @@ export function runGameLoop(time) {
   lastTime = time;
   
   if (!session.isPaused) {
-    updateDynamicResolution(delta);
+    updateDynamicGraphics(delta);
     updateControls(delta);
     updateWeaponCooldowns(delta);
     updateMarshmallows(delta);
