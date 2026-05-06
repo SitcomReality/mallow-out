@@ -1,8 +1,8 @@
 import { gameState } from './state.js';
 import * as THREE from 'three';
 import { 
-  BUBBLE_SPAWN_Y, 
-  BUBBLE_MAX_Y, 
+  BUBBLE_SPAWN_DISTANCE,
+  BUBBLE_POP_DISTANCE,
   BUBBLE_INITIAL_BLEND, 
   BUBBLE_FINAL_BLEND, 
   BUBBLE_OUTER_RADIUS, 
