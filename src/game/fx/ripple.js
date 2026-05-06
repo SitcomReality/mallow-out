@@ -24,12 +24,24 @@ export function createRippleFX(position, isCharged = false) {
     ? position.clone()
     : new THREE.Vector3(position.x || 0, position.y || 0, position.z || 0);
 
-  // Align with sphere normal
+  // Align with sphere normal. Ensure torus Y-axis matches the surface normal
   const normal = posVec.clone().normalize();
+
+  // Build an orthonormal basis where Y = normal. We prefer the bitangent as X to avoid a 90° twist.
+  // Use a robust fallback when normal is nearly parallel to world-up.
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let tangent = new THREE.Vector3().crossVectors(worldUp, normal);
+  if (tangent.lengthSq() < 1e-6) {
+    // normal is nearly parallel to worldUp — pick a different vector for cross
+    tangent = new THREE.Vector3(1, 0, 0).cross(normal);
+  }
+  tangent.normalize();
+
+  const bitangent = new THREE.Vector3().crossVectors(normal, tangent).normalize();
+
+  // Make basis with X = bitangent, Y = normal, Z = tangent so the torus' Y-axis aligns with the surface normal
   const matrix = new THREE.Matrix4();
-  const tangent = new THREE.Vector3(0, 1, 0).cross(normal).normalize();
-  const bitangent = normal.clone().cross(tangent).normalize();
-  matrix.makeBasis(tangent, normal, bitangent);
+  matrix.makeBasis(bitangent, normal, tangent);
   const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
   const euler = new THREE.Euler().setFromQuaternion(q);
 
