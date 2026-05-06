@@ -32,6 +32,9 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     mov.targetPhi = mov.phi;
     mov.orbitRadiusTarget = mov.orbitRadius;
     mov.lastPos = p.clone();
+    
+    // Initialise stable orientation from current mesh state
+    mov.currentQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z));
   }
 
   // Gently retarget wander within a cone around the camera view
@@ -95,30 +98,38 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     newPos.multiplyScalar((SPHERE_RADIUS - INNER_MARGIN) / distFromCenter);
   }
 
-  // Compute velocity from last frame for orientation
+  // Compute orientation vectors
   const vel = newPos.clone().sub(mov.lastPos);
   const speed = vel.length();
-  let forward;
-  if (speed > 1e-4) {
-    forward = vel.normalize();
-  } else {
-    // If nearly stationary, face roughly toward the camera center
-    forward = camPos.clone().sub(newPos).normalize();
-  }
+  
+  // Blend target forward direction between velocity and camera-focus
+  // This prevents snaps when the marshmallow stops or starts moving.
+  const lookAtCamera = camPos.clone().sub(newPos).normalize();
+  const velDir = speed > 1e-4 ? vel.clone().normalize() : lookAtCamera;
+  
+  const forward = new THREE.Vector3();
+  const weight = Math.min(1.0, speed * 10.0); // Bias towards velocity as it moves faster
+  forward.lerpVectors(lookAtCamera, velDir, weight).normalize();
 
-  // Build an orientation where local Y = forward (cylinder axis), keeping a nice "up"
-  let upGuess = new THREE.Vector3(0, 1, 0);
-  if (Math.abs(forward.dot(upGuess)) > 0.9) {
-    upGuess.set(1, 0, 0);
+  // Build a stable basis: local Y = forward (cylinder axis).
+  // We want the face (local X) to stay generally "upright" relative to the world.
+  let worldUp = new THREE.Vector3(0, 1, 0);
+  if (Math.abs(forward.dot(worldUp)) > 0.98) {
+    worldUp.set(0, 0, 1); // Avoid gimbal lock at world poles
   }
-  const right = new THREE.Vector3().crossVectors(upGuess, forward).normalize();
-  const up = new THREE.Vector3().crossVectors(forward, right).normalize();
+  
+  const targetRight = new THREE.Vector3().crossVectors(worldUp, forward).normalize();
+  const targetUp = new THREE.Vector3().crossVectors(forward, targetRight).normalize();
 
-  const matrix = new THREE.Matrix4();
-  // local X = up, local Y = forward, local Z = right
-  matrix.makeBasis(up, forward, right);
-  const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
-  const euler = new THREE.Euler().setFromQuaternion(q);
+  const targetMatrix = new THREE.Matrix4();
+  targetMatrix.makeBasis(targetUp, forward, targetRight);
+  const targetQuat = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
+
+  // Slerp the persistent quaternion to eliminate any remaining basis-flip jolts
+  const rotationSmoothSpeed = 4.0;
+  mov.currentQuat.slerp(targetQuat, Math.min(1, rotationSmoothSpeed * delta));
+  
+  const euler = new THREE.Euler().setFromQuaternion(mov.currentQuat);
 
   marsh.position.x = newPos.x;
   marsh.position.y = newPos.y;
