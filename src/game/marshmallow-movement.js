@@ -16,34 +16,40 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   mov.wanderTimer -= delta;
   
   if (mov.wanderTimer <= 0) {
-    mov.wanderTimer = 2.0 + Math.random() * 4.0;
-    // Wander within a range on the back wall
-    mov.targetTheta = Math.PI + (Math.random() - 0.5) * 1.8;
-    mov.targetPhi = (Math.random() - 0.5) * 1.2;
+    mov.wanderTimer = 3.0 + Math.random() * 5.0;
+    // The "back wall" center for our fixed camera is roughly theta=4.71, phi=-0.6
+    // We constrain wander to stay within view (approx +/- 0.6 rad from center)
+    mov.targetTheta = 4.71 + (Math.random() - 0.5) * 1.0; 
+    mov.targetPhi = -0.5 + (Math.random() - 0.5) * 0.6;
   }
 
-  // Smoothly lerp spherical coordinates
+  // Smoothly lerp spherical coordinates for a gentle wander
   mov.theta += (mov.targetTheta - mov.theta) * delta * mov.speed;
   mov.phi += (mov.targetPhi - mov.phi) * delta * mov.speed;
 
-  mov.bobPhase += delta * 1.5;
+  mov.bobPhase += delta * 2.0;
   const bob = Math.sin(mov.bobPhase) * mov.bobAmplitude;
-  const r = mov.radius - bob; // "Floating" off the wall
+  // Offset from sphere wall (radius 15) so it stands *inside*
+  const currentRadius = mov.radius - 1.2 + bob; 
 
   // Update position on the sphere
-  marsh.position.x = Math.cos(mov.theta) * Math.cos(mov.phi) * r;
-  marsh.position.y = Math.sin(mov.phi) * r;
-  marsh.position.z = Math.sin(mov.theta) * Math.cos(mov.phi) * r;
+  marsh.position.x = Math.cos(mov.theta) * Math.cos(mov.phi) * currentRadius;
+  marsh.position.y = Math.sin(mov.phi) * currentRadius;
+  marsh.position.z = Math.sin(mov.theta) * Math.cos(mov.phi) * currentRadius;
 
-  // Orient "face first" - height (Y) aligns with normal (outwards from center)
+  // Orient "upright" relative to the sphere wall. 
+  // In a hollow sphere, "Up" for a character standing on the wall is toward the center.
   const posVec = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-  const normal = posVec.clone().normalize();
+  const inwardNormal = posVec.clone().normalize().multiplyScalar(-1);
   
-  // Create rotation matrix where Up is the normal
+  // Create rotation matrix where Cylinder Y (height) matches inwardNormal
   const matrix = new THREE.Matrix4();
-  const up = normal;
-  const tangent = new THREE.Vector3(0, 1, 0).cross(up).normalize();
-  const bitangent = up.clone().cross(tangent).normalize();
+  const up = inwardNormal;
+  // Use world-up to keep the mallow "standing" upright relative to the horizon where possible
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let tangent = new THREE.Vector3().crossVectors(worldUp, up).normalize();
+  if (tangent.lengthSq() < 0.001) tangent.set(1, 0, 0);
+  const bitangent = new THREE.Vector3().crossVectors(up, tangent).normalize();
   
   matrix.makeBasis(tangent, up, bitangent);
   const q = new THREE.Quaternion().setFromRotationMatrix(matrix);

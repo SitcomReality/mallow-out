@@ -28,21 +28,27 @@ export function updateSpawningMarshmallows(currentTime) {
 
   const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-  // Animate distance from wall (spawn from inside the wall)
+  // Animate distance from wall (spawn from inside the wall toward the center)
   const mov = enemy.movement;
-  const r = (mov.radius + 2.0) - (2.0 * ease);
+  // Radius 15 is the wall. Start at 16 (inside wall) and move to ~13.8 (standing on wall)
+  const startR = 16.0;
+  const endR = mov.radius - 1.2;
+  const r = lerp(startR, endR, ease);
   
   enemy.marshmallow.position.x = Math.cos(mov.theta) * Math.cos(mov.phi) * r;
   enemy.marshmallow.position.y = Math.sin(mov.phi) * r;
   enemy.marshmallow.position.z = Math.sin(mov.theta) * Math.cos(mov.phi) * r;
 
-  // Align rotation to normal
+  // Align rotation to inward normal
   const posVec = new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z);
-  const normal = posVec.clone().normalize();
+  const inwardNormal = posVec.clone().normalize().multiplyScalar(-1);
   const matrix = new THREE.Matrix4();
-  const tangent = new THREE.Vector3(0, 1, 0).cross(normal).normalize();
-  const bitangent = normal.clone().cross(tangent).normalize();
-  matrix.makeBasis(tangent, normal, bitangent);
+  const up = inwardNormal;
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let tangent = new THREE.Vector3().crossVectors(worldUp, up).normalize();
+  if (tangent.lengthSq() < 0.001) tangent.set(1, 0, 0);
+  const bitangent = new THREE.Vector3().crossVectors(up, tangent).normalize();
+  matrix.makeBasis(tangent, up, bitangent);
   const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
   const euler = new THREE.Euler().setFromQuaternion(q);
   enemy.marshmallow.rotation.x = euler.x;

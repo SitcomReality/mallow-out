@@ -50,11 +50,14 @@ export function updateMeltingMarshmallows(currentTime) {
     const half = 0.5;
     
     if (t <= half) {
-      // PHASE 1: Sinking
+      // PHASE 1: Falling and Sinking
       const p = t / half; // 0..1 for first half
       const ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
       
+      // Fall toward the bottom Y and also move slightly toward the center to avoid clipping the wall too hard
       marshmallow.marshmallow.position.y = lerp(marshmallow.meltStartY, MELT_END_Y, ease);
+      marshmallow.marshmallow.position.x *= (1.0 - ease * 0.2);
+      marshmallow.marshmallow.position.z *= (1.0 - ease * 0.2);
       
       marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
       marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);

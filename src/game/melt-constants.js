@@ -1,6 +1,6 @@
 export const MELT_DURATION = 3.0; // seconds
 export const MELT_START_Y = 0.0;
-export const MELT_END_Y = -3.0; // Reduced depth to prevent visible clipping through floor edge
+export const MELT_END_Y = -14.5; // Fall to the bottom of the sphere
 export const MELT_NOISE_AMOUNT_START = 0.0;
 export const MELT_NOISE_AMOUNT_END = 2.5;
 export const MELT_NOISE_SCALE_START = 1.0;
