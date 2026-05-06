@@ -117,15 +117,20 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     const healAmount = baseHeal * (1 + healBonus) * comboMult;
 
     if (isCharged) {
-      applyHolepunch(gameState.currentMarshmallow, result.point, direction);
+      const hole = applyHolepunch(gameState.currentMarshmallow, result.point, direction);
+      // Make charged holepunch heal after the current charge time (so upgrades to charge-time affect heal delay)
+      if (hole && hole.repairData) {
+        hole.repairData.delay = gameState.weaponStates.maxChargeTime || gameState.weaponStates.maxChargeTime === 0 ? gameState.weaponStates.maxChargeTime : 3.0;
+      }
     } else {
       const chunk = applyRoundChunk(gameState.currentMarshmallow, result.point);
       chunk.scale = { x: 0.05, y: 0.05, z: 0.05 }; // Reduced size for default shot
       // Ensure repair animation uses the same small starting scale
       if (chunk.repairData) {
         chunk.repairData.initialScale = 0.05;
+        // Default shot begins healing after the player's shot cooldown duration
+        chunk.repairData.delay = gameState.weaponStates.maxCooldown || gameState.weaponStates.maxCooldown === 0 ? gameState.weaponStates.maxCooldown : 1.0;
       }
-      chunk.repairData.noDelay = true; // Heals quickly
     }
     
     // Particles

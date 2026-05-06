@@ -39,7 +39,9 @@ export function updateRepairs(currentTime, delta) {
       
       const elapsed = currentTime - hole.repairData.startTime;
       
-      const delay = hole.repairData.noDelay ? 0 : REPAIR_DELAY;
+      const delay = (hole.repairData && hole.repairData.delay !== undefined)
+        ? hole.repairData.delay
+        : (hole.repairData && hole.repairData.noDelay ? 0 : REPAIR_DELAY);
 
       // Delay repair start
       if (elapsed < delay) continue;
