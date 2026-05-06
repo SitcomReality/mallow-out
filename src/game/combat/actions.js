@@ -30,11 +30,11 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
   const direction = vec.sub(camera.position).normalize();
   const origin = camera.position.clone();
 
-  // Raycast against the floor specifically
+  // Raycast against the inner world sphere specifically
   const floorResult = castRay(origin, direction, (p) => {
-    const dx = Math.sqrt(p.x * p.x + p.z * p.z) - 5.5;
-    const dy = Math.abs(p.y + 0.1) - 0.1;
-    return Math.min(Math.max(dx, dy), 0.0) + Math.sqrt(Math.max(dx, 0) ** 2 + Math.max(dy, 0) ** 2);
+    const radius = 15.0; // Matches WORLD_BOUNDS.radius
+    const distFromCenter = p.length();
+    return radius - distFromCenter;
   });
 
   // Raycast against the current marshmallow specifically

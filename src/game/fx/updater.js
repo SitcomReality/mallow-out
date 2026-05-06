@@ -100,9 +100,16 @@ export function updateFX(currentTime) {
       const thickness = baseThickness * (1.0 - t * t);
       fx.scale.y = thickness;
       fx.blendRadius = lerp(RIPPLE_INITIAL_BLEND, RIPPLE_FINAL_BLEND, t);
-      const sy = (fx.fxData.startY !== undefined) ? fx.fxData.startY : fx.position.y;
-      const ey = (fx.fxData.endY !== undefined) ? fx.fxData.endY : (sy - 0.6);
-      fx.position.y = lerp(sy, ey, t);
+      // Sink into the wall
+      if (fx.fxData.initialPos === undefined) {
+          fx.fxData.initialPos = { x: fx.position.x, y: fx.position.y, z: fx.position.z };
+      }
+      const p = new THREE.Vector3(fx.fxData.initialPos.x, fx.fxData.initialPos.y, fx.fxData.initialPos.z);
+      const normal = p.clone().normalize();
+      const currentPos = p.clone().add(normal.multiplyScalar(-0.4 * t));
+      fx.position.x = currentPos.x;
+      fx.position.y = currentPos.y;
+      fx.position.z = currentPos.z;
     }
   }
   

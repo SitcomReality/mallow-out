@@ -10,21 +10,29 @@ import {
   CHARGED_RIPPLE_THICKNESS
 } from '../fx-constants.js';
 
+import * as THREE from 'three';
+
 export function createRippleFX(position, isCharged = false) {
   const id = getNextFxId();
-  
-  const startY = 0.3;
-  const endY = -0.4;
   
   const duration = isCharged ? CHARGED_RIPPLE_DURATION : RIPPLE_DURATION;
   const finalRadius = isCharged ? CHARGED_RIPPLE_FINAL_RADIUS : RIPPLE_FINAL_RADIUS;
   const thickness = isCharged ? CHARGED_RIPPLE_THICKNESS : RIPPLE_THICKNESS;
 
+  // Align with sphere normal
+  const normal = position.clone().normalize();
+  const matrix = new THREE.Matrix4();
+  const tangent = new THREE.Vector3(0, 1, 0).cross(normal).normalize();
+  const bitangent = normal.clone().cross(tangent).normalize();
+  matrix.makeBasis(tangent, normal, bitangent);
+  const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
+  const euler = new THREE.Euler().setFromQuaternion(q);
+
   const fx = {
     id,
     type: 'torus',
-    position: { x: position.x, y: startY, z: position.z },
-    rotation: { x: 0, y: 0, z: 0 },
+    position: { x: position.x, y: position.y, z: position.z },
+    rotation: { x: euler.x, y: euler.y, z: euler.z },
     scale: { x: RIPPLE_INITIAL_RADIUS, y: thickness, z: 0 },
     color: '#8afdff',
     operation: 'union',
@@ -37,8 +45,6 @@ export function createRippleFX(position, isCharged = false) {
       type: 'ripple',
       startTime: performance.now() * 0.001,
       duration: duration,
-      startY,
-      endY,
       finalRadius,
       thickness
     }

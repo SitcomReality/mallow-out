@@ -1,11 +1,11 @@
 export const ENV_COLORS = {
   // Fantastical Marsh palette
-  sun: 0xfff0f5,      // Lavender-tinted sun
-  ambient: 0x4b0082,  // Indigo ambient shadows
-  sky: 0xffa07a,      // Light salmon horizon (rarely seen)
-  sky2: 0x8a2be2,     // Blue violet zenith
-  fog: 0xe0ecff,      // Vibrant Orchid fog
-  floor: 0x8afdff,      // Medium Spring Green (Glow-in-the-dark moss)
+  sun: 0xfff0f5,      
+  ambient: 0x4b0082,  
+  sky: 0xffa07a,      
+  sky2: 0x8a2be2,     
+  fog: 0xe0ecff,      
+  floor: 0x8afdff,    
 };
 
 export const ENV_SETTINGS = {
@@ -14,12 +14,11 @@ export const ENV_SETTINGS = {
   skyTextured: 0.0,
 };
 
-// World bounding sphere (intersects all geometry to hide underground objects)
-// Radius: 2x ground disc radius (11 units)
-// Center Y: 9.5 (so ground disc edges touch sphere's bottom)
+// World bounding sphere
+// Radius 15.0 centered at origin.
 export const WORLD_BOUNDS = {
   enabled: true,
-  radius: 11.0,
-  centerY: 9.5,
-  showOutline: true, // Set to false once positioning is verified
+  radius: 15.0,
+  centerY: 0.0,
+  showOutline: true,
 };

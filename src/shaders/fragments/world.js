@@ -18,19 +18,22 @@ struct Object {
 
 float sdFloor(vec3 p) {
   if (uFloorEnabled < 0.5) return 1e10;
-  // Simplified flat circular disk at y=0
-  return sdCylinder(p + vec3(0.0, 0.1, 0.0), 5.5, 0.1);
+  // The "floor" is now the interior of the world sphere
+  vec3 sphereCenter = vec3(0.0, uWorldBoundsCenterY, 0.0);
+  return uWorldBoundsRadius - length(p - sphereCenter);
 }
 
 vec3 getFloorColorAt(vec3 p) {
   vec3 col = uFloorColor;
   if (uFloorTextured > 0.5) {
-    float dist = length(p.xz);
-    // Cheap concentric ring pattern
-    float rings = smoothstep(0.0, 0.1, abs(fract(dist * 0.8) - 0.5));
-    col = mix(col * 1.15, col * 0.9, rings);
-    // Darken edge of the disk for visual definition
-    col = mix(col, col * 0.4, smoothstep(4.8, 5.5, dist));
+    vec3 sphereCenter = vec3(0.0, uWorldBoundsCenterY, 0.0);
+    vec3 n = normalize(p - sphereCenter);
+    // Use polar coordinates for pattern on the sphere
+    float phi = atan(n.z, n.x);
+    float theta = acos(n.y);
+    float pattern = smoothstep(0.0, 0.1, abs(fract(theta * 3.0) - 0.5)) * 
+                    smoothstep(0.0, 0.1, abs(fract(phi * 2.0 / PI) - 0.5));
+    col = mix(col * 1.1, col * 0.9, pattern);
   }
   return col;
 }
@@ -141,22 +144,6 @@ vec4 map(vec3 p) {
   vec4 groupRes = vec4(1e10, 1.0, 1.0, 1.0);
   float lastGid = 0.0;
   bool worldFirst = false;
-  
-  // World bounding sphere for underground culling
-  float boundingSphereD = 1e10;
-  if (uWorldBoundsEnabled > 0.5) {
-    vec3 sphereCenter = vec3(0.0, uWorldBoundsCenterY, 0.0);
-    boundingSphereD = length(p - sphereCenter) - uWorldBoundsRadius;
-    
-    // Debug outline visualization
-    if (uWorldBoundsOutline > 0.5) {
-      float thickness = 0.05;
-      float outlineDist = abs(boundingSphereD) - thickness;
-      if (outlineDist < worldRes.x) {
-        worldRes = vec4(outlineDist, vec3(1.0, 0.0, 1.0));
-      }
-    }
-  }
 
   for (int i = 0; i < 32; i++) {
     if (float(i) >= uNumObjects) break;
@@ -242,11 +229,7 @@ vec4 map(vec3 p) {
     }
   }
   
-  // Apply world bounds as final intersection to cull underground geometry
-  if (uWorldBoundsEnabled > 0.5 && uWorldBoundsOutline < 0.5) {
-    worldRes.x = max(worldRes.x, boundingSphereD);
-  }
-  
+  // No longer applying boundingSphereD as an intersection because the floor IS the interior
   return worldRes;
 }
 

@@ -100,11 +100,20 @@ export function updateBubbles(delta, currentTime) {
     if (bubble.state === 'rising') {
       bubble.riseTime += delta;
       const speed = BUBBLE_INITIAL_VELOCITY + bubble.riseTime * BUBBLE_ACCELERATION;
-      bubble.group.position.y += speed * delta;
       
-      const targetY = BUBBLE_MAX_Y;
-      const totalDist = targetY - BUBBLE_SPAWN_Y;
-      const progress = Math.max(0, Math.min(1, (bubble.group.position.y - BUBBLE_SPAWN_Y) / totalDist));
+      // Move towards camera (center origin approx)
+      const currentPos = new THREE.Vector3(bubble.group.position.x, bubble.group.position.y, bubble.group.position.z);
+      const dirToCenter = currentPos.clone().normalize().multiplyScalar(-1);
+      
+      currentPos.add(dirToCenter.multiplyScalar(speed * delta));
+      bubble.group.position.x = currentPos.x;
+      bubble.group.position.y = currentPos.y;
+      bubble.group.position.z = currentPos.z;
+      
+      const startDist = 15.0;
+      const targetDist = 5.0;
+      const distFromCenter = currentPos.length();
+      const progress = Math.max(0, Math.min(1, (startDist - distFromCenter) / (startDist - targetDist)));
       
       // Grow from much smaller start to full size over a longer ascent
       const currentScale = 0.02 + progress * 0.98;

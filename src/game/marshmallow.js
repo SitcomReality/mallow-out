@@ -25,13 +25,15 @@ function generateMarshmallowName() {
  * Creates the marshmallow pet.
  */
 export function createMarshmallow(totalDestroyed) {
-  // Only spawn on the far side of the floor (opposite the camera at z=8.5)
-  // To ensure z is negative, we pick an angle between PI and 2*PI
-  const angle = Math.PI + Math.random() * Math.PI;
-  const distance = 0.5 + Math.random() * (MARSHMALLOW_SPAWN_RADIUS - 0.5);
-  const x = Math.cos(angle) * distance;
-  const z = Math.sin(angle) * distance;
+  // Spawn on the back wall of the sphere
+  const angle = Math.PI + (Math.random() - 0.5) * 1.5;
+  const vertical = (Math.random() - 0.5) * 1.0;
+  const radius = 15.0;
   
+  const x = Math.cos(angle) * Math.cos(vertical) * radius;
+  const y = Math.sin(vertical) * radius;
+  const z = Math.sin(angle) * Math.cos(vertical) * radius;
+
   const type = selectMarshmallowType();
   
   const hue = type.color.hue + (Math.random() - 0.5) * 0.04;
@@ -47,9 +49,9 @@ export function createMarshmallow(totalDestroyed) {
   const marshmallow = {
     id: marshmallowId,
     type: 'cylinder',
-    // Start below the floor to avoid a single-frame flash at the final Y before the spawn animation runs
-    position: { x, y: SPAWN_START_Y, z },
-    rotation: { x: 0, y: 0, z: Math.PI / 2 },
+    // Positioned on the sphere wall
+    position: { x, y, z },
+    rotation: { x: 0, y: 0, z: 0 },
     scale: { 
       x: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier, 
       y: MARSHMALLOW_CYLINDER_HEIGHT * heightMultiplier, 
@@ -101,12 +103,16 @@ export function createMarshmallow(totalDestroyed) {
     isDying: false,
     movement: {
       bobPhase: Math.random() * Math.PI * 2,
-      bobAmplitude: BASE_BOB_AMPLITUDE * (0.8 + Math.random() * 0.4),
-      baseY: SPAWN_END_Y,
-      yaw: Math.random() * Math.PI * 2,
-      wanderTargetYaw: Math.random() * Math.PI * 2,
+      bobAmplitude: 0.15,
+      // Target radius on sphere
+      radius: 15.0,
+      // Current spherical coords
+      theta: angle, 
+      phi: vertical,
+      targetTheta: angle,
+      targetPhi: vertical,
       wanderTimer: 2.0 + Math.random() * 3.0,
-      speed: 0.3 + Math.random() * 0.4,
+      speed: 0.2,
     },
   };
   

@@ -42,8 +42,9 @@ function sdCylinder(p, r, h) {
 export function getSceneDistanceAt(p) {
   let dist = 1e10;
 
-  // 1. Floor distance (matching shader: sdCylinder(p + vec3(0.0, 0.1, 0.0), 5.5, 0.1))
-  const floorDist = sdCylinder({ x: p.x, y: p.y + 0.1, z: p.z }, 5.5, 0.1);
+  // 1. World sphere distance
+  const radius = 15.0;
+  const floorDist = radius - p.length();
   dist = Math.min(dist, floorDist);
 
   // 2. Current active marshmallow
