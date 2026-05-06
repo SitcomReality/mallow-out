@@ -113,7 +113,8 @@ export function applyRoundChunk(marshmallowEntity, hitPoint) {
     operation: 'subtract',
     blendRadius: CHUNK_REPAIR_INITIAL_BLEND,
     parentId: marshmallow.id,
-    noiseAmount: 0.4,
+    // Reduced noise for more consistent circular chunks
+    noiseAmount: 0.2,
     noiseScale: 1.0,
     noiseOffset: { 
       x: Math.random() * 100, 
