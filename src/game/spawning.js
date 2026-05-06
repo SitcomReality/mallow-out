@@ -74,12 +74,28 @@ export function updateSpawningMarshmallows(currentTime) {
 
   if (t >= 1.0) {
     delete enemy.spawnStartTime;
-    // Synchronize movement state to current position to prevent velocity spikes on handover
+    // Synchronize movement state to current position to prevent velocity spikes on handover.
+    // Also initialize angular wander (theta/phi) from the final world position so the mallow
+    // will continue smoothly from where it emerged rather than snapping to its default orbit.
     if (mov) {
-      mov.lastPos = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-      // Ensure we don't immediately leap to a distant target radius
-      mov.orbitRadius = mov.lastPos.length();
-      mov.orbitRadiusTarget = 9.0;
+      const finalPos = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+      mov.lastPos = finalPos.clone();
+
+      // Derive spherical coordinates from world-space position
+      const r = finalPos.length();
+      const phi = r > 0.0001 ? Math.asin(THREE.MathUtils.clamp(finalPos.y / r, -1, 1)) : mov.phi || 0;
+      const theta = Math.atan2(finalPos.z, finalPos.x);
+
+      // Initialize angular state and targets to the spawn-aligned orientation
+      mov.theta = theta;
+      mov.phi = phi;
+      mov.targetTheta = theta;
+      mov.targetPhi = phi;
+
+      // Use the final radius as the current orbit radius and pick a nearby target radius for gentle drifting
+      mov.orbitRadius = r;
+      // Keep the target modestly inward so it can gently wander without an abrupt radius jump
+      mov.orbitRadiusTarget = Math.max(2.0, Math.min(r, 9.0));
     }
   }
 }
