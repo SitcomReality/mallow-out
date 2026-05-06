@@ -112,10 +112,10 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
       phi: -0.5,
       targetTheta: 4.71,
       targetPhi: -0.5,
-      orbitRadius: 9.0,     // Preferred distance from the sphere center for floating
-      orbitRadiusTarget: 9.0,
+      orbitRadius: 15.0,    // Start at the wall distance to match spawn finish
+      orbitRadiusTarget: 9.0, // Target a closer float orbit
       radius: 15.0,         // Still used by spawn logic for initial emergence from the wall
-      wanderTimer: 0,
+      wanderTimer: 1.0,     // Wait a bit after spawn before first wander retarget
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: 0.2,
       radialBobAmplitude: 0.6,

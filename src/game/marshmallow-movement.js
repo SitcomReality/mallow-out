@@ -24,6 +24,7 @@ export function updateMarshmallowMovement(marshmallow, delta) {
       const theta = Math.atan2(p.z, p.x);
       mov.theta = theta;
       mov.phi = phi;
+      mov.orbitRadius = r;
     } else {
       mov.theta = BACK_THETA;
       mov.phi = BACK_PHI;
@@ -48,12 +49,12 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     mov.orbitRadiusTarget = 8.0 + Math.random() * 3.0;
   }
 
-  // Smoothly approach targets
-  const angleLerpSpeed = 0.8;
+  // Smoothly approach targets with much lower speeds for gentle wandering
+  const angleLerpSpeed = 0.3;
   mov.theta += (mov.targetTheta - mov.theta) * Math.min(1, angleLerpSpeed * delta);
   mov.phi += (mov.targetPhi - mov.phi) * Math.min(1, angleLerpSpeed * delta);
 
-  const radiusLerpSpeed = 0.5;
+  const radiusLerpSpeed = 0.2;
   mov.orbitRadius += (mov.orbitRadiusTarget - mov.orbitRadius) * Math.min(1, radiusLerpSpeed * delta);
 
   // Add subtle sine-based wobble to angles and radius
@@ -106,9 +107,9 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     rawForward = camPos.clone().sub(newPos).normalize();
   }
 
-  // 1. Smooth the forward vector to reduce jitter
+  // 1. Smooth the forward vector to reduce jitter (heavier damping)
   if (!mov.smoothForward) mov.smoothForward = rawForward.clone();
-  mov.smoothForward.lerp(rawForward, Math.min(1, 5.0 * delta)).normalize();
+  mov.smoothForward.lerp(rawForward, Math.min(1, 2.5 * delta)).normalize();
   const forward = mov.smoothForward;
 
   // 2. Build a stable basis using a persistent 'up' vector to avoid snaps
@@ -137,14 +138,14 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   
   mov.lastUp.copy(up);
 
-  // 4. Convert to rotation and slerp for maximum smoothness
+  // 4. Convert to rotation and slerp for maximum smoothness (lower slerp speed for grace)
   const matrix = new THREE.Matrix4();
   // local X = up, local Y = forward, local Z = right
   matrix.makeBasis(up, forward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(matrix);
   
   if (!mov.currentQ) mov.currentQ = targetQ.clone();
-  mov.currentQ.slerp(targetQ, Math.min(1, 8.0 * delta));
+  mov.currentQ.slerp(targetQ, Math.min(1, 3.5 * delta));
 
   const euler = new THREE.Euler().setFromQuaternion(mov.currentQ);
 
