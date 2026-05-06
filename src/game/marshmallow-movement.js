@@ -1,10 +1,4 @@
 import { gameState } from './state.js';
-import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
-
-/**
- * Idle movement for the marshmallow pet: wandering around the marsh floor.
- * Uses a gentle "wander" steering approach and robust boundary correction to avoid getting stuck.
- */
 import * as THREE from 'three';
 
 export function updateMarshmallowMovement(marshmallow, delta) {
@@ -13,45 +7,61 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const mov = marshmallow.movement;
   const marsh = marshmallow.marshmallow;
 
+  const posVec = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+  const inwardNormal = posVec.clone().normalize().multiplyScalar(-1);
+
+  if (!mov.velocity) {
+    const randomDir = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    mov.velocity = randomDir.projectOnPlane(inwardNormal).normalize();
+    mov.targetVelocity = mov.velocity.clone();
+  }
+
   mov.wanderTimer -= delta;
   
   if (mov.wanderTimer <= 0) {
-    mov.wanderTimer = 3.0 + Math.random() * 5.0;
-    // The "back wall" center for our fixed camera is roughly theta=4.71, phi=-0.6
-    // We constrain wander to stay within view (approx +/- 0.6 rad from center)
-    mov.targetTheta = 4.71 + (Math.random() - 0.5) * 1.0; 
-    mov.targetPhi = -0.5 + (Math.random() - 0.5) * 0.6;
+    mov.wanderTimer = 2.0 + Math.random() * 3.0;
+    
+    // Pick a new target direction tangent to the surface
+    const randomDir = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    // Bias the random direction slightly towards the front so it doesn't just jitter in place
+    randomDir.add(mov.velocity).normalize(); 
+    mov.targetVelocity = randomDir.projectOnPlane(inwardNormal).normalize();
   }
 
-  // Smoothly lerp spherical coordinates for a gentle wander
-  mov.theta += (mov.targetTheta - mov.theta) * delta * mov.speed;
-  mov.phi += (mov.targetPhi - mov.phi) * delta * mov.speed;
+  // Smoothly rotate velocity towards target
+  mov.velocity.lerp(mov.targetVelocity, delta * 2.0).projectOnPlane(inwardNormal).normalize();
+
+  // Move position along velocity
+  posVec.add(mov.velocity.clone().multiplyScalar(mov.speed * delta));
 
   mov.bobPhase += delta * 2.0;
   const bob = Math.sin(mov.bobPhase) * mov.bobAmplitude;
-  // Offset from sphere wall (radius 15) so it stands *inside*
-  const currentRadius = mov.radius - 1.2 + bob; 
-
-  // Update position on the sphere
-  marsh.position.x = Math.cos(mov.theta) * Math.cos(mov.phi) * currentRadius;
-  marsh.position.y = Math.sin(mov.phi) * currentRadius;
-  marsh.position.z = Math.sin(mov.theta) * Math.cos(mov.phi) * currentRadius;
-
-  // Orient "upright" relative to the sphere wall. 
-  // In a hollow sphere, "Up" for a character standing on the wall is toward the center.
-  const posVec = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-  const inwardNormal = posVec.clone().normalize().multiplyScalar(-1);
   
-  // Create rotation matrix where Cylinder Y (height) matches inwardNormal
+  // Padding: cylinder radius (scale.x) + some extra to prevent clipping into the sphere wall
+  const padding = marsh.scale.x + 0.3;
+  const currentRadius = mov.radius - padding + bob; 
+
+  // Snap back to spherical surface
+  posVec.normalize().multiplyScalar(currentRadius);
+
+  marsh.position.x = posVec.x;
+  marsh.position.y = posVec.y;
+  marsh.position.z = posVec.z;
+
+  // Re-calculate inward normal at new position
+  const newInwardNormal = posVec.clone().normalize().multiplyScalar(-1);
+
+  // Orient "upright" relative to the sphere wall.
+  // localX = Up (inwardNormal)
+  // localY = Forward (velocity)
+  // localZ = Right
+  const up = newInwardNormal;
+  const forward = mov.velocity.clone().projectOnPlane(up).normalize();
+  const right = new THREE.Vector3().crossVectors(up, forward).normalize();
+  forward.crossVectors(right, up).normalize();
+
   const matrix = new THREE.Matrix4();
-  const up = inwardNormal;
-  // Use world-up to keep the mallow "standing" upright relative to the horizon where possible
-  const worldUp = new THREE.Vector3(0, 1, 0);
-  let tangent = new THREE.Vector3().crossVectors(worldUp, up).normalize();
-  if (tangent.lengthSq() < 0.001) tangent.set(1, 0, 0);
-  const bitangent = new THREE.Vector3().crossVectors(up, tangent).normalize();
-  
-  matrix.makeBasis(tangent, up, bitangent);
+  matrix.makeBasis(up, forward, right);
   const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
   const euler = new THREE.Euler().setFromQuaternion(q);
   

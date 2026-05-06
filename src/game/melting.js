@@ -30,6 +30,11 @@ export function updateMeltingMarshmallows(currentTime) {
     if (marshmallow.meltStartY === undefined) {
       marshmallow.meltStartY = marshmallow.marshmallow.position.y;
       
+      const x0 = marshmallow.marshmallow.position.x;
+      const z0 = marshmallow.marshmallow.position.z;
+      const val = 15.0 * 15.0 - x0 * x0 - z0 * z0;
+      marshmallow.meltEndY = (val > 0 ? -Math.sqrt(val) : marshmallow.meltStartY) - 2.0;
+
       // Capture the starting scale so we can shrink from that value
       marshmallow.meltStartScale = {
         x: marshmallow.marshmallow.scale.x,
@@ -54,10 +59,7 @@ export function updateMeltingMarshmallows(currentTime) {
       const p = t / half; // 0..1 for first half
       const ease = p < 0.5 ? 2 * p * p : -1 + (4 - 2 * p) * p;
       
-      // Fall toward the bottom Y and also move slightly toward the center to avoid clipping the wall too hard
-      marshmallow.marshmallow.position.y = lerp(marshmallow.meltStartY, MELT_END_Y, ease);
-      marshmallow.marshmallow.position.x *= (1.0 - ease * 0.2);
-      marshmallow.marshmallow.position.z *= (1.0 - ease * 0.2);
+      marshmallow.marshmallow.position.y = lerp(marshmallow.meltStartY, marshmallow.meltEndY, ease);
       
       marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_START, MELT_BLEND_END, ease);
       marshmallow.marshmallow.noiseAmount = lerp(MELT_NOISE_AMOUNT_START, MELT_NOISE_AMOUNT_END, ease);
@@ -78,7 +80,7 @@ export function updateMeltingMarshmallows(currentTime) {
       const p = (t - half) / (1.0 - half); // 0..1 for second half
       
       // Stop moving vertically
-      marshmallow.marshmallow.position.y = MELT_END_Y;
+      marshmallow.marshmallow.position.y = marshmallow.meltEndY;
       
       // Reduce effects to 0
       marshmallow.marshmallow.blendRadius = lerp(MELT_BLEND_END, 0.0, p);

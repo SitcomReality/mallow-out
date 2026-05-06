@@ -1,24 +1,15 @@
 import { gameState } from './state.js';
 import {
   SPAWN_DURATION,
-  SPAWN_START_Y,
-  SPAWN_END_Y,
   SPAWN_BLEND_START,
-  SPAWN_BLEND_END,
-  SPAWN_NOISE_START,
-  SPAWN_NOISE_END
+  SPAWN_BLEND_END
 } from './spawn-constants.js';
-import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
+import * as THREE from 'three';
 
 function lerp(a, b, t) {
   return a + (b - a) * t;
 }
 
-import * as THREE from 'three';
-
-/**
- * Handles the "popping out of wall" animation for newly spawned marshmallows.
- */
 export function updateSpawningMarshmallows(currentTime) {
   const enemy = gameState.currentMarshmallow;
   if (!enemy || enemy.spawnStartTime === undefined) return;
@@ -28,34 +19,58 @@ export function updateSpawningMarshmallows(currentTime) {
 
   const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
-  // Animate distance from wall (spawn from inside the wall toward the center)
   const mov = enemy.movement;
-  // Radius 15 is the wall. Start at 16 (inside wall) and move to ~13.8 (standing on wall)
-  const startR = 16.0;
-  const endR = mov.radius - 1.2;
-  const r = lerp(startR, endR, ease);
+  const marsh = enemy.marshmallow;
+
+  if (!enemy.spawnPosWorld) {
+    enemy.spawnPosWorld = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+    const inwardNormal = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
+    
+    // Pick random tangent velocity
+    const randomDir = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+    mov.velocity = randomDir.projectOnPlane(inwardNormal).normalize();
+    mov.targetVelocity = mov.velocity.clone();
+  }
+
+  const inwardNormal = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
+  const tangentVelocity = mov.velocity.clone().projectOnPlane(inwardNormal).normalize();
   
-  enemy.marshmallow.position.x = Math.cos(mov.theta) * Math.cos(mov.phi) * r;
-  enemy.marshmallow.position.y = Math.sin(mov.phi) * r;
-  enemy.marshmallow.position.z = Math.sin(mov.theta) * Math.cos(mov.phi) * r;
+  const right = new THREE.Vector3().crossVectors(inwardNormal, tangentVelocity).normalize();
 
-  // Align rotation to inward normal
-  const posVec = new THREE.Vector3(enemy.marshmallow.position.x, enemy.marshmallow.position.y, enemy.marshmallow.position.z);
-  const inwardNormal = posVec.clone().normalize().multiplyScalar(-1);
-  const matrix = new THREE.Matrix4();
-  const up = inwardNormal;
-  const worldUp = new THREE.Vector3(0, 1, 0);
-  let tangent = new THREE.Vector3().crossVectors(worldUp, up).normalize();
-  if (tangent.lengthSq() < 0.001) tangent.set(1, 0, 0);
-  const bitangent = new THREE.Vector3().crossVectors(up, tangent).normalize();
-  matrix.makeBasis(tangent, up, bitangent);
-  const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
-  const euler = new THREE.Euler().setFromQuaternion(q);
-  enemy.marshmallow.rotation.x = euler.x;
-  enemy.marshmallow.rotation.y = euler.y;
-  enemy.marshmallow.rotation.z = euler.z;
+  // Start orientation: Face first towards center
+  const mStart = new THREE.Matrix4().makeBasis(
+    tangentVelocity.clone().multiplyScalar(-1), // Up
+    inwardNormal, // Forward
+    right
+  );
+  const qStart = new THREE.Quaternion().setFromRotationMatrix(mStart);
 
-  enemy.marshmallow.blendRadius = lerp(SPAWN_BLEND_START, SPAWN_BLEND_END, ease);
+  // End orientation: Wandering on surface
+  const mEnd = new THREE.Matrix4().makeBasis(
+    inwardNormal, // Up
+    tangentVelocity, // Forward
+    right
+  );
+  const qEnd = new THREE.Quaternion().setFromRotationMatrix(mEnd);
+
+  const qCurrent = qStart.clone().slerp(qEnd, ease);
+  const euler = new THREE.Euler().setFromQuaternion(qCurrent);
+  
+  marsh.rotation.x = euler.x;
+  marsh.rotation.y = euler.y;
+  marsh.rotation.z = euler.z;
+
+  const padding = marsh.scale.x + 0.3;
+  const startPos = enemy.spawnPosWorld.clone().add(inwardNormal.clone().multiplyScalar(-2.0)); // Deep inside wall
+  const endPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(mov.radius - padding);
+
+  const posVec = startPos.clone().lerp(endPos, ease);
+
+  marsh.position.x = posVec.x;
+  marsh.position.y = posVec.y;
+  marsh.position.z = posVec.z;
+
+  marsh.blendRadius = lerp(SPAWN_BLEND_START, SPAWN_BLEND_END, ease);
 
   if (t >= 1.0) {
     delete enemy.spawnStartTime;

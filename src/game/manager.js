@@ -85,10 +85,7 @@ export function spawnNextMarshmallowAt(point) {
   if (gameState.currentMarshmallow) return;
   if (gameState.meltingMarshmallows.length > 1) return;
   
-  const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed);
-  // Set the spawn point to where the treat hit
-  marshmallow.marshmallow.position.x = point.x;
-  marshmallow.marshmallow.position.z = point.z;
+  const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed, point);
   
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;

@@ -24,15 +24,20 @@ function generateMarshmallowName() {
 /**
  * Creates the marshmallow pet.
  */
-export function createMarshmallow(totalDestroyed) {
-  // Spawn on the back wall of the sphere
-  const angle = Math.PI + (Math.random() - 0.5) * 1.5;
-  const vertical = (Math.random() - 0.5) * 1.0;
-  const radius = 15.0;
-  
-  const x = Math.cos(angle) * Math.cos(vertical) * radius;
-  const y = Math.sin(vertical) * radius;
-  const z = Math.sin(angle) * Math.cos(vertical) * radius;
+export function createMarshmallow(totalDestroyed, spawnPoint) {
+  let x, y, z;
+  if (spawnPoint) {
+    x = spawnPoint.x;
+    y = spawnPoint.y;
+    z = spawnPoint.z;
+  } else {
+    const angle = Math.PI + (Math.random() - 0.5) * 1.5;
+    const vertical = (Math.random() - 0.5) * 1.0;
+    const radius = 15.0;
+    x = Math.cos(angle) * Math.cos(vertical) * radius;
+    y = Math.sin(vertical) * radius;
+    z = Math.sin(angle) * Math.cos(vertical) * radius;
+  }
 
   const type = selectMarshmallowType();
   
@@ -104,15 +109,11 @@ export function createMarshmallow(totalDestroyed) {
     movement: {
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: 0.15,
-      // Target radius on sphere
       radius: 15.0,
-      // Current spherical coords
-      theta: angle, 
-      phi: vertical,
-      targetTheta: angle,
-      targetPhi: vertical,
-      wanderTimer: 2.0 + Math.random() * 3.0,
-      speed: 0.2,
+      wanderTimer: 0,
+      speed: 2.0,
+      velocity: null,
+      targetVelocity: null
     },
   };
   
