@@ -7,9 +7,9 @@ import { PLAYER_HEIGHT } from './controls-constants.js';
 export function updateUniforms(uniforms, time) {
   const player = gameState.player;
   
-  // Camera setup - Static position for incremental gameplay
-  player.position.set(0, 6.5, 8.5);
-  player.pitch = -0.65;
+  // Camera setup - place the camera well inside the world sphere, looking toward the back wall
+  player.position.set(0, 2.5, 5.0);
+  player.pitch = -0.35;
   player.yaw = 0;
   
   uniforms.uCamPos.value.copy(player.position);
