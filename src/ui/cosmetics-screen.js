@@ -1,5 +1,5 @@
 import { gameState } from '../game/state.js';
-import { COSMETIC_CATEGORIES, COSMETIC_RARITIES, getCosmeticsByCategory } from '../game/cosmetics/cosmetics-types.js';
+import { COSMETIC_CATEGORIES, COSMETIC_RARITIES, getCosmeticsByCategory, COSMETIC_ITEMS } from '../game/cosmetics/cosmetics-types.js';
 import { openLootbox, equipCosmetic, LOOTBOX_COST, canAffordLootbox } from '../game/cosmetics/lootbox-logic.js';
 import { getCurrencySVG } from './currency-symbols.js';
 
@@ -50,7 +50,7 @@ export function createCosmeticsScreen() {
   function show() {
     const canAfford = canAffordLootbox();
     const unlockedCount = gameState.cosmetics.unlocked.length;
-    const totalCount = Object.values(require('../game/cosmetics/cosmetics-types.js').COSMETIC_ITEMS).length;
+    const totalCount = Object.values(COSMETIC_ITEMS).length;
     
     screen.innerHTML = `
       <div class="cosmetics-content wonky" data-fill="rgba(255,255,255,0.95)" data-stroke="#000000" data-stroke-width="8">

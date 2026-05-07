@@ -6,6 +6,7 @@ import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
 import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
 import { gameState } from './state.js';
+import { getCosmeticById } from './cosmetics/cosmetics-types.js';
 
 let nextId = 1;
 
@@ -45,7 +46,7 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
   let color;
   const equippedSkin = gameState.cosmetics.equipped.skin;
   if (equippedSkin) {
-    const skinData = require('./cosmetics/cosmetics-types.js').getCosmeticById(equippedSkin);
+    const skinData = getCosmeticById(equippedSkin);
     if (skinData && skinData.color) {
       color = new THREE.Color(skinData.color);
     } else {
