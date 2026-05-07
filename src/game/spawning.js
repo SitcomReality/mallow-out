@@ -73,9 +73,31 @@ export function updateSpawningMarshmallows(currentTime) {
   marsh.blendRadius = lerp(SPAWN_BLEND_START, SPAWN_BLEND_END, ease);
 
   if (t >= 1.0) {
-    // End the spawn sequence. Movement logic in marshmallow-movement.js will
-    // automatically initialize itself from the current Cartesian position
-    // on the next frame because mov.lastPos is null.
     delete enemy.spawnStartTime;
+    // Synchronize movement state to current position to prevent velocity spikes on handover
+    if (mov) {
+      const finalPos = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+      mov.lastPos = finalPos.clone();
+      
+      // Calculate actual angular position from final spawn position
+      const r = finalPos.length();
+      const phi = Math.asin(finalPos.y / r);
+      const theta = Math.atan2(finalPos.z, finalPos.x);
+      
+      // Set both current and target to final spawn state to prevent jump
+      mov.theta = theta;
+      mov.phi = phi;
+      mov.targetTheta = theta;
+      mov.targetPhi = phi;
+      mov.orbitRadius = r;
+      mov.orbitRadiusTarget = r; // Start at current position, will vary during next wander
+      
+      // Preserve spawn rotation so movement doesn't recalculate it immediately
+      mov.currentQ = new THREE.Quaternion().setFromEuler(
+        new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z)
+      );
+      mov.lastUp = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.currentQ).normalize();
+      mov.smoothForward = inwardNormal.clone(); // Start with the direction it was emerging
+    }
   }
 }

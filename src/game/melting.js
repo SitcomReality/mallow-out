@@ -32,7 +32,7 @@ export function updateMeltingMarshmallows(currentTime) {
       
       const x0 = marshmallow.marshmallow.position.x;
       const z0 = marshmallow.marshmallow.position.z;
-      const val = 15.0 * 15.0 - x0 * x0 - z0 * z0;
+      const val = 10.0 * 10.0 - x0 * x0 - z0 * z0;
       marshmallow.meltEndY = (val > 0 ? -Math.sqrt(val) : marshmallow.meltStartY) - 2.0;
 
       // Capture the starting scale so we can shrink from that value

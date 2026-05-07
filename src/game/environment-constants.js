@@ -15,10 +15,10 @@ export const ENV_SETTINGS = {
 };
 
 // World bounding sphere
-// Radius 15.0 centered at origin.
+// Radius 10.0 centered at origin.
 export const WORLD_BOUNDS = {
   enabled: true,
-  radius: 15.0,
+  radius: 10.0,
   centerY: 0.0,
   showOutline: true,
 };

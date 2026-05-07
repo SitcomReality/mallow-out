@@ -1,9 +1,9 @@
 import { gameState } from './state.js';
 import * as THREE from 'three';
 
-const SPHERE_RADIUS = 15.0;
-const INNER_MARGIN = 1.5;     // Keep a bit away from the sphere wall
-const MIN_CAMERA_DISTANCE = 3; // Do not let the mallow get too close to the camera
+const SPHERE_RADIUS = 10.0;
+const INNER_MARGIN = 1.0;     // Keep a bit away from the sphere wall
+const MIN_CAMERA_DISTANCE = 2.5; // Do not let the mallow get too close to the camera
 const BACK_THETA = 4.71;
 const BACK_PHI = -0.6;
 
@@ -46,7 +46,7 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     mov.targetPhi = -0.5 + (Math.random() - 0.5) * 0.6;
 
     // Slightly vary the orbit radius so it drifts nearer/farther
-    mov.orbitRadiusTarget = 8.0 + Math.random() * 3.0;
+    mov.orbitRadiusTarget = 5.5 + Math.random() * 2.0;
   }
 
   // Smoothly approach targets with much lower speeds for gentle wandering

@@ -1,5 +1,5 @@
-export const BUBBLE_SPAWN_DISTANCE = 17.5;
-export const BUBBLE_POP_DISTANCE = 14.5;
+export const BUBBLE_SPAWN_DISTANCE = 11.5;
+export const BUBBLE_POP_DISTANCE = 9.5;
 // Start more subtle
 export const BUBBLE_INITIAL_BLEND = 0.4;
 // Increase final blend by +0.5 for a stronger soft edge at apex

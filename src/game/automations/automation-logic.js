@@ -40,8 +40,8 @@ function fireAutoShooter() {
     (Math.random() - 0.5) * spread
   )).normalize();
 
-  // World sphere radius is 15.0
-  const hitPoint = targetDir.clone().multiplyScalar(15.0);
+  // World sphere radius is 10.0
+  const hitPoint = targetDir.clone().multiplyScalar(10.0);
   
   // Calculate reward
   const baseMarsh = 1 + getUpgradeEffect('marsh_reward', gameState.upgrades.marsh_reward || 0);

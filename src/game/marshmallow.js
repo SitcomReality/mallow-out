@@ -33,7 +33,7 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
   } else {
     const angle = Math.PI + (Math.random() - 0.5) * 1.5;
     const vertical = (Math.random() - 0.5) * 1.0;
-    const radius = 15.0;
+    const radius = 10.0;
     x = Math.cos(angle) * Math.cos(vertical) * radius;
     y = Math.sin(vertical) * radius;
     z = Math.sin(angle) * Math.cos(vertical) * radius;
@@ -112,9 +112,9 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
       phi: -0.5,
       targetTheta: 4.71,
       targetPhi: -0.5,
-      orbitRadius: 15.0,    // Start at the wall distance to match spawn finish
-      orbitRadiusTarget: 9.0, // Target a closer float orbit
-      radius: 15.0,         // Still used by spawn logic for initial emergence from the wall
+      orbitRadius: 10.0,    // Start at the wall distance to match spawn finish
+      orbitRadiusTarget: 6.5, // Target a closer float orbit
+      radius: 10.0,         // Still used by spawn logic for initial emergence from the wall
       wanderTimer: 1.0,     // Wait a bit after spawn before first wander retarget
       bobPhase: Math.random() * Math.PI * 2,
       bobAmplitude: 0.2,
