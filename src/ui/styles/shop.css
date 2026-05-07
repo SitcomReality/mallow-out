@@ -1,7 +1,8 @@
 .shop-overlay {
   position: fixed;
   inset: 0;
-  background: #87ceeb;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -13,31 +14,6 @@
 
 .shop-overlay.active {
   display: flex;
-}
-
-.shop-content {
-  padding: 32px;
-  max-width: 600px;
-  width: 95%;
-  position: relative;
-  margin: auto;
-}
-
-.shop-title {
-  font-size: 20px;
-  font-weight: 400;
-  text-align: center;
-  margin: 0 0 16px;
-  color: #000000;
-  text-transform: uppercase;
-}
-
-.shop-subtitle {
-  font-size: 10px;
-  text-align: center;
-  color: #000000;
-  margin: 0 0 20px;
-  font-weight: 400;
 }
 
 .shop-items {

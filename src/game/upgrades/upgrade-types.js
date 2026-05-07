@@ -12,18 +12,16 @@ export const UPGRADE_TYPES = {
     id: 'shot_cooldown',
     category: UPGRADE_CATEGORIES.PLAYER,
     name: 'Quick Shot',
-    icon: '⚡',
     description: 'Reduce cooldown between shots',
-    shortDesc: '-10% cooldown per level'
+    shortDesc: '-10% cooldown'
   },
 
   COMBO_DURATION: {
     id: 'combo_duration',
     category: UPGRADE_CATEGORIES.PLAYER,
     name: 'Combo Master',
-    icon: '🎯',
     description: 'Increase time window for combo chain',
-    shortDesc: '+0.5s combo window per level'
+    shortDesc: '+0.5s combo window'
   },
 
   // Marshmallow Upgrades
@@ -31,36 +29,32 @@ export const UPGRADE_TYPES = {
     id: 'mallow_heal',
     category: UPGRADE_CATEGORIES.MARSHMALLOW,
     name: 'Love Boost',
-    icon: '💖',
     description: 'Increase health restored when shooting marshmallow',
-    shortDesc: '+25% heal per level'
+    shortDesc: '+25% heal'
   },
 
   HIT_PROTECTION: {
     id: 'hit_protection',
     category: UPGRADE_CATEGORIES.MARSHMALLOW,
     name: 'Hit Protection',
-    icon: '🛡️',
     description: 'Increase time before marshmallow loses health after being shot',
-    shortDesc: '+0.5s protection per level'
+    shortDesc: '+0.5s protection'
   },
 
   HEALTH_REGEN: {
     id: 'health_regen',
     category: UPGRADE_CATEGORIES.MARSHMALLOW,
     name: 'Slow Melt',
-    icon: '❄️',
     description: 'Reduce marshmallow health loss rate',
-    shortDesc: '+50% slower loss per level'
+    shortDesc: '+50% slower loss'
   },
 
   MALLOW_MAX_HEALTH: {
     id: 'mallow_max_health',
     category: UPGRADE_CATEGORIES.MARSHMALLOW,
     name: 'Hardy Mallow',
-    icon: '💪',
     description: 'Increase marshmallow maximum health',
-    shortDesc: '+20% max HP per level'
+    shortDesc: '+20% max HP'
   },
 
   // Economy Upgrades
@@ -68,27 +62,24 @@ export const UPGRADE_TYPES = {
     id: 'pollen_multiplier',
     category: UPGRADE_CATEGORIES.ECONOMY,
     name: 'Pollen Collector',
-    icon: '🌼',
-    description: 'Increase pollen earned from damage',
-    shortDesc: '+20% pollen per level'
+    description: 'Increase pollen earned from marshmallow interactions',
+    shortDesc: '+20% pollen'
   },
 
   CARAMEL_BONUS: {
     id: 'caramel_bonus',
     category: UPGRADE_CATEGORIES.ECONOMY,
     name: 'Sweet Rewards',
-    icon: '🍯',
-    description: 'Increase caramel earned from kills',
-    shortDesc: '+20% caramel per level'
+    description: 'Increase caramel earned from combos',
+    shortDesc: '+20% caramel'
   },
 
   MARSH_REWARD: {
     id: 'marsh_reward',
     category: UPGRADE_CATEGORIES.ECONOMY,
     name: 'Marsh Bounty',
-    icon: '💧',
     description: 'Increase marsh currency from floor shots',
-    shortDesc: '+1 marsh per level'
+    shortDesc: '+1 marsh'
   },
 
   // Automation Upgrades
@@ -96,9 +87,8 @@ export const UPGRADE_TYPES = {
     id: 'auto_shooter_unlock',
     category: UPGRADE_CATEGORIES.AUTOMATION,
     name: 'Auto Shooter',
-    icon: '🔫',
     description: 'Unlock automatic marsh shooter',
-    shortDesc: 'Unlocks automation (one-time)',
+    shortDesc: 'Unlocks automation',
     maxLevel: 1
   },
 
@@ -106,9 +96,8 @@ export const UPGRADE_TYPES = {
     id: 'auto_shooter_rate',
     category: UPGRADE_CATEGORIES.AUTOMATION,
     name: 'Shooter Speed',
-    icon: '💨',
     description: 'Increase auto shooter fire rate',
-    shortDesc: '+20% fire rate per level',
+    shortDesc: '+20% fire rate',
     prerequisite: 'auto_shooter_unlock'
   },
 
@@ -116,9 +105,8 @@ export const UPGRADE_TYPES = {
     id: 'auto_shooter_value',
     category: UPGRADE_CATEGORIES.AUTOMATION,
     name: 'Shooter Power',
-    icon: '💥',
     description: 'Increase auto shooter marsh reward',
-    shortDesc: '+10% value per level',
+    shortDesc: '+10% value',
     prerequisite: 'auto_shooter_unlock'
   },
 };

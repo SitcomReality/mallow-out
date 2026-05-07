@@ -41,10 +41,25 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
 
   const type = selectMarshmallowType();
   
-  const hue = type.color.hue + (Math.random() - 0.5) * 0.04;
-  const sat = type.color.satMin + Math.random() * (type.color.satMax - type.color.satMin);
-  const light = type.color.lightMin + Math.random() * (type.color.lightMax - type.color.lightMin);
-  const color = new THREE.Color().setHSL(hue, sat, light);
+  // Use equipped cosmetic skin if available
+  let color;
+  const equippedSkin = gameState.cosmetics.equipped.skin;
+  if (equippedSkin) {
+    const skinData = require('./cosmetics/cosmetics-types.js').getCosmeticById(equippedSkin);
+    if (skinData && skinData.color) {
+      color = new THREE.Color(skinData.color);
+    } else {
+      const hue = type.color.hue + (Math.random() - 0.5) * 0.04;
+      const sat = type.color.satMin + Math.random() * (type.color.satMax - type.color.satMin);
+      const light = type.color.lightMin + Math.random() * (type.color.lightMax - type.color.lightMin);
+      color = new THREE.Color().setHSL(hue, sat, light);
+    }
+  } else {
+    const hue = type.color.hue + (Math.random() - 0.5) * 0.04;
+    const sat = type.color.satMin + Math.random() * (type.color.satMax - type.color.satMin);
+    const light = type.color.lightMin + Math.random() * (type.color.lightMax - type.color.lightMin);
+    color = new THREE.Color().setHSL(hue, sat, light);
+  }
   
   const sizeMultiplier = 0.95 + Math.random() * 0.1;
   const heightMultiplier = 0.95 + Math.random() * 0.1;

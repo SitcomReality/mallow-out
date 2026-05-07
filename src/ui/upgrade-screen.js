@@ -25,14 +25,13 @@ export function createUpgradeScreen() {
       
       return `
         <div class="upgrade-card wonky ${canAfford && !locked ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${locked ? 'locked' : ''}" 
-             data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" 
+             data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" 
              data-id="${upgrade.id}" data-cost="${cost}">
-          <div class="upgrade-card-icon" style="font-size: 32px;">${upgrade.icon}</div>
-          <h3 class="upgrade-card-name" style="font-size: 10px; color: #000000; margin: 8px 0;">${upgrade.name}</h3>
+          <h3 class="upgrade-card-name">${upgrade.name}</h3>
           <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-            ${maxed ? 'MAX' : locked ? '🔒 LOCKED' : 'Lv ' + currentLevel}
+            ${maxed ? 'MAX' : locked ? '🔒' : 'Lv ' + currentLevel}
           </div>
-          <p class="upgrade-card-desc" style="font-size: 8px; color: #000000; margin: 8px 0;">${upgrade.description}</p>
+          <p class="upgrade-card-desc">${upgrade.description}</p>
           <div class="upgrade-effect">${upgrade.shortDesc}</div>
           ${!maxed && !locked ? `
             <div class="upgrade-cost">
@@ -60,11 +59,11 @@ export function createUpgradeScreen() {
       .join('');
     
     screen.innerHTML = `
-      <div class="upgrade-content wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="8">
+      <div class="upgrade-content wonky" data-fill="rgba(255,255,255,0.95)" data-stroke="#000000" data-stroke-width="8">
         <h2 class="upgrade-title">Permanent Upgrades</h2>
         <p class="upgrade-subtitle">
           ${getCurrencySVG('caramel', 16)} 
-          ${gameState.currencies.caramel} Caramel Available
+          ${gameState.currencies.caramel} Caramel
         </p>
         <div class="upgrade-categories-container">
           ${categoriesHTML}
@@ -74,6 +73,9 @@ export function createUpgradeScreen() {
     `;
     
     screen.classList.add('active');
+    
+    // Immediately update wonky UI to prevent loading delay
+    if (window.updateWonkyUI) window.updateWonkyUI();
     
     const cards = screen.querySelectorAll('.upgrade-card');
     cards.forEach(card => {

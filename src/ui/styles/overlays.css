@@ -1,7 +1,8 @@
-.wave-summary-overlay, #upgradeScreen, #pauseMenu {
+#upgradeScreen, #pauseMenu, .cosmetics-overlay {
   position: fixed;
   inset: 0;
-  background: #87ceeb;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
   display: none;
   flex-direction: column;
   align-items: center;
@@ -12,69 +13,60 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.wave-summary-overlay.active, #upgradeScreen.active, #pauseMenu.active {
+#upgradeScreen.active, #pauseMenu.active, .cosmetics-overlay.active {
   display: flex;
 }
 
-.upgrade-content, .wave-summary-content, .pause-content {
+.upgrade-content, .pause-content, .cosmetics-content, .shop-content {
   padding: 32px;
-  max-width: 800px;
+  max-width: 900px;
   width: 95%;
   position: relative;
   margin: auto;
   flex-shrink: 0;
 }
 
-.upgrade-title, .wave-summary-title, .pause-title {
+.upgrade-title, .pause-title, .cosmetics-title, .shop-title {
   font-size: 20px;
   font-weight: 400;
   text-align: center;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: #000000;
   text-transform: uppercase;
 }
 
-.wave-end-reason {
-  text-align: center;
-  font-size: 10px;
-  font-weight: 400;
-  color: #dc143c;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
-}
-
-.upgrade-subtitle, .petal-hint {
-  font-size: 10px;
+.upgrade-subtitle, .cosmetics-subtitle, .shop-subtitle {
+  font-size: 9px;
   text-align: center;
   color: #000000;
   margin: 0 0 20px;
   font-weight: 400;
 }
 
-.upgrade-categories-container {
+.upgrade-categories-container, .cosmetics-container {
   max-height: 60vh;
   overflow-y: auto;
   margin-bottom: 24px;
 }
 
-.upgrade-category {
-  margin-bottom: 32px;
+.upgrade-category, .cosmetic-category {
+  margin-bottom: 24px;
 }
 
 .category-title {
-  font-size: 14px;
+  font-size: 12px;
   color: #000000;
   text-transform: uppercase;
   margin-bottom: 12px;
   text-align: center;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
+  font-weight: 400;
 }
 
 .category-upgrades {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
 }
 
 .upgrade-card.locked {
@@ -83,132 +75,121 @@
   filter: grayscale(0.7);
 }
 
+/* Cosmetics specific styles */
+.lootbox-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.lootbox-btn {
+  padding: 12px 20px;
+  font-size: 10px;
+  cursor: pointer;
+  color: #000000;
+}
+
+.lootbox-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.lootbox-result {
+  margin-bottom: 16px;
+}
+
+.cosmetic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.cosmetic-item {
+  padding: 8px;
+  cursor: pointer;
+  transition: transform 0.1s;
+  text-align: center;
+}
+
+.cosmetic-item:not(.locked):hover {
+  transform: translateY(-2px);
+}
+
+.cosmetic-item.locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cosmetic-item.equipped {
+  box-shadow: 0 0 12px rgba(50, 205, 50, 0.6);
+}
+
+.cosmetic-preview {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 2px solid #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 4px;
+}
+
+.equipped-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #32cd32;
+  color: #000000;
+  font-size: 6px;
+  padding: 2px 4px;
+  border: 1px solid #000000;
+  font-weight: 400;
+}
+
+.locked-icon {
+  font-size: 24px;
+}
+
+.cosmetic-name {
+  font-size: 8px;
+  color: #000000;
+  margin-top: 4px;
+}
+
+.cosmetic-rarity {
+  font-size: 7px;
+  font-weight: 400;
+}
+
 @media (max-width: 600px) {
-  .wave-summary-overlay, #upgradeScreen, #pauseMenu {
+  #upgradeScreen, #pauseMenu, .cosmetics-overlay {
     padding: 10px;
   }
-  .upgrade-content, .wave-summary-content, .pause-content {
+  .upgrade-content, .pause-content, .cosmetics-content, .shop-content {
     padding: 16px;
     width: 98%;
   }
-  .upgrade-title, .wave-summary-title, .pause-title {
+  .upgrade-title, .pause-title, .cosmetics-title, .shop-title {
     font-size: 14px;
   }
-  .upgrade-subtitle, .petal-hint {
+  .upgrade-subtitle, .cosmetics-subtitle, .shop-subtitle {
     font-size: 8px;
     margin-bottom: 12px;
   }
   .category-upgrades {
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
+  }
+  .cosmetic-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   }
   .upgrade-card {
     padding: 12px;
   }
-  .wave-stats {
-    padding: 12px;
-    font-size: 8px;
-  }
-  .stat-row {
-    font-size: 8px;
-  }
-  .currency-row {
-    padding: 8px;
-  }
-  .currency-row .currency-label {
-    font-size: 8px;
-  }
-  .currency-row .currency-amount {
-    font-size: 10px;
-  }
-}
-
-.wave-stats {
-  padding: 16px;
-  margin-bottom: 16px;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  font-size: 10px;
-  font-weight: 400;
-}
-
-.currency-earned {
-  margin: 16px 0;
-}
-
-.currency-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 8px;
-}
-
-.currency-row .currency-label {
-  flex: 1;
-  font-size: 10px;
-  font-weight: 400;
-}
-
-.currency-row .currency-amount {
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.petal-inventory {
-  margin-bottom: 16px;
-  padding: 16px;
-}
-
-.petal-slots {
-  display: flex;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-
-.petal-slot {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-
-.petal-slot.filled {
-}
-
-.petal-triggers-section {
-  margin: 12px 0;
-  padding: 12px;
-}
-
-.petal-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  margin-bottom: 6px;
-}
-
-.petal-trigger.vapor {
-}
-
-.petal-name {
-  flex: 1;
-  font-weight: 400;
-  font-size: 9px;
-}
-
-.petal-effect {
-  color: #000000;
-  font-weight: 400;
-  font-size: 9px;
 }
 
 /* Settings/Pause specific */

@@ -20,6 +20,26 @@ export function registerHit(type = 'marshmallow') {
   
   if (gameState.combo.timer > 0) {
     gameState.combo.count++;
+    
+    // Award caramel for combo chains (every 3rd hit in chain)
+    if (gameState.combo.count % 3 === 0 && gameState.combo.count > 2) {
+      import('./economy.js').then(m => {
+        const caramel = m.awardCaramel(1);
+        if (import('./manager.js').then(mgr => mgr.session.notifications)) {
+          import('./manager.js').then(mgr => {
+            if (mgr.session.notifications) {
+              mgr.session.notifications.add({
+                id: 'combo_caramel',
+                sticky: false,
+                title: 'Combo Bonus!',
+                text: `+${caramel} caramel for combo x${gameState.combo.count}`,
+                color: '#ff8c00'
+              });
+            }
+          });
+        }
+      });
+    }
   } else {
     gameState.combo.count = 1;
   }

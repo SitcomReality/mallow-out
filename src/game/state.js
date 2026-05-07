@@ -39,6 +39,16 @@ export const gameState = {
     auto_shooter_value: 0,
   },
 
+  // Cosmetics system
+  cosmetics: {
+    unlocked: ['skin_pink'], // Start with default skin unlocked
+    equipped: {
+      skin: 'skin_pink',
+      pattern: null,
+      accessory: null
+    }
+  },
+
   // Automation timers
   automationTimers: {
     auto_shooter: 0,

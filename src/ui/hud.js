@@ -31,6 +31,7 @@ export function createHUD() {
       <div class="nav-buttons">
          <button id="navShop" class="nav-btn wonky" data-fill="#32cd32" data-stroke="#000000" data-stroke-width="3">Shop</button>
          <button id="navUpgrades" class="nav-btn wonky" data-fill="#ff69b4" data-stroke="#000000" data-stroke-width="3">Upgrades</button>
+         <button id="navCosmetics" class="nav-btn wonky" data-fill="#ffd700" data-stroke="#000000" data-stroke-width="3">Cosmetics</button>
          <div id="treatControls" style="display: flex; gap: 4px;">
            <button id="equipTreat" class="nav-btn wonky" data-fill="#ffd700" data-stroke="#000000" data-stroke-width="3">Equip (0)</button>
          </div>
@@ -70,6 +71,21 @@ export function createHUD() {
         });
       } else {
         window._shopInstance.show();
+      }
+    });
+  }
+
+  const cosmeticsBtn = hud.querySelector('#navCosmetics');
+  if (cosmeticsBtn) {
+    cosmeticsBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!window._cosmeticsInstance) {
+        import('./cosmetics-screen.js').then(m => {
+          window._cosmeticsInstance = m.createCosmeticsScreen();
+          window._cosmeticsInstance.show();
+        });
+      } else {
+        window._cosmeticsInstance.show();
       }
     });
   }

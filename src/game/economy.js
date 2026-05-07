@@ -3,13 +3,14 @@ import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
 import { saveGame } from './persistence.js';
 import { session } from './manager.js';
 
-// Base earning rates (rebalanced for incremental gameplay)
+// Base earning rates - rebalanced for distinct currencies
 const BASE_MARSH_PER_SHOT = 1;
-const BASE_POLLEN_PER_SHOT = 5;
-const CARAMEL_CONVERSION_RATE = 100; // 100 pollen = 1 caramel
+const BASE_POLLEN_PER_MALLOW = 2; // Pollen from marshmallow interaction
+const BASE_CARAMEL_PER_COMBO = 1; // Caramel from combo chains
 
 /**
- * Awards marsh currency for shooting the marsh floor
+ * Awards marsh currency for shooting the marsh floor.
+ * Marsh is the basic currency earned from floor shots.
  */
 export function awardMarshMultiplier(multiplier = 1.0) {
   const baseMarsh = BASE_MARSH_PER_SHOT;
@@ -17,16 +18,6 @@ export function awardMarshMultiplier(multiplier = 1.0) {
   
   const marsh = Math.floor(baseMarsh * (1 + upgradeBonus) * multiplier);
   gameState.currencies.marsh += marsh;
-  
-  // Auto-convert excess marsh to caramel at a very high threshold for late game
-  if (gameState.currencies.marsh > 10000) {
-    const excess = gameState.currencies.marsh - 10000;
-    const caramelBonus = Math.floor(excess / 1000);
-    if (caramelBonus > 0) {
-      gameState.currencies.caramel += caramelBonus;
-      gameState.currencies.marsh -= caramelBonus * 1000;
-    }
-  }
   
   saveGame();
   return marsh;
@@ -37,66 +28,55 @@ export function awardMarsh() {
 }
 
 /**
- * Awards pollen for shooting the marshmallow friend
+ * Awards pollen for shooting the marshmallow friend.
+ * Pollen is earned from marshmallow interactions and used for cosmetics.
  */
 export function awardPollen(amount = null, customMultiplier = 1.0) {
-  // If an amount is provided, use that as the raw pollen source (e.g. damage/heal),
-  // otherwise fall back to the base per-shot pollen constant.
-  const basePollen = BASE_POLLEN_PER_SHOT;
+  const basePollen = BASE_POLLEN_PER_MALLOW;
   const raw = (amount !== null && !isNaN(amount)) ? Math.max(0, amount) : basePollen;
   const upgradeBonus = getUpgradeEffect('pollen_multiplier', gameState.upgrades.pollen_multiplier || 0);
   
-  // Scale raw source by upgrade bonus and floor to integer pollen units
   const pollen = Math.floor(raw * (1 + upgradeBonus) * customMultiplier);
   gameState.currencies.pollen += pollen;
-  
-  // Convert pollen to caramel at the conversion rate
-  if (gameState.currencies.pollen >= CARAMEL_CONVERSION_RATE) {
-    const caramelEarned = Math.floor(gameState.currencies.pollen / CARAMEL_CONVERSION_RATE);
-    gameState.currencies.caramel += caramelEarned;
-    gameState.currencies.pollen -= caramelEarned * CARAMEL_CONVERSION_RATE;
-    
-    if (session.notifications && caramelEarned > 0) {
-      session.notifications.add({
-        id: 'caramel_gain',
-        sticky: false,
-        title: 'Caramel Crystallized',
-        text: `Converted {v} pollen into caramel!`,
-        value: caramelEarned * CARAMEL_CONVERSION_RATE,
-        color: '#ff8c00'
-      });
-    }
-  }
   
   saveGame();
   return pollen;
 }
 
 /**
- * Awards caramel when a marshmallow is defeated.
- * This was added so manager.onMarshmallowDefeated can import awardCaramel().
- * The amount is derived from upgrades and a base reward tied to total destroyed.
+ * Awards caramel for combo chains and special achievements.
+ * Caramel is the premium currency used for permanent upgrades.
  */
-export function awardCaramel() {
-  // Base caramel reward for defeating a marshmallow (scaled mildly by progression)
-  const baseCaramel = 1;
-  const progressBonus = Math.floor(gameState.totalMarshmallowsDestroyed / 10); // small milestone bonus
+export function awardCaramel(amount = BASE_CARAMEL_PER_COMBO) {
   const upgradeBonus = getUpgradeEffect('caramel_bonus', gameState.upgrades.caramel_bonus || 0);
+  const caramel = Math.floor(amount * (1 + upgradeBonus));
   
-  const caramel = Math.max(1, Math.floor((baseCaramel + progressBonus) * (1 + upgradeBonus)));
   gameState.currencies.caramel += caramel;
-  
-  if (session.notifications && caramel > 0) {
-    session.notifications.add({
-      id: 'caramel_from_defeat',
-      sticky: false,
-      title: 'Caramel Reward',
-      text: `You gained ${caramel} caramel for defeating a marshmallow!`,
-      value: caramel,
-      color: '#ff8c00'
-    });
-  }
-  
   saveGame();
   return caramel;
+}
+
+/**
+ * Currency conversion shop functions
+ */
+export const CONVERSION_RATES = {
+  MARSH_TO_POLLEN: 10,    // 10 marsh = 1 pollen
+  POLLEN_TO_MARSH: 5,     // 1 pollen = 5 marsh
+  MARSH_TO_CARAMEL: 100,  // 100 marsh = 1 caramel
+};
+
+export function convertCurrency(from, to, amount) {
+  const key = `${from.toUpperCase()}_TO_${to.toUpperCase()}`;
+  const rate = CONVERSION_RATES[key];
+  
+  if (!rate) return false;
+  
+  const cost = amount * rate;
+  if (gameState.currencies[from] < cost) return false;
+  
+  gameState.currencies[from] -= cost;
+  gameState.currencies[to] += amount;
+  
+  saveGame();
+  return true;
 }
