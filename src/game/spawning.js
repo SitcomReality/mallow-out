@@ -16,7 +16,6 @@ export function updateSpawningMarshmallows(currentTime) {
 
   const elapsed = currentTime - enemy.spawnStartTime;
   const t = Math.min(elapsed / SPAWN_DURATION, 1.0);
-
   const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 
   const mov = enemy.movement;
@@ -24,80 +23,57 @@ export function updateSpawningMarshmallows(currentTime) {
 
   if (!enemy.spawnPosWorld) {
     enemy.spawnPosWorld = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-    const inwardNormal = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
+    const spawnRadius = enemy.spawnPosWorld.length();
     
-    // Pick random tangent velocity
-    const randomDir = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
-    mov.velocity = randomDir.projectOnPlane(inwardNormal).normalize();
-    mov.targetVelocity = mov.velocity.clone();
+    // Initialize movement state to match spawn
+    mov.position = enemy.spawnPosWorld.clone();
+    mov.velocity = new THREE.Vector3(0, 0, 0);
+    
+    // Face inward with upright orientation
+    const inward = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
+    const up = new THREE.Vector3().crossVectors(inward, right).normalize();
+    
+    const matrix = new THREE.Matrix4().makeBasis(up, inward, right);
+    mov.orientation = new THREE.Quaternion().setFromRotationMatrix(matrix);
   }
 
-  const inwardNormal = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
-  const tangentVelocity = mov.velocity.clone().projectOnPlane(inwardNormal).normalize();
+  const padding = marsh.scale.x + 0.3;
+  const targetRadius = 6.0;
+  const startPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(10.0 + 2.0);
+  const endPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(targetRadius);
+
+  mov.position.copy(startPos).lerp(endPos, ease);
   
-  const right = new THREE.Vector3().crossVectors(inwardNormal, tangentVelocity).normalize();
+  marsh.position.x = mov.position.x;
+  marsh.position.y = mov.position.y;
+  marsh.position.z = mov.position.z;
+  marsh.blendRadius = lerp(SPAWN_BLEND_START, SPAWN_BLEND_END, ease);
 
-  // Start orientation: Face first towards center
-  const mStart = new THREE.Matrix4().makeBasis(
-    tangentVelocity.clone().multiplyScalar(-1), // Up
-    inwardNormal, // Forward
-    right
-  );
-  const qStart = new THREE.Quaternion().setFromRotationMatrix(mStart);
-
-  // End orientation: Wandering on surface
-  const mEnd = new THREE.Matrix4().makeBasis(
-    inwardNormal, // Up
-    tangentVelocity, // Forward
-    right
-  );
-  const qEnd = new THREE.Quaternion().setFromRotationMatrix(mEnd);
-
-  const qCurrent = qStart.clone().slerp(qEnd, ease);
-  const euler = new THREE.Euler().setFromQuaternion(qCurrent);
+  // Keep face upright and pointing inward during spawn
+  const inward = mov.position.clone().normalize().multiplyScalar(-1);
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  const right = new THREE.Vector3().crossVectors(worldUp, inward);
+  if (right.lengthSq() < 0.01) {
+    right.set(1, 0, 0).cross(inward);
+  }
+  right.normalize();
+  const up = new THREE.Vector3().crossVectors(inward, right).normalize();
   
+  const targetMatrix = new THREE.Matrix4().makeBasis(up, inward, right);
+  const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
+  mov.orientation.slerp(targetQ, Math.min(1, 8.0 * (1.0/60.0)));
+  
+  const euler = new THREE.Euler().setFromQuaternion(mov.orientation);
   marsh.rotation.x = euler.x;
   marsh.rotation.y = euler.y;
   marsh.rotation.z = euler.z;
 
-  const padding = marsh.scale.x + 0.3;
-  const startPos = enemy.spawnPosWorld.clone().add(inwardNormal.clone().multiplyScalar(-2.0)); // Deep inside wall
-  const endPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(mov.radius - padding);
-
-  const posVec = startPos.clone().lerp(endPos, ease);
-
-  marsh.position.x = posVec.x;
-  marsh.position.y = posVec.y;
-  marsh.position.z = posVec.z;
-
-  marsh.blendRadius = lerp(SPAWN_BLEND_START, SPAWN_BLEND_END, ease);
-
   if (t >= 1.0) {
     delete enemy.spawnStartTime;
-    // Synchronize movement state to current position to prevent velocity spikes on handover
-    if (mov) {
-      const finalPos = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-      mov.lastPos = finalPos.clone();
-      
-      // Calculate actual angular position from final spawn position
-      const r = finalPos.length();
-      const phi = Math.asin(finalPos.y / r);
-      const theta = Math.atan2(finalPos.z, finalPos.x);
-      
-      // Set both current and target to final spawn state to prevent jump
-      mov.theta = theta;
-      mov.phi = phi;
-      mov.targetTheta = theta;
-      mov.targetPhi = phi;
-      mov.orbitRadius = r;
-      mov.orbitRadiusTarget = r; // Start at current position, will vary during next wander
-      
-      // Preserve spawn rotation so movement doesn't recalculate it immediately
-      mov.currentQ = new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z)
-      );
-      mov.lastUp = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.currentQ).normalize();
-      mov.smoothForward = inwardNormal.clone(); // Start with the direction it was emerging
-    }
+    // Seamlessly transition to wandering with gentle initial drift
+    const tangent = new THREE.Vector3(-inward.z, 0, inward.x).normalize();
+    mov.velocity.copy(tangent).multiplyScalar(0.5);
   }
 }

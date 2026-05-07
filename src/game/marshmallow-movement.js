@@ -2,10 +2,10 @@ import { gameState } from './state.js';
 import * as THREE from 'three';
 
 const SPHERE_RADIUS = 10.0;
-const INNER_MARGIN = 1.0;     // Keep a bit away from the sphere wall
-const MIN_CAMERA_DISTANCE = 2.5; // Do not let the mallow get too close to the camera
-const BACK_THETA = 4.71;
-const BACK_PHI = -0.6;
+const INNER_MARGIN = 1.5;
+const MIN_CAMERA_DISTANCE = 2.5;
+const DRIFT_SPEED = 0.6;
+const FLOAT_HEIGHT_VARIANCE = 2.5;
 
 export function updateMarshmallowMovement(marshmallow, delta) {
   if (!marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
@@ -15,147 +15,104 @@ export function updateMarshmallowMovement(marshmallow, delta) {
 
   mov.time += delta;
 
-  // Initialise angular state the first time, based on current position if available
-  if (mov.lastPos === null) {
-    const p = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-    if (p.lengthSq() > 0.0001) {
-      const r = p.length();
-      const phi = Math.asin(p.y / r);
-      const theta = Math.atan2(p.z, p.x);
-      mov.theta = theta;
-      mov.phi = phi;
-      mov.orbitRadius = r;
-    } else {
-      mov.theta = BACK_THETA;
-      mov.phi = BACK_PHI;
-    }
-    mov.targetTheta = mov.theta;
-    mov.targetPhi = mov.phi;
-    mov.orbitRadiusTarget = mov.orbitRadius;
-    mov.lastPos = p.clone();
+  // Initialize on first wandering frame
+  if (!mov.position) {
+    mov.position = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+    mov.velocity = new THREE.Vector3(0, 0, 0);
+    mov.orientation = new THREE.Quaternion().setFromEuler(
+      new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z)
+    );
   }
 
-  // Gently retarget wander within a cone around the camera view
-  mov.wanderTimer -= delta;
-  if (mov.wanderTimer <= 0) {
-    mov.wanderTimer = 2.0 + Math.random() * 3.0;
-
-    // The "back wall" center for our fixed camera is roughly theta=4.71, phi=-0.6
-    // Constrain wander to stay within view
-    mov.targetTheta = BACK_THETA + (Math.random() - 0.5) * 1.0;
-    mov.targetPhi = -0.5 + (Math.random() - 0.5) * 0.6;
-
-    // Slightly vary the orbit radius so it drifts nearer/farther
-    mov.orbitRadiusTarget = 5.5 + Math.random() * 2.0;
-  }
-
-  // Smoothly approach targets with much lower speeds for gentle wandering
-  const angleLerpSpeed = 0.3;
-  mov.theta += (mov.targetTheta - mov.theta) * Math.min(1, angleLerpSpeed * delta);
-  mov.phi += (mov.targetPhi - mov.phi) * Math.min(1, angleLerpSpeed * delta);
-
-  const radiusLerpSpeed = 0.2;
-  mov.orbitRadius += (mov.orbitRadiusTarget - mov.orbitRadius) * Math.min(1, radiusLerpSpeed * delta);
-
-  // Add subtle sine-based wobble to angles and radius
-  const yawWave = 0.12 * Math.sin(mov.time * 0.7 + mov.bobPhase);
-  const pitchWave = 0.08 * Math.sin(mov.time * 1.1 + mov.bobPhase * 1.7);
-  const radialBob = mov.radialBobAmplitude * Math.sin(mov.time * 0.9 + mov.bobPhase * 2.3);
-
-  const theta = mov.theta + yawWave;
-  const phi = mov.phi + pitchWave;
-
-  // Clamp phi to avoid flipping over poles
-  const maxPhi = Math.PI / 2 - 0.25;
-  const minPhi = -maxPhi;
-  const clampedPhi = Math.max(minPhi, Math.min(maxPhi, phi));
-
-  let r = mov.orbitRadius + radialBob;
-  r = Math.max(2.0, Math.min(SPHERE_RADIUS - INNER_MARGIN, r));
-
-  // Convert spherical -> Cartesian (sphere centered at origin)
-  const cosPhi = Math.cos(clampedPhi);
-  const x = r * Math.cos(theta) * cosPhi;
-  const y = r * Math.sin(clampedPhi);
-  const z = r * Math.sin(theta) * cosPhi;
-
-  const newPos = new THREE.Vector3(x, y, z);
-
-  // Keep away from the camera so it doesn't fill the whole screen
-  const camPos = gameState.player.position;
-  const toMallow = newPos.clone().sub(camPos);
-  const distToCam = toMallow.length();
-  if (distToCam < MIN_CAMERA_DISTANCE) {
-    const pushDir = toMallow.lengthSq() > 0.0001 ? toMallow.normalize() : new THREE.Vector3(0, 0, -1);
-    newPos.copy(camPos).add(pushDir.multiplyScalar(MIN_CAMERA_DISTANCE));
-  }
-
-  // Ensure we remain inside the sphere
-  const distFromCenter = newPos.length();
-  if (distFromCenter > SPHERE_RADIUS - INNER_MARGIN) {
-    newPos.multiplyScalar((SPHERE_RADIUS - INNER_MARGIN) / distFromCenter);
-  }
-
-  // Compute velocity from last frame for orientation
-  const vel = newPos.clone().sub(mov.lastPos);
-  const speed = vel.length();
-  let rawForward;
-  if (speed > 1e-4) {
-    rawForward = vel.normalize();
-  } else {
-    // If nearly stationary, face roughly toward the camera center
-    rawForward = camPos.clone().sub(newPos).normalize();
-  }
-
-  // 1. Smooth the forward vector to reduce jitter (heavier damping)
-  if (!mov.smoothForward) mov.smoothForward = rawForward.clone();
-  mov.smoothForward.lerp(rawForward, Math.min(1, 2.5 * delta)).normalize();
-  const forward = mov.smoothForward;
-
-  // 2. Build a stable basis using a persistent 'up' vector to avoid snaps
-  if (!mov.lastUp) mov.lastUp = new THREE.Vector3(0, 1, 0);
+  // Gentle continuous drift using multiple sine waves for organic motion
+  const driftX = 0.3 * Math.sin(mov.time * 0.4 + mov.bobPhase);
+  const driftY = 0.2 * Math.sin(mov.time * 0.5 + mov.bobPhase * 1.3);
+  const driftZ = 0.3 * Math.sin(mov.time * 0.35 + mov.bobPhase * 0.7);
   
-  // Project last up onto plane perpendicular to forward to maintain continuity
-  let right = new THREE.Vector3().crossVectors(mov.lastUp, forward);
-  if (right.lengthSq() < 1e-6) {
-    // Fallback if forward is aligned with lastUp
-    const fallbackUp = Math.abs(forward.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
-    right.crossVectors(fallbackUp, forward);
+  const drift = new THREE.Vector3(driftX, driftY, driftZ);
+  
+  // Slowly blend velocity toward drift direction
+  mov.velocity.lerp(drift, Math.min(1, 0.5 * delta));
+  
+  // Apply velocity with very gentle damping
+  mov.position.addScaledVector(mov.velocity, DRIFT_SPEED * delta);
+
+  // Camera-relative centering force to keep marshmallow in view
+  const camPos = gameState.player.position;
+  const camForward = new THREE.Vector3(
+    Math.sin(gameState.player.yaw) * Math.cos(gameState.player.pitch),
+    Math.sin(gameState.player.pitch),
+    -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
+  ).normalize();
+  
+  const viewCenter = camPos.clone().add(camForward.multiplyScalar(6.0));
+  const toCenter = viewCenter.clone().sub(mov.position);
+  const centerDist = toCenter.length();
+  
+  // Very gentle pull toward view center if drifting too far
+  if (centerDist > 3.5) {
+    const pullStrength = Math.min(0.3, (centerDist - 3.5) * 0.15);
+    mov.velocity.addScaledVector(toCenter.normalize(), pullStrength * delta);
+  }
+
+  // Keep away from camera
+  const toCam = mov.position.clone().sub(camPos);
+  const distToCam = toCam.length();
+  if (distToCam < MIN_CAMERA_DISTANCE) {
+    const pushDir = toCam.lengthSq() > 0.01 ? toCam.normalize() : new THREE.Vector3(0, 0, -1);
+    mov.position.copy(camPos).add(pushDir.multiplyScalar(MIN_CAMERA_DISTANCE));
+  }
+
+  // Keep inside sphere with soft boundary
+  const distFromCenter = mov.position.length();
+  const maxDist = SPHERE_RADIUS - INNER_MARGIN;
+  if (distFromCenter > maxDist) {
+    const excess = distFromCenter - maxDist;
+    const inward = mov.position.clone().normalize().multiplyScalar(-excess * 0.8);
+    mov.position.add(inward);
+    // Dampen velocity component pointing outward
+    const normal = mov.position.clone().normalize();
+    const outwardComponent = mov.velocity.dot(normal);
+    if (outwardComponent > 0) {
+      mov.velocity.addScaledVector(normal, -outwardComponent * 0.7);
+    }
+  }
+
+  // Update physical position
+  marsh.position.x = mov.position.x;
+  marsh.position.y = mov.position.y;
+  marsh.position.z = mov.position.z;
+
+  // Orientation: face the direction of movement while keeping face upright
+  const velMag = mov.velocity.length();
+  let forward;
+  if (velMag > 0.01) {
+    forward = mov.velocity.clone().normalize();
+  } else {
+    // If stationary, maintain current forward
+    const currentEuler = new THREE.Euler().setFromQuaternion(mov.orientation);
+    forward = new THREE.Vector3(0, 1, 0).applyEuler(currentEuler);
+  }
+
+  // Build upright-constrained basis
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let right = new THREE.Vector3().crossVectors(worldUp, forward);
+  if (right.lengthSq() < 0.01) {
+    // Forward is nearly vertical, use fallback
+    right.set(1, 0, 0).cross(forward);
   }
   right.normalize();
   
   const up = new THREE.Vector3().crossVectors(forward, right).normalize();
-
-  // 3. Gently guide 'up' towards the world vertical over time (uprightness)
-  const worldUp = new THREE.Vector3(0, 1, 0);
-  const projectedWorldUp = worldUp.clone().projectOnPlane(forward).normalize();
-  if (projectedWorldUp.lengthSq() > 0.1) {
-     // Slowly blend the calculated up with the world-relative up for a graceful upright posture
-     up.lerp(projectedWorldUp, Math.min(1, 1.5 * delta)).normalize();
-     // Re-calculate right to ensure orthogonality
-     right.crossVectors(up, forward).normalize();
-  }
   
-  mov.lastUp.copy(up);
-
-  // 4. Convert to rotation and slerp for maximum smoothness (lower slerp speed for grace)
-  const matrix = new THREE.Matrix4();
-  // local X = up, local Y = forward, local Z = right
-  matrix.makeBasis(up, forward, right);
-  const targetQ = new THREE.Quaternion().setFromRotationMatrix(matrix);
+  const targetMatrix = new THREE.Matrix4().makeBasis(up, forward, right);
+  const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
   
-  if (!mov.currentQ) mov.currentQ = targetQ.clone();
-  mov.currentQ.slerp(targetQ, Math.min(1, 3.5 * delta));
-
-  const euler = new THREE.Euler().setFromQuaternion(mov.currentQ);
-
-  marsh.position.x = newPos.x;
-  marsh.position.y = newPos.y;
-  marsh.position.z = newPos.z;
-
+  // Very gentle slerp for ultra-smooth rotation
+  mov.orientation.slerp(targetQ, Math.min(1, 1.5 * delta));
+  
+  const euler = new THREE.Euler().setFromQuaternion(mov.orientation);
   marsh.rotation.x = euler.x;
   marsh.rotation.y = euler.y;
   marsh.rotation.z = euler.z;
-
-  mov.lastPos.copy(newPos);
 }

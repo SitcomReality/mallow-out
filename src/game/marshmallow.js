@@ -107,20 +107,10 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
     lastHitTime: performance.now() * 0.001,
     isDying: false,
     movement: {
-      // Angular wander state (theta = azimuth, phi = elevation)
-      theta: 4.71,          // Start near the "back wall" center of the camera
-      phi: -0.5,
-      targetTheta: 4.71,
-      targetPhi: -0.5,
-      orbitRadius: 10.0,    // Start at the wall distance to match spawn finish
-      orbitRadiusTarget: 6.5, // Target a closer float orbit
-      radius: 10.0,         // Still used by spawn logic for initial emergence from the wall
-      wanderTimer: 1.0,     // Wait a bit after spawn before first wander retarget
+      position: null,      // World position (THREE.Vector3)
+      velocity: null,      // World velocity (THREE.Vector3)
+      orientation: null,   // Quaternion for rotation
       bobPhase: Math.random() * Math.PI * 2,
-      bobAmplitude: 0.2,
-      radialBobAmplitude: 0.6,
-      speed: 2.0,
-      lastPos: null,
       time: 0
     },
   };
