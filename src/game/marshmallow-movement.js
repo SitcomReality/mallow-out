@@ -108,8 +108,8 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const targetMatrix = new THREE.Matrix4().makeBasis(up, forward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
   
-  // Very gentle slerp for ultra-smooth rotation
-  mov.orientation.slerp(targetQ, Math.min(1, 1.5 * delta));
+  // Even gentler slerp to avoid abrupt high-speed spins — smooth slow convergence
+  mov.orientation.slerp(targetQ, Math.min(1, 0.5 * delta));
   
   const euler = new THREE.Euler().setFromQuaternion(mov.orientation);
   marsh.rotation.x = euler.x;

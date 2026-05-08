@@ -118,7 +118,8 @@ vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 
   float capDist = scale.y - localP.y;
   if (capDist > 0.1) return baseCol;
   
-  vec2 uv = vec2(localP.z, localP.x) / scale.x;
+  // Use X (around the cylinder) as U and Z (along ring/circumference) as V so facial features stay anchored to the end-cap
+  vec2 uv = vec2(localP.x, localP.z) / scale.x;
   
   FaceParams p1 = getDefaultFace();
   FaceParams p2 = getDefaultFace();
