@@ -35,8 +35,8 @@ void main() {
   bool hit = false;
   float minD = 1e10;
   
-  // Early sphere hit test - if we don't hit sphere at all, skip raymarching
-  if (sphereHit.x < 0.0) {
+  // Early sphere hit test - if we don't hit sphere at all (or it's behind us), skip raymarching
+  if (sphereHit.y < 0.0) {
     // Ray misses sphere entirely - render sky
     float skyGrad = clamp(rd.y * 2.0 + 0.5, 0.0, 1.0);
     vec3 skyBase = mix(uSkyColor2, uSkyColor, skyGrad);
@@ -66,7 +66,9 @@ void main() {
     
     // Ray-sphere test for bounding volume
     vec2 boundHit = intersectSphere(ro, rd, objPos, boundingRadius);
-    if (boundHit.x >= 0.0 && boundHit.x < tMax) {
+    // If the exit point of the bounding sphere is in front of the camera
+    // and the entry point is before the world boundary wall, it's potentially visible.
+    if (boundHit.y > 0.0 && boundHit.x < tMax) {
       hasNearbyObjects = true;
       break;
     }
@@ -75,6 +77,7 @@ void main() {
   // Hybrid rendering: if no objects, use analytical sphere
   if (!hasNearbyObjects) {
     // Analytical sphere rendering (optimization #2)
+    t = tMax; // Project ray to the background sphere wall
     hitP = ro + rd * t;
     hitCol = getFloorColorAt(hitP);
     hit = true;
