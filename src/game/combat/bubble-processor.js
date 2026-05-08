@@ -5,6 +5,7 @@ import { session } from '../manager.js';
 import { createRippleFX } from '../fx.js';
 import { intersectRaySphere } from './geometry-utils.js';
 import { BUBBLE_OUTER_RADIUS } from '../bubble-constants.js';
+import { getComboMultiplier } from '../combo-system.js';
 
 /**
  * Handles bubble intersection and reward application.
@@ -18,7 +19,8 @@ export function processBubbleHits(origin, direction, isCharged, particleSystem) 
       
       if (t !== false && t < maxBubbleDist) {
         bubble.state = 'popping';
-        const bubbleReward = awardMarshMultiplier(10);
+        const comboMult = getComboMultiplier();
+        const bubbleReward = awardMarshMultiplier(10 * comboMult);
         const bubbleHitPos = origin.clone().add(direction.clone().multiplyScalar(t));
         
         if (session.floatingTextSystem) {

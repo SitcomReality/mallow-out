@@ -65,7 +65,7 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
  */
 export function handleFloorImpact(floorPoint, isCharged, usedAmmo, particleSystem) {
   registerHit('marsh');
-  const marshReward = awardMarsh();
+  const marshReward = awardMarshMultiplier(getComboMultiplier());
   
   if (!gameState.tutorial.hasShot) {
     gameState.tutorial.hasShot = true;
