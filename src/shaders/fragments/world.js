@@ -91,10 +91,11 @@ float getObjectDist(vec3 p, int idx) {
   
   vec3 localP = p - pos;
   
-  // Apply rotation to the local coordinate space
-  localP.yz *= rot2(-rot.x);
-  localP.xz *= rot2(rot.y);
+  // Apply inverse Euler rotation to transform world->local correctly.
+  // Use consistent inverse signs so basis-from-quaternion matrices created on the JS side match shader unrotation.
   localP.xy *= rot2(-rot.z);
+  localP.xz *= rot2(-rot.y);
+  localP.yz *= rot2(-rot.x);
   
   float d = 0.0;
   if (objType < 0.5) {
@@ -179,15 +180,13 @@ vec4 map(vec3 p) {
     if (expression > 0.5) {
       vec3 localP = p - uObjData1[i].xyz;
       vec3 rot = uObjData4[i].xyz;
-      localP.yz *= rot2(-rot.x);
-      localP.xz *= rot2(rot.y);
+      // Inverse rotation order: Z, Y, X (apply negative angles)
       localP.xy *= rot2(-rot.z);
+      localP.xz *= rot2(-rot.y);
+      localP.yz *= rot2(-rot.x);
       
-      // uObjData5.w holds pupil look X, uObjData6.w holds pupil look Y (if needed, otherwise 0)
-      vec2 lookDir = vec2(uObjData5[i].w, 0.0); 
-      // We'll hijack the unused Y component in uObjData5 or just stay horizontal for now.
-      // Wait, uObjData6.w is charCode. Let's use uObjData2.w for lookY if needed.
-      lookDir.y = uObjData2[i].w; 
+      // uObjData5.w holds pupil look X, uObjData2.w holds pupil look Y
+      vec2 lookDir = vec2(uObjData5[i].w, uObjData2[i].w);
       
       col = getFaceColor(localP, uObjData2[i].xyz, col, expression, lookDir);
     }
