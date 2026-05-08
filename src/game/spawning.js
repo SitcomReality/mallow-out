@@ -71,6 +71,12 @@ export function updateSpawningMarshmallows(currentTime) {
     delete enemy.spawnStartTime;
     // Seamlessly transition to wandering with gentle initial drift
     const tangent = new THREE.Vector3(-inward.z, 0, inward.x).normalize();
-    mov.velocity.copy(tangent).multiplyScalar(0.5);
+
+    // Add a small randomized lateral + upward component so the marshmallow
+    // doesn't continue in a perfectly straight line — gives gentle "floaty" wandering.
+    const rand = () => (Math.random() - 0.5);
+    const lateral = new THREE.Vector3(rand(), 0.15 * (0.3 + Math.random() * 0.7), rand()).normalize();
+    // Blend the tangent with the lateral jitter and keep overall speed modest
+    mov.velocity.copy(tangent).multiplyScalar(0.45).add(lateral.multiplyScalar(0.25));
   }
 }
