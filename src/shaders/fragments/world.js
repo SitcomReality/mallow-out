@@ -72,20 +72,21 @@ float sdText(vec3 p, vec3 scale, float charCode) {
   return min(max(w.x, w.y), 0.0) + length(max(w, 0.0));
 }
 
+vec3 qtransform(vec4 q, vec3 v) {
+  return v + 2.0 * cross(q.xyz, cross(q.xyz, v) + q.w * v);
+}
+
 float getObjectDist(vec3 p, int idx) {
   vec3 pos = uObjData1[idx].xyz;
   vec3 scale = uObjData2[idx].xyz;
-  vec3 rot = uObjData4[idx].xyz;
+  vec4 quat = uObjData4[idx]; // Quaternion (x,y,z,w)
   float objType = uObjData0[idx].x;
   float nAmount = uObjData5[idx].x;
   float nScale = uObjData5[idx].y;
   
-  vec3 localP = p - pos;
-  
-  // Apply rotation to local coordinate space (Inverse of THREE.js XYZ Euler order: Z, then Y, then X)
-  localP.xy *= rot2(-rot.z);
-  localP.xz *= rot2(rot.y);
-  localP.yz *= rot2(-rot.x);
+  // Inverse rotation for local point: q_inv = (-x, -y, -z, w) for unit quaternions
+  vec4 qinv = vec4(-quat.xyz, quat.w);
+  vec3 localP = qtransform(qinv, p - pos);
   
   float d = 0.0;
   if (objType < 0.5) {
@@ -172,11 +173,9 @@ vec4 map(vec3 p) {
     // Apply expression textures without adding to CSG limits
     float expression = uObjData5[i].z;
     if (expression > 0.5) {
-      vec3 localP = p - uObjData1[i].xyz;
-      vec3 rot = uObjData4[i].xyz;
-      localP.yz *= rot2(-rot.x);
-      localP.xz *= rot2(rot.y);
-      localP.xy *= rot2(-rot.z);
+      vec4 quat = uObjData4[i];
+      vec4 qinv = vec4(-quat.xyz, quat.w);
+      vec3 localP = qtransform(qinv, p - uObjData1[i].xyz);
       
       // uObjData5.w holds pupil look X, uObjData6.w holds pupil look Y (if needed, otherwise 0)
       vec2 lookDir = vec2(uObjData5[i].w, 0.0); 

@@ -61,14 +61,11 @@ export function updateSpawningMarshmallows(currentTime) {
   right.normalize();
   const up = new THREE.Vector3().crossVectors(inward, right).normalize();
   
-  const targetMatrix = new THREE.Matrix4().makeBasis(up, inward, right);
+  const targetMatrix = new THREE.Matrix4().makeBasis(right, up, inward);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
   mov.orientation.slerp(targetQ, Math.min(1, 8.0 * (1.0/60.0)));
   
-  const euler = new THREE.Euler().setFromQuaternion(mov.orientation);
-  marsh.rotation.x = euler.x;
-  marsh.rotation.y = euler.y;
-  marsh.rotation.z = euler.z;
+  marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
 
   if (t >= 1.0) {
     delete enemy.spawnStartTime;

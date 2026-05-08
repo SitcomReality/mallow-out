@@ -108,7 +108,21 @@ export function updateUniforms(uniforms, time) {
       gid
     );
     uniforms.uObjData1.value[i].set(finalPos.x, finalPos.y, finalPos.z, 0);
-    uniforms.uObjData4.value[i].set(finalRot.x, finalRot.y, finalRot.z, 0);
+    // Handle both Euler and Quaternion rotation inputs
+    let finalQuat;
+    if (obj.rotation && typeof obj.rotation.w === 'number') {
+      finalQuat = new THREE.Quaternion(obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.w);
+    } else {
+      finalQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z));
+    }
+
+    if (parent) {
+      const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
+      const pQuat = new THREE.Quaternion().setFromEuler(pRot);
+      finalQuat.premultiply(pQuat);
+    }
+
+    uniforms.uObjData4.value[i].set(finalQuat.x, finalQuat.y, finalQuat.z, finalQuat.w);
     const color = new THREE.Color(obj.color);
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
     

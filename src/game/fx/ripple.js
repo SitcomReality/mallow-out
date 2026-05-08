@@ -39,17 +39,17 @@ export function createRippleFX(position, isCharged = false) {
 
   const bitangent = new THREE.Vector3().crossVectors(normal, tangent).normalize();
 
-  // Make basis with X = bitangent, Y = normal, Z = tangent so the torus' Y-axis aligns with the surface normal
+  // Torus SDF in our world.js uses Y-axis for hole.
+  // We want the Torus hole (Y axis) to align with the surface normal.
   const matrix = new THREE.Matrix4();
   matrix.makeBasis(bitangent, normal, tangent);
   const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
-  const euler = new THREE.Euler().setFromQuaternion(q);
 
   const fx = {
     id,
     type: 'torus',
     position: { x: posVec.x, y: posVec.y, z: posVec.z },
-    rotation: { x: euler.x, y: euler.y, z: euler.z },
+    rotation: { x: q.x, y: q.y, z: q.z, w: q.w },
     scale: { x: RIPPLE_INITIAL_RADIUS, y: thickness, z: 0 },
     color: '#8afdff',
     operation: 'union',

@@ -24,95 +24,88 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     );
   }
 
-  // Gentle continuous drift using multiple sine waves for organic motion
-  const driftX = 0.3 * Math.sin(mov.time * 0.4 + mov.bobPhase);
-  const driftY = 0.2 * Math.sin(mov.time * 0.5 + mov.bobPhase * 1.3);
-  const driftZ = 0.3 * Math.sin(mov.time * 0.35 + mov.bobPhase * 0.7);
-  
-  const drift = new THREE.Vector3(driftX, driftY, driftZ);
-  
-  // Slowly blend velocity toward drift direction
-  mov.velocity.lerp(drift, Math.min(1, 0.5 * delta));
-  
-  // Apply velocity with very gentle damping
-  mov.position.addScaledVector(mov.velocity, DRIFT_SPEED * delta);
+  // Determine target facing direction based on organic noise + soft centering
+  const turnNoiseX = Math.sin(mov.time * 0.3 + mov.bobPhase) * 0.6;
+  const turnNoiseZ = Math.cos(mov.time * 0.25 + mov.bobPhase * 1.1) * 0.6;
+  const turnNoiseY = Math.sin(mov.time * 0.4 + mov.bobPhase * 0.8) * 0.3;
 
-  // Camera-relative centering force to keep marshmallow in view
+  let targetDir = new THREE.Vector3(turnNoiseX, turnNoiseY, turnNoiseZ).normalize();
+
+  // Add gentle centering force to keep it in view
   const camPos = gameState.player.position;
   const camForward = new THREE.Vector3(
     Math.sin(gameState.player.yaw) * Math.cos(gameState.player.pitch),
     Math.sin(gameState.player.pitch),
     -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
   ).normalize();
-  
+
   const viewCenter = camPos.clone().add(camForward.multiplyScalar(6.0));
   const toCenter = viewCenter.clone().sub(mov.position);
   const centerDist = toCenter.length();
-  
-  // Very gentle pull toward view center if drifting too far
-  if (centerDist > 3.5) {
-    const pullStrength = Math.min(0.3, (centerDist - 3.5) * 0.15);
-    mov.velocity.addScaledVector(toCenter.normalize(), pullStrength * delta);
+
+  if (centerDist > 3.0) {
+    const pull = Math.min(1.0, (centerDist - 3.0) * 0.2);
+    targetDir.lerp(toCenter.normalize(), pull).normalize();
   }
 
-  // Keep away from camera
+  // Soft boundary from camera
   const toCam = mov.position.clone().sub(camPos);
-  const distToCam = toCam.length();
-  if (distToCam < MIN_CAMERA_DISTANCE) {
-    const pushDir = toCam.lengthSq() > 0.01 ? toCam.normalize() : new THREE.Vector3(0, 0, -1);
-    mov.position.copy(camPos).add(pushDir.multiplyScalar(MIN_CAMERA_DISTANCE));
+  if (toCam.length() < MIN_CAMERA_DISTANCE + 1.0) {
+    targetDir.lerp(toCam.normalize(), 0.5).normalize();
   }
 
-  // Keep inside sphere with soft boundary
-  const distFromCenter = mov.position.length();
+  // Soft boundary from sphere edge
   const maxDist = SPHERE_RADIUS - INNER_MARGIN;
-  if (distFromCenter > maxDist) {
-    const excess = distFromCenter - maxDist;
-    const inward = mov.position.clone().normalize().multiplyScalar(-excess * 0.8);
-    mov.position.add(inward);
-    // Dampen velocity component pointing outward
-    const normal = mov.position.clone().normalize();
-    const outwardComponent = mov.velocity.dot(normal);
-    if (outwardComponent > 0) {
-      mov.velocity.addScaledVector(normal, -outwardComponent * 0.7);
-    }
+  if (mov.position.length() > maxDist) {
+    const inward = mov.position.clone().normalize().multiplyScalar(-1);
+    targetDir.lerp(inward, 0.8).normalize();
   }
 
-  // Update physical position
+  // Get current forward vector from orientation (Local +Y is forward for the cylinder face)
+  const currentForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+
+  // Smoothly turn current forward towards target dir
+  currentForward.lerp(targetDir, 0.8 * delta).normalize();
+
+  // Build upright-constrained basis from the new forward
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  let right = new THREE.Vector3().crossVectors(worldUp, currentForward);
+  if (right.lengthSq() < 0.01) {
+    right.set(1, 0, 0).cross(currentForward);
+  }
+  right.normalize();
+  const up = new THREE.Vector3().crossVectors(currentForward, right).normalize();
+
+  const targetMatrix = new THREE.Matrix4().makeBasis(right, up, currentForward.clone().negate());
+  // Correction: We want local Y to be 'up' on the face, and local Z to be forward/back.
+  // The cylinder is along Y. Let's make basis: X=right, Y=up(normal), Z=forward.
+  targetMatrix.makeBasis(right, up, currentForward);
+  const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
+
+  // Extremely gentle slerp
+  mov.orientation.slerp(targetQ, Math.min(1, 2.0 * delta));
+
+  // Update visual rotation directly with quaternion
+  marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
+
+  // Move exactly along the orientation's forward vector
+  const moveForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+  const bobY = Math.cos(mov.time * 1.5 + mov.bobPhase) * 0.15;
+
+  mov.velocity.copy(moveForward).multiplyScalar(DRIFT_SPEED);
+  mov.velocity.y += bobY;
+
+  mov.position.addScaledVector(mov.velocity, delta);
+
+  // Hard limits
+  if (mov.position.distanceTo(camPos) < MIN_CAMERA_DISTANCE) {
+    mov.position.copy(camPos).add(mov.position.clone().sub(camPos).normalize().multiplyScalar(MIN_CAMERA_DISTANCE));
+  }
+  if (mov.position.length() > SPHERE_RADIUS - INNER_MARGIN) {
+    mov.position.normalize().multiplyScalar(SPHERE_RADIUS - INNER_MARGIN);
+  }
+
   marsh.position.x = mov.position.x;
   marsh.position.y = mov.position.y;
   marsh.position.z = mov.position.z;
-
-  // Orientation: face the direction of movement while keeping face upright
-  const velMag = mov.velocity.length();
-  let forward;
-  if (velMag > 0.01) {
-    forward = mov.velocity.clone().normalize();
-  } else {
-    // If stationary, maintain current forward
-    const currentEuler = new THREE.Euler().setFromQuaternion(mov.orientation);
-    forward = new THREE.Vector3(0, 1, 0).applyEuler(currentEuler);
-  }
-
-  // Build upright-constrained basis
-  const worldUp = new THREE.Vector3(0, 1, 0);
-  let right = new THREE.Vector3().crossVectors(worldUp, forward);
-  if (right.lengthSq() < 0.01) {
-    // Forward is nearly vertical, use fallback
-    right.set(1, 0, 0).cross(forward);
-  }
-  right.normalize();
-  
-  const up = new THREE.Vector3().crossVectors(forward, right).normalize();
-  
-  const targetMatrix = new THREE.Matrix4().makeBasis(up, forward, right);
-  const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
-  
-  // Very gentle slerp for ultra-smooth rotation
-  mov.orientation.slerp(targetQ, Math.min(1, 1.5 * delta));
-  
-  const euler = new THREE.Euler().setFromQuaternion(mov.orientation);
-  marsh.rotation.x = euler.x;
-  marsh.rotation.y = euler.y;
-  marsh.rotation.z = euler.z;
 }
