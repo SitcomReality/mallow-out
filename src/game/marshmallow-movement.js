@@ -48,24 +48,27 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     targetDir.lerp(toCenter.normalize(), pull).normalize();
   }
 
-  // Soft boundary from camera
+  // Soft boundary from camera (repel if too close)
   const toCam = mov.position.clone().sub(camPos);
-  if (toCam.length() < MIN_CAMERA_DISTANCE + 1.0) {
-    targetDir.lerp(toCam.normalize(), 0.5).normalize();
+  const distToCam = toCam.length();
+  if (distToCam < MIN_CAMERA_DISTANCE + 4.0) {
+    // Stronger repulsion as it gets closer
+    const repelStrength = Math.pow(1.0 - Math.max(0, distToCam - MIN_CAMERA_DISTANCE) / 4.0, 1.5);
+    targetDir.lerp(toCam.normalize(), 0.7 * repelStrength).normalize();
   }
 
   // Soft boundary from sphere edge
   const maxDist = SPHERE_RADIUS - INNER_MARGIN;
   if (mov.position.length() > maxDist) {
     const inward = mov.position.clone().normalize().multiplyScalar(-1);
-    targetDir.lerp(inward, 0.8).normalize();
+    targetDir.lerp(inward, 0.9).normalize();
   }
 
   // Get current forward vector from orientation (Local +Y is forward for the cylinder face)
   const currentForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
 
-  // Smoothly turn current forward towards target dir
-  currentForward.lerp(targetDir, 0.8 * delta).normalize();
+  // Smoothly turn current forward towards target dir - increased responsiveness (3.5x faster)
+  currentForward.lerp(targetDir, 2.8 * delta).normalize();
 
   // Build upright-constrained basis from the new forward
   const worldUp = new THREE.Vector3(0, 1, 0);

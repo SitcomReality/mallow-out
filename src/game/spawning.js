@@ -68,41 +68,23 @@ export function updateSpawningMarshmallows(currentTime) {
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
 
   if (t >= 1.0) {
-    // Finish spawn state
     delete enemy.spawnStartTime;
-
-    // Ensure movement state is fully initialized
-    if (!mov.position) {
-      mov.position = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-    }
-    if (!mov.orientation) {
-      const inward = mov.position.clone().normalize().multiplyScalar(-1);
-      const worldUp = new THREE.Vector3(0, 1, 0);
-      const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
-      const up = new THREE.Vector3().crossVectors(inward, right).normalize();
-      const matrix = new THREE.Matrix4().makeBasis(up, inward, right);
-      mov.orientation = new THREE.Quaternion().setFromRotationMatrix(matrix);
-    }
-    if (!mov.velocity) mov.velocity = new THREE.Vector3(0, 0, 0);
-
-    // Start gentle wandering: mostly tangent to the sphere surface with a small randomized
-    // lateral and upward component so the marshmallow drifts softly in front of the camera.
-    const tangent = new THREE.Vector3(-inward.z, 0, inward.x).normalize();
-
+    
+    // Seed initial wander movement
     const rand = () => (Math.random() - 0.5);
-    const lateral = new THREE.Vector3(rand(), 0.12 * (0.5 + Math.random() * 0.5), rand());
-
-    // Compose final velocity with conservative magnitudes to avoid it flying out of view.
-    mov.velocity.copy(tangent).multiplyScalar(0.35).add(lateral.multiplyScalar(0.18));
-
-    // Small initial bob phase/time offset so motion feels organic
-    mov.bobPhase = mov.bobPhase || (Math.random() * Math.PI * 2);
-    mov.time = mov.time || 0;
-
-    // Write final transform back to the SDF marsh object so the shader sees the orientation/position immediately
-    marsh.position.x = mov.position.x;
-    marsh.position.y = mov.position.y;
-    marsh.position.z = mov.position.z;
-    marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
+    const wanderSeed = new THREE.Vector3(rand(), rand(), rand()).normalize();
+    
+    // Update orientation to look slightly away from the direct inward line to start the turn
+    const currentFwd = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+    currentFwd.add(wanderSeed.multiplyScalar(0.5)).normalize();
+    
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(worldUp, currentFwd).normalize();
+    const up = new THREE.Vector3().crossVectors(currentFwd, right).normalize();
+    const matrix = new THREE.Matrix4().makeBasis(up, currentFwd, right);
+    mov.orientation.setFromRotationMatrix(matrix);
+    
+    // Set initial velocity for the movement script to pick up
+    mov.velocity.copy(currentFwd).multiplyScalar(0.6);
   }
 }
