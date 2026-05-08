@@ -112,24 +112,13 @@ float sdCapsule(vec2 p, vec2 a, vec2 b, float r) {
     return length(pa - ba*h) - r;
 }
 
-vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 lookDir, vec3 localCamPos) {
+vec3 getFaceColor(vec3 localP, vec3 scale, vec3 baseCol, float expression, vec2 lookDir) {
   if (expression < 0.5) return baseCol;
   
-  // Always face the camera by projecting UVs onto a camera-facing plane
-  vec3 faceFwd = normalize(localCamPos);
-  vec3 localUp = vec3(0.0, 1.0, 0.0);
-  vec3 faceRight = normalize(cross(localUp, faceFwd));
-  vec3 faceUp = cross(faceFwd, faceRight);
+  float capDist = scale.y - localP.y;
+  if (capDist > 0.1) return baseCol;
   
-  // Calculate relative projection
-  float u = dot(localP, faceRight) / scale.x;
-  float v = dot(localP, faceUp) / scale.y;
-  
-  // Only draw face on the side of the marshmallow pointing at the camera
-  float frontness = dot(normalize(localP), faceFwd);
-  if (frontness < 0.6) return baseCol;
-
-  vec2 uv = vec2(u, v);
+  vec2 uv = vec2(localP.z, localP.x) / scale.x;
   
   FaceParams p1 = getDefaultFace();
   FaceParams p2 = getDefaultFace();
