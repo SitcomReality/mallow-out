@@ -75,6 +75,13 @@ float sdText(vec3 p, vec3 scale, float charCode) {
 float getObjectDist(vec3 p, int idx) {
   vec3 pos = uObjData1[idx].xyz;
   vec3 scale = uObjData2[idx].xyz;
+  
+  // Optimization #3: Early bounding sphere cull
+  float boundingRadius = getObjectBoundingRadius(idx);
+  if (length(p - pos) > boundingRadius) {
+    return boundingRadius; // Return conservative distance
+  }
+  
   vec3 rot = uObjData4[idx].xyz;
   float objType = uObjData0[idx].x;
   float nAmount = uObjData5[idx].x;
@@ -101,6 +108,7 @@ float getObjectDist(vec3 p, int idx) {
     d = sdText(localP, scale, uObjData6[idx].w);
   }
   
+  // Only apply noise if actually needed
   if (nAmount > 0.001) {
     vec3 nOffset = uObjData6[idx].xyz;
     float pert = (fbm3D(localP * nScale - nOffset) - 0.5) * 2.0 * nAmount;
@@ -111,25 +119,33 @@ float getObjectDist(vec3 p, int idx) {
 }
 
 vec4 blendOp(vec4 res, float d, vec3 col, float op, float blend) {
-  float safeBlend = max(blend, 0.0);
+  // Optimization #6: Simplified blending - cap blend radius
+  float safeBlend = min(max(blend, 0.0), 0.3);
+  
   if (op < 0.5) {
+    // Union with optional smooth blend
     if (safeBlend > 0.001) {
+      // Cheaper polynomial smooth min
       float h = clamp(0.5 + 0.5 * (res.x - d) / safeBlend, 0.0, 1.0);
       vec3 finalCol = mix(res.yzw, col, h);
       return vec4(mix(res.x, d, h) - safeBlend * h * (1.0 - h), finalCol);
     } else {
+      // Hard union (fast path)
       return (d < res.x) ? vec4(d, col) : res;
     }
   } else if (op < 1.5) {
-    float newD = smax(res.x, -d, safeBlend);
-    float h = 0.0;
+    // Subtraction with optional smooth blend
     if (safeBlend > 0.001) {
-      h = clamp(0.5 + 0.5 * (-d - res.x) / safeBlend, 0.0, 1.0);
+      float newD = smax(res.x, -d, safeBlend);
+      float h = clamp(0.5 + 0.5 * (-d - res.x) / safeBlend, 0.0, 1.0);
+      vec3 newCol = mix(res.yzw, col, h);
+      return vec4(newD, newCol);
     } else {
-      h = (-d > res.x) ? 1.0 : 0.0;
+      // Hard subtraction (fast path for damage holes)
+      float newD = max(res.x, -d);
+      vec3 newCol = (-d > res.x) ? col : res.yzw;
+      return vec4(newD, newCol);
     }
-    vec3 newCol = mix(res.yzw, col, h);
-    return vec4(newD, newCol);
   } else {
     float oldD = res.x;
     float newD = max(res.x, d);

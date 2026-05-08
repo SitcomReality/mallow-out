@@ -5,6 +5,7 @@ precision highp float;
 #define PI 3.14159265
 
 varying vec2 vUv;
+varying vec2 vScreenUV;
 
 uniform vec2 uResolution;
 uniform vec3 uCamPos;

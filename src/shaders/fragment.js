@@ -3,21 +3,31 @@ import { sdf } from './fragments/sdf.js';
 import { face } from './fragments/face.js';
 import { world } from './fragments/world.js';
 import { lighting } from './fragments/lighting.js';
+import { analyticalSphere } from './analytical/sphere.js';
+import { rayUtils } from './analytical/ray.js';
 
 export const fragmentShader = `
 ${common}
 ${sdf}
+${analyticalSphere}
+${rayUtils}
 ${face}
 ${world}
 ${lighting}
 
 void main() {
-  // Use vUv (0 to 1) and map to -1 to 1 for resolution-independent ray generation
-  vec2 uv2 = vUv * 2.0 - 1.0;
+  // Use pre-computed screen UV with aspect ratio correction
+  vec2 uv2 = vScreenUV;
   uv2.x *= uResolution.x / uResolution.y;
-  vec3 rd = normalize(uCamFwd + uCamRight * uv2.x + uCamUp * uv2.y);
+  
+  // Pre-computed ray direction (constant per pixel since camera is static)
+  vec3 rd = getRayDirection(uv2, uCamFwd, uCamRight, uCamUp);
   vec3 ro = uCamPos;
   LightEnv env = getLightEnv(uDayTime);
+  
+  // Analytical sphere intersection (optimization #1)
+  vec3 sphereCenter = vec3(0.0, uWorldBoundsCenterY, 0.0);
+  vec2 sphereHit = intersectSphere(ro, rd, sphereCenter, uWorldBoundsRadius);
   
   float t = 0.0;
   vec3 hitCol = vec3(0.0);
@@ -25,22 +35,83 @@ void main() {
   bool hit = false;
   float minD = 1e10;
   
-  for (int i = 0; i < 160; i++) {
-    if (float(i) >= uMaxSteps) break;
-    hitP = ro + rd * t;
-    vec4 res = map(hitP);
+  // Early sphere hit test - if we don't hit sphere at all, skip raymarching
+  if (sphereHit.x < 0.0) {
+    // Ray misses sphere entirely - render sky
+    float skyGrad = clamp(rd.y * 2.0 + 0.5, 0.0, 1.0);
+    vec3 skyBase = mix(uSkyColor2, uSkyColor, skyGrad);
     
-    // Track minimum distance for global silhouettes
-    float dNorm = res.x / max(t, 1.0);
-    minD = min(minD, dNorm);
+    if (uSkyTextured > 0.5) {
+      vec2 skyUV = rd.xz / (rd.y + 0.3) * 5.0;
+      float clouds = fbm(skyUV + uTime * 0.02);
+      gl_FragColor = vec4(mix(skyBase, vec3(1.0, 0.95, 0.9), smoothstep(0.4, 0.7, clouds) * 0.3 * max(0.0, env.sunDir.y)), 1.0);
+    } else {
+      gl_FragColor = vec4(skyBase, 1.0);
+    }
+    gl_FragDepth = 1.0;
+    return;
+  }
+  
+  // Start raymarching from sphere entry point
+  t = max(0.0, sphereHit.x);
+  float tMax = sphereHit.y;
+  
+  // Check if any objects are potentially visible along this ray
+  bool hasNearbyObjects = false;
+  for (int i = 0; i < 32; i++) {
+    if (float(i) >= uNumObjects) break;
     
-    if (res.x < EPSILON * max(1.0, t)) {
-      hitCol = res.yzw;
-      hit = true;
+    vec3 objPos = uObjData1[i].xyz;
+    float boundingRadius = getObjectBoundingRadius(i);
+    
+    // Ray-sphere test for bounding volume
+    vec2 boundHit = intersectSphere(ro, rd, objPos, boundingRadius);
+    if (boundHit.x >= 0.0 && boundHit.x < tMax) {
+      hasNearbyObjects = true;
       break;
     }
-    t += res.x * 0.8;
-    if (t > uDrawDist) break;
+  }
+  
+  // Hybrid rendering: if no objects, use analytical sphere
+  if (!hasNearbyObjects) {
+    // Analytical sphere rendering (optimization #2)
+    hitP = ro + rd * t;
+    hitCol = getFloorColorAt(hitP);
+    hit = true;
+    
+    // Skip expensive raymarching entirely
+  } else {
+    // Raymarch for objects with optimized step limits
+    int maxSteps = int(uMaxSteps);
+    for (int i = 0; i < 160; i++) {
+      if (i >= maxSteps) break;
+      
+      hitP = ro + rd * t;
+      vec4 res = map(hitP);
+      
+      // Track minimum distance for silhouettes
+      float dNorm = res.x / max(t, 1.0);
+      minD = min(minD, dNorm);
+      
+      // Relaxed convergence threshold (optimization #4)
+      float threshold = EPSILON * max(1.0, t * 0.5);
+      if (res.x < threshold) {
+        hitCol = res.yzw;
+        hit = true;
+        break;
+      }
+      
+      // Adaptive step size
+      t += res.x * 0.9;
+      if (t > tMax) {
+        // Hit sphere wall - use analytical result
+        t = tMax;
+        hitP = ro + rd * t;
+        hitCol = getFloorColorAt(hitP);
+        hit = true;
+        break;
+      }
+    }
   }
   
   float skyGrad = clamp(rd.y * 2.0 + 0.5, 0.0, 1.0);
