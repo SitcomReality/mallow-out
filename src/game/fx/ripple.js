@@ -48,9 +48,11 @@ export function createRippleFX(position, isCharged = false) {
   const fx = {
     id,
     type: 'torus',
-    position: { x: posVec.x, y: posVec.y, z: posVec.z },
+    // Start the ripple slightly offset along the surface normal so it appears higher/above the wall
+    position: { x: posVec.x + normal.x * 0.25, y: posVec.y + normal.y * 0.25, z: posVec.z + normal.z * 0.25 },
     rotation: { x: q.x, y: q.y, z: q.z, w: q.w },
-    scale: { x: RIPPLE_INITIAL_RADIUS, y: thickness, z: 0 },
+    // Start thicker so the ripple is prominent, then decay in the updater
+    scale: { x: RIPPLE_INITIAL_RADIUS, y: thickness * 1.5, z: 0 },
     color: '#8afdff',
     operation: 'union',
     blendRadius: RIPPLE_INITIAL_BLEND,
@@ -64,6 +66,7 @@ export function createRippleFX(position, isCharged = false) {
       duration: duration,
       finalRadius,
       thickness,
+      // record the original surface point so the updater can compute sinking relative to the true surface
       initialPos: { x: posVec.x, y: posVec.y, z: posVec.z }
     }
   };
