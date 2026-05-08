@@ -14,14 +14,22 @@ bool insideBoundingSphere(vec3 p, vec3 center, float radius) {
 float getObjectBoundingRadius(int idx) {
   vec3 scale = uObjData2[idx].xyz;
   float objType = uObjData0[idx].x;
+  float bound = 0.0;
   
-  // Correct estimate for rotated objects: distance from center to furthest point
-  // For most shapes length(scale) is the distance to corner; for torus, it's sum of radii.
-  float bound = (objType > 2.5 && objType < 3.5) ? (scale.x + scale.y) : length(scale);
+  if (objType < 0.5) { // Sphere
+    bound = scale.x;
+  } else if (objType < 1.5) { // Box
+    bound = length(scale);
+  } else if (objType < 2.5) { // Cylinder
+    bound = length(scale.xy); // sqrt(r^2 + h^2)
+  } else if (objType < 3.5) { // Torus
+    bound = scale.x + scale.y;
+  } else { // Text/Other
+    bound = length(scale);
+  }
   
-  // Add blend radius for safety
+  // Add blend radius and a small safety margin
   float blend = uObjData0[idx].z;
-  
-  return bound + blend + 0.5;
+  return bound + blend + 0.2;
 }
 `;

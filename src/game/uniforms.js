@@ -37,7 +37,7 @@ export function updateUniforms(uniforms, time) {
   uniforms.uAOEnabled.value = settings.aoEnabled ? 1 : 0;
   
   const opMap = { union: 0, subtract: 1, intersect: 2 };
-  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3, group: 5 };
+  const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3, text: 4, group: 5 };
   
   let nextGid = 1;
   const groupMap = new Map();
@@ -112,9 +112,10 @@ export function updateUniforms(uniforms, time) {
     const color = new THREE.Color(obj.color);
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
     
-    // Pass noise parameters
+    // Pass noise parameters and text char codes
     const nOffset = obj.noiseOffset || { x: 0, y: 0, z: 0 };
-    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, 0);
+    const charCode = obj.type === 'text' ? (obj.textChar || ' ').charCodeAt(0) : 0;
+    uniforms.uObjData6.value[i].set(nOffset.x, nOffset.y, nOffset.z, charCode);
     
     const lookX = obj.pupilLookX || 0;
     const lookY = obj.pupilLookY || 0;

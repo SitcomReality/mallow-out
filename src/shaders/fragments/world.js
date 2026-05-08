@@ -75,26 +75,16 @@ float sdText(vec3 p, vec3 scale, float charCode) {
 float getObjectDist(vec3 p, int idx) {
   vec3 pos = uObjData1[idx].xyz;
   vec3 scale = uObjData2[idx].xyz;
-  
-  // Optimization #3: Early bounding sphere cull
-  float distToCenter = length(p - pos);
-  float boundingRadius = getObjectBoundingRadius(idx);
-  if (distToCenter > boundingRadius) {
-    return distToCenter - boundingRadius; 
-  }
-  
   vec3 rot = uObjData4[idx].xyz;
   float objType = uObjData0[idx].x;
   float nAmount = uObjData5[idx].x;
   float nScale = uObjData5[idx].y;
-  vec3 nSpeed = uObjData6[idx].xyz;
   
   vec3 localP = p - pos;
   
-  // Apply inverse Euler rotation to transform world->local correctly.
-  // Use consistent inverse signs so basis-from-quaternion matrices created on the JS side match shader unrotation.
+  // Apply rotation to local coordinate space (Inverse of THREE.js XYZ Euler order: Z, then Y, then X)
   localP.xy *= rot2(-rot.z);
-  localP.xz *= rot2(-rot.y);
+  localP.xz *= rot2(rot.y);
   localP.yz *= rot2(-rot.x);
   
   float d = 0.0;
@@ -112,9 +102,13 @@ float getObjectDist(vec3 p, int idx) {
   
   // Only apply noise if actually needed
   if (nAmount > 0.001) {
-    vec3 nOffset = uObjData6[idx].xyz;
-    float pert = (fbm3D(localP * nScale - nOffset) - 0.5) * 2.0 * nAmount;
-    d += pert;
+    // Optimization: Skip expensive noise if we are comfortably outside the bounding volume
+    float distToCenter = length(p - pos);
+    if (distToCenter < getObjectBoundingRadius(idx) + 0.1) {
+      vec3 nOffset = uObjData6[idx].xyz;
+      float pert = (fbm3D(localP * nScale - nOffset) - 0.5) * 2.0 * nAmount;
+      d += pert;
+    }
   }
   
   return d;
@@ -180,13 +174,15 @@ vec4 map(vec3 p) {
     if (expression > 0.5) {
       vec3 localP = p - uObjData1[i].xyz;
       vec3 rot = uObjData4[i].xyz;
-      // Inverse rotation order: Z, Y, X (apply negative angles)
-      localP.xy *= rot2(-rot.z);
-      localP.xz *= rot2(-rot.y);
       localP.yz *= rot2(-rot.x);
+      localP.xz *= rot2(rot.y);
+      localP.xy *= rot2(-rot.z);
       
-      // uObjData5.w holds pupil look X, uObjData2.w holds pupil look Y
-      vec2 lookDir = vec2(uObjData5[i].w, uObjData2[i].w);
+      // uObjData5.w holds pupil look X, uObjData6.w holds pupil look Y (if needed, otherwise 0)
+      vec2 lookDir = vec2(uObjData5[i].w, 0.0); 
+      // We'll hijack the unused Y component in uObjData5 or just stay horizontal for now.
+      // Wait, uObjData6.w is charCode. Let's use uObjData2.w for lookY if needed.
+      lookDir.y = uObjData2[i].w; 
       
       col = getFaceColor(localP, uObjData2[i].xyz, col, expression, lookDir);
     }
