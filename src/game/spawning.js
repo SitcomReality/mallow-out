@@ -68,15 +68,41 @@ export function updateSpawningMarshmallows(currentTime) {
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
 
   if (t >= 1.0) {
+    // Finish spawn state
     delete enemy.spawnStartTime;
-    // Seamlessly transition to wandering with gentle initial drift
+
+    // Ensure movement state is fully initialized
+    if (!mov.position) {
+      mov.position = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+    }
+    if (!mov.orientation) {
+      const inward = mov.position.clone().normalize().multiplyScalar(-1);
+      const worldUp = new THREE.Vector3(0, 1, 0);
+      const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
+      const up = new THREE.Vector3().crossVectors(inward, right).normalize();
+      const matrix = new THREE.Matrix4().makeBasis(up, inward, right);
+      mov.orientation = new THREE.Quaternion().setFromRotationMatrix(matrix);
+    }
+    if (!mov.velocity) mov.velocity = new THREE.Vector3(0, 0, 0);
+
+    // Start gentle wandering: mostly tangent to the sphere surface with a small randomized
+    // lateral and upward component so the marshmallow drifts softly in front of the camera.
     const tangent = new THREE.Vector3(-inward.z, 0, inward.x).normalize();
 
-    // Add a small randomized lateral + upward component so the marshmallow
-    // doesn't continue in a perfectly straight line — gives gentle "floaty" wandering.
     const rand = () => (Math.random() - 0.5);
-    const lateral = new THREE.Vector3(rand(), 0.15 * (0.3 + Math.random() * 0.7), rand()).normalize();
-    // Blend the tangent with the lateral jitter and keep overall speed modest
-    mov.velocity.copy(tangent).multiplyScalar(0.45).add(lateral.multiplyScalar(0.25));
+    const lateral = new THREE.Vector3(rand(), 0.12 * (0.5 + Math.random() * 0.5), rand());
+
+    // Compose final velocity with conservative magnitudes to avoid it flying out of view.
+    mov.velocity.copy(tangent).multiplyScalar(0.35).add(lateral.multiplyScalar(0.18));
+
+    // Small initial bob phase/time offset so motion feels organic
+    mov.bobPhase = mov.bobPhase || (Math.random() * Math.PI * 2);
+    mov.time = mov.time || 0;
+
+    // Write final transform back to the SDF marsh object so the shader sees the orientation/position immediately
+    marsh.position.x = mov.position.x;
+    marsh.position.y = mov.position.y;
+    marsh.position.z = mov.position.z;
+    marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
   }
 }
