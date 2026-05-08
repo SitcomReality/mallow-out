@@ -108,7 +108,8 @@ export function updateFX(currentTime) {
       }
       const p = new THREE.Vector3(fx.fxData.initialPos.x, fx.fxData.initialPos.y, fx.fxData.initialPos.z);
       const normal = p.clone().normalize();
-      const currentPos = p.clone().add(normal.multiplyScalar(-0.4 * t));
+      // Move the ripple outward from the sphere surface over its lifetime (positive normal)
+      const currentPos = p.clone().add(normal.multiplyScalar(0.4 * t));
       fx.position.x = currentPos.x;
       fx.position.y = currentPos.y;
       fx.position.z = currentPos.z;
