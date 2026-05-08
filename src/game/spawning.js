@@ -63,28 +63,19 @@ export function updateSpawningMarshmallows(currentTime) {
   
   const targetMatrix = new THREE.Matrix4().makeBasis(up, inward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
-  mov.orientation.slerp(targetQ, Math.min(1, 8.0 * (1.0/60.0)));
+  mov.orientation.slerp(targetQ, Math.min(1, 10.0 * (1.0/60.0)));
   
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
 
   if (t >= 1.0) {
+    // Ensure we are exactly at the target orientation when spawning finishes to prevent snapping
+    mov.orientation.copy(targetQ);
+    marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
+    
     delete enemy.spawnStartTime;
     
-    // Seed initial wander movement
-    const rand = () => (Math.random() - 0.5);
-    const wanderSeed = new THREE.Vector3(rand(), rand(), rand()).normalize();
-    
-    // Update orientation to look slightly away from the direct inward line to start the turn
-    const currentFwd = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
-    currentFwd.add(wanderSeed.multiplyScalar(0.5)).normalize();
-    
-    const worldUp = new THREE.Vector3(0, 1, 0);
-    const right = new THREE.Vector3().crossVectors(worldUp, currentFwd).normalize();
-    const up = new THREE.Vector3().crossVectors(currentFwd, right).normalize();
-    const matrix = new THREE.Matrix4().makeBasis(up, currentFwd, right);
-    mov.orientation.setFromRotationMatrix(matrix);
-    
     // Set initial velocity for the movement script to pick up
+    const currentFwd = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
     mov.velocity.copy(currentFwd).multiplyScalar(0.6);
   }
 }

@@ -2,10 +2,9 @@ import { gameState } from './state.js';
 import * as THREE from 'three';
 
 const SPHERE_RADIUS = 10.0;
-const INNER_MARGIN = 1.5;
-const MIN_CAMERA_DISTANCE = 2.5;
-const DRIFT_SPEED = 0.6;
-const FLOAT_HEIGHT_VARIANCE = 2.5;
+const INNER_MARGIN = 2.0;
+const MIN_CAMERA_DISTANCE = 3.5;
+const DRIFT_SPEED = 0.55;
 
 export function updateMarshmallowMovement(marshmallow, delta) {
   if (!marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
@@ -15,23 +14,18 @@ export function updateMarshmallowMovement(marshmallow, delta) {
 
   mov.time += delta;
 
-  // Initialize on first wandering frame
+  // Initialize only if not already done by spawning script
   if (!mov.position) {
     mov.position = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
     mov.velocity = new THREE.Vector3(0, 0, 0);
-    mov.orientation = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z)
-    );
+    if (marsh.rotation.w !== undefined) {
+      mov.orientation = new THREE.Quaternion(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z, marsh.rotation.w);
+    } else {
+      mov.orientation = new THREE.Quaternion().setFromEuler(new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z));
+    }
   }
 
-  // Determine target facing direction based on organic noise + soft centering
-  const turnNoiseX = Math.sin(mov.time * 0.3 + mov.bobPhase) * 0.6;
-  const turnNoiseZ = Math.cos(mov.time * 0.25 + mov.bobPhase * 1.1) * 0.6;
-  const turnNoiseY = Math.sin(mov.time * 0.4 + mov.bobPhase * 0.8) * 0.3;
-
-  let targetDir = new THREE.Vector3(turnNoiseX, turnNoiseY, turnNoiseZ).normalize();
-
-  // Add gentle centering force to keep it in view
+  // 1. Determine camera-relative targets
   const camPos = gameState.player.position;
   const camForward = new THREE.Vector3(
     Math.sin(gameState.player.yaw) * Math.cos(gameState.player.pitch),
@@ -39,71 +33,79 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
   ).normalize();
 
-  const viewCenter = camPos.clone().add(camForward.multiplyScalar(6.0));
+  // Target a comfortable viewing area ~7 units ahead of camera
+  const viewCenter = camPos.clone().add(camForward.multiplyScalar(7.0));
+  
+  // 2. Generate wandering target with organic noise
+  const noiseX = Math.sin(mov.time * 0.4 + mov.bobPhase) * 1.8;
+  const noiseY = Math.cos(mov.time * 0.3 + mov.bobPhase * 1.5) * 1.2;
+  const noiseZ = Math.sin(mov.time * 0.5 + mov.bobPhase * 0.8) * 1.8;
+  const wanderTarget = viewCenter.clone().add(new THREE.Vector3(noiseX, noiseY, noiseZ));
+
+  // 3. Calculate steering direction
+  let targetDir = wanderTarget.clone().sub(mov.position).normalize();
+
+  // CENTERING: Strong pull if wandering too far from the screen center
   const toCenter = viewCenter.clone().sub(mov.position);
   const centerDist = toCenter.length();
-
-  if (centerDist > 3.0) {
-    const pull = Math.min(1.0, (centerDist - 3.0) * 0.2);
-    targetDir.lerp(toCenter.normalize(), pull).normalize();
+  if (centerDist > 2.0) {
+    const pullFactor = Math.min(1.0, (centerDist - 2.0) * 0.6);
+    targetDir.lerp(toCenter.normalize(), pullFactor).normalize();
   }
 
-  // Soft boundary from camera (repel if too close)
+  // REPEL FROM CAMERA: Keep a minimum distance
   const toCam = mov.position.clone().sub(camPos);
   const distToCam = toCam.length();
-  if (distToCam < MIN_CAMERA_DISTANCE + 4.0) {
-    // Stronger repulsion as it gets closer
-    const repelStrength = Math.pow(1.0 - Math.max(0, distToCam - MIN_CAMERA_DISTANCE) / 4.0, 1.5);
-    targetDir.lerp(toCam.normalize(), 0.7 * repelStrength).normalize();
+  if (distToCam < MIN_CAMERA_DISTANCE + 2.0) {
+    const pushStrength = 1.0 - (distToCam - MIN_CAMERA_DISTANCE) / 2.0;
+    targetDir.lerp(toCam.normalize(), Math.min(1.0, pushStrength * 0.9)).normalize();
   }
 
-  // Soft boundary from sphere edge
-  const maxDist = SPHERE_RADIUS - INNER_MARGIN;
-  if (mov.position.length() > maxDist) {
+  // REPEL FROM SPHERE EDGE
+  const sphereDist = mov.position.length();
+  if (sphereDist > SPHERE_RADIUS - INNER_MARGIN) {
     const inward = mov.position.clone().normalize().multiplyScalar(-1);
     targetDir.lerp(inward, 0.9).normalize();
   }
 
-  // Get current forward vector from orientation (Local +Y is forward for the cylinder face)
+  // 4. Update Orientation (Steering)
   const currentForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+  
+  // Responsiveness of the head-turn
+  const steerSpeed = 1.4;
+  currentForward.lerp(targetDir, Math.min(1.0, steerSpeed * delta)).normalize();
 
-  // Smoothly turn current forward towards target dir - increased responsiveness (3.5x faster)
-  currentForward.lerp(targetDir, 2.8 * delta).normalize();
-
-  // Build upright-constrained basis from the new forward
+  // Build stable upright basis
   const worldUp = new THREE.Vector3(0, 1, 0);
   let right = new THREE.Vector3().crossVectors(worldUp, currentForward);
-  if (right.lengthSq() < 0.01) {
+  if (right.lengthSq() < 0.001) {
     right.set(1, 0, 0).cross(currentForward);
   }
   right.normalize();
   const up = new THREE.Vector3().crossVectors(currentForward, right).normalize();
 
-  // Local X = up (face vertical), Local Y = currentForward (face direction), Local Z = right (face horizontal)
+  // Local basis: X=Up, Y=Forward, Z=Right (matches spawning script)
   const targetMatrix = new THREE.Matrix4().makeBasis(up, currentForward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
 
-  // Extremely gentle slerp
-  mov.orientation.slerp(targetQ, Math.min(1, 2.0 * delta));
-
-  // Update visual rotation directly with quaternion
+  // Smooth rotation blending
+  mov.orientation.slerp(targetQ, Math.min(1.0, 1.8 * delta));
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
 
-  // Move exactly along the orientation's forward vector
-  const moveForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
-  const bobY = Math.cos(mov.time * 1.5 + mov.bobPhase) * 0.15;
-
-  mov.velocity.copy(moveForward).multiplyScalar(DRIFT_SPEED);
-  mov.velocity.y += bobY;
+  // 5. Update Position
+  // Movement is always in the direction of the face's current orientation
+  const actualForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+  mov.velocity.copy(actualForward).multiplyScalar(DRIFT_SPEED);
+  
+  // Gentle vertical bobbing
+  const bob = Math.sin(mov.time * 1.8 + mov.bobPhase) * 0.12;
+  mov.velocity.y += bob;
 
   mov.position.addScaledVector(mov.velocity, delta);
 
-  // Hard limits
-  if (mov.position.distanceTo(camPos) < MIN_CAMERA_DISTANCE) {
-    mov.position.copy(camPos).add(mov.position.clone().sub(camPos).normalize().multiplyScalar(MIN_CAMERA_DISTANCE));
-  }
-  if (mov.position.length() > SPHERE_RADIUS - INNER_MARGIN) {
-    mov.position.normalize().multiplyScalar(SPHERE_RADIUS - INNER_MARGIN);
+  // Hard safety boundaries
+  if (mov.position.length() > SPHERE_RADIUS - 0.5) {
+    mov.position.normalize().multiplyScalar(SPHERE_RADIUS - 0.5);
   }
 
   marsh.position.x = mov.position.x;
