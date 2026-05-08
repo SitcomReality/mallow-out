@@ -35,13 +35,19 @@ export function updateSpawningMarshmallows(currentTime) {
     const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
     const up = new THREE.Vector3().crossVectors(inward, right).normalize();
     
-    const matrix = new THREE.Matrix4().makeBasis(up, inward, right);
+    const inward = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
+    const worldUp = new THREE.Vector3(0, 1, 0);
+    const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
+    const up = new THREE.Vector3().crossVectors(inward, right).normalize();
+    
+    // Y-axis of the cylinder (the face) should point inward.
+    // X = right, Y = forward (inward), Z = up
+    const matrix = new THREE.Matrix4().makeBasis(right, inward, up);
     mov.orientation = new THREE.Quaternion().setFromRotationMatrix(matrix);
   }
 
-  const padding = marsh.scale.x + 0.3;
   const targetRadius = 6.0;
-  const startPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(10.0 + 2.0);
+  const startPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(12.0);
   const endPos = enemy.spawnPosWorld.clone().normalize().multiplyScalar(targetRadius);
 
   mov.position.copy(startPos).lerp(endPos, ease);
@@ -54,16 +60,17 @@ export function updateSpawningMarshmallows(currentTime) {
   // Keep face upright and pointing inward during spawn
   const inward = mov.position.clone().normalize().multiplyScalar(-1);
   const worldUp = new THREE.Vector3(0, 1, 0);
-  const right = new THREE.Vector3().crossVectors(worldUp, inward);
+  let right = new THREE.Vector3().crossVectors(worldUp, inward);
   if (right.lengthSq() < 0.01) {
     right.set(1, 0, 0).cross(inward);
   }
   right.normalize();
   const up = new THREE.Vector3().crossVectors(inward, right).normalize();
   
-  const targetMatrix = new THREE.Matrix4().makeBasis(right, up, inward);
+  // Align Y (face) with inward direction
+  const targetMatrix = new THREE.Matrix4().makeBasis(right, inward, up);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
-  mov.orientation.slerp(targetQ, Math.min(1, 8.0 * (1.0/60.0)));
+  mov.orientation.slerp(targetQ, Math.min(1, 10.0 * (1.0/60.0)));
   
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
 

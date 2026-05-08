@@ -76,14 +76,13 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   right.normalize();
   const up = new THREE.Vector3().crossVectors(currentForward, right).normalize();
 
-  const targetMatrix = new THREE.Matrix4().makeBasis(right, up, currentForward.clone().negate());
-  // Correction: We want local Y to be 'up' on the face, and local Z to be forward/back.
-  // The cylinder is along Y. Let's make basis: X=right, Y=up(normal), Z=forward.
-  targetMatrix.makeBasis(right, up, currentForward);
+  // Face points along local +Y. So Col 1 (Y) should be our currentForward.
+  // Col 0 (X) = right, Col 1 (Y) = forward, Col 2 (Z) = up
+  const targetMatrix = new THREE.Matrix4().makeBasis(right, currentForward, up);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
 
-  // Extremely gentle slerp
-  mov.orientation.slerp(targetQ, Math.min(1, 2.0 * delta));
+  // Smoothly interpolate to the target orientation
+  mov.orientation.slerp(targetQ, Math.min(1, 4.0 * delta));
 
   // Update visual rotation directly with quaternion
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
@@ -92,10 +91,13 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const moveForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
   const bobY = Math.cos(mov.time * 1.5 + mov.bobPhase) * 0.15;
 
+  // Movement velocity follows the face direction
   mov.velocity.copy(moveForward).multiplyScalar(DRIFT_SPEED);
-  mov.velocity.y += bobY;
-
-  mov.position.addScaledVector(mov.velocity, delta);
+  
+  // Add gentle vertical bobbing to the position rather than velocity to prevent "ascending" bias
+  const currentPos = mov.position.clone().addScaledVector(mov.velocity, delta);
+  currentPos.y += bobY * delta;
+  mov.position.copy(currentPos);
 
   // Hard limits
   if (mov.position.distanceTo(camPos) < MIN_CAMERA_DISTANCE) {
