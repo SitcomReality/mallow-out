@@ -3,7 +3,7 @@ import { gameState } from '../state.js';
 import { applyHolepunch, applyRoundChunk } from '../damage/actions.js';
 import { healMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
-import { awardMarsh, awardPollen } from '../economy.js';
+import { awardMarsh, awardPollen, awardMarshMultiplier } from '../economy.js';
 import { spawnNextMarshmallowAt, session } from '../manager.js';
 import { getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
 import { createRippleFX } from '../fx.js';
