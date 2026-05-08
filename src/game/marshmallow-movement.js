@@ -8,33 +8,34 @@ const DRIFT_SPEED = 0.6;
 const FLOAT_HEIGHT_VARIANCE = 2.5;
 
 export function updateMarshmallowMovement(marshmallow, delta) {
-  if (!marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
-  
+  if (!marshmallow || !marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
+
   const mov = marshmallow.movement;
   const marsh = marshmallow.marshmallow;
 
-  mov.time += delta;
+  // Defensive initialization in case any subfields are missing or were nulled elsewhere
+  if (!mov.time && mov.time !== 0) mov.time = 0;
+  if (mov.bobPhase === undefined || mov.bobPhase === null) mov.bobPhase = Math.random() * Math.PI * 2;
+  if (!mov.position) mov.position = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
+  if (!mov.velocity) mov.velocity = new THREE.Vector3(0, 0, 0);
+  if (!mov.orientation) mov.orientation = new THREE.Quaternion().setFromEuler(
+    new THREE.Euler(marsh.rotation.x || 0, marsh.rotation.y || 0, marsh.rotation.z || 0)
+  );
+  if (!mov.lastForward) mov.lastForward = new THREE.Vector3(0, 0, 1);
 
-  // Initialize on first wandering frame
-  if (!mov.position) {
-    mov.position = new THREE.Vector3(marsh.position.x, marsh.position.y, marsh.position.z);
-    mov.velocity = new THREE.Vector3(0, 0, 0);
-    mov.orientation = new THREE.Quaternion().setFromEuler(
-      new THREE.Euler(marsh.rotation.x, marsh.rotation.y, marsh.rotation.z)
-    );
-    mov.lastForward = new THREE.Vector3(0, 0, 1);
-  }
+  // Advance internal time
+  mov.time += delta;
 
   // Gentle continuous drift using multiple sine waves for organic motion
   const driftX = 0.3 * Math.sin(mov.time * 0.4 + mov.bobPhase);
   const driftY = 0.2 * Math.sin(mov.time * 0.5 + mov.bobPhase * 1.3);
   const driftZ = 0.3 * Math.sin(mov.time * 0.35 + mov.bobPhase * 0.7);
-  
+
   const drift = new THREE.Vector3(driftX, driftY, driftZ);
-  
-  // Slowly blend velocity toward drift direction
+
+  // Slowly blend velocity toward drift direction (safeguard lerp target)
   mov.velocity.lerp(drift, Math.min(1, 0.5 * delta));
-  
+
   // Apply velocity with very gentle damping
   mov.position.addScaledVector(mov.velocity, DRIFT_SPEED * delta);
 
@@ -45,11 +46,11 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     Math.sin(gameState.player.pitch),
     -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
   ).normalize();
-  
+
   const viewCenter = camPos.clone().add(camForward.multiplyScalar(6.0));
   const toCenter = viewCenter.clone().sub(mov.position);
   const centerDist = toCenter.length();
-  
+
   // Very gentle pull toward view center if drifting too far
   if (centerDist > 3.5) {
     const pullStrength = Math.min(0.3, (centerDist - 3.5) * 0.15);
@@ -79,7 +80,7 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     }
   }
 
-  // Update physical position
+  // Update physical position back to the marshmallow model
   marsh.position.x = mov.position.x;
   marsh.position.y = mov.position.y;
   marsh.position.z = mov.position.z;
@@ -87,7 +88,7 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   // Orientation: face the direction of movement while keeping face upright
   const velMag = mov.velocity.length();
   let forward = new THREE.Vector3();
-  
+
   if (velMag > 0.05) {
     forward.copy(mov.velocity).normalize();
     // Blend with previous forward to smooth out jitter
@@ -106,15 +107,15 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     right.set(1, 0, 0).cross(forward);
   }
   right.normalize();
-  
+
   const up = new THREE.Vector3().crossVectors(forward, right).normalize();
-  
+
   const targetMatrix = new THREE.Matrix4().makeBasis(up, forward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
-  
-  // Very gentle slerp for ultra-smooth rotation
+
+  // Very gentle slerp for ultra-smooth rotation (ensure orientation exists)
   mov.orientation.slerp(targetQ, Math.min(1, 1.5 * delta));
-  
+
   const euler = new THREE.Euler().setFromQuaternion(mov.orientation);
   marsh.rotation.x = euler.x;
   marsh.rotation.y = euler.y;
