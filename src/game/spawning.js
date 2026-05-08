@@ -35,11 +35,6 @@ export function updateSpawningMarshmallows(currentTime) {
     const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
     const up = new THREE.Vector3().crossVectors(inward, right).normalize();
     
-    const inward = enemy.spawnPosWorld.clone().normalize().multiplyScalar(-1);
-    const worldUp = new THREE.Vector3(0, 1, 0);
-    const right = new THREE.Vector3().crossVectors(worldUp, inward).normalize();
-    const up = new THREE.Vector3().crossVectors(inward, right).normalize();
-    
     // Y-axis of the cylinder (the face) should point inward.
     // X = right, Y = forward (inward), Z = up
     const matrix = new THREE.Matrix4().makeBasis(right, inward, up);
