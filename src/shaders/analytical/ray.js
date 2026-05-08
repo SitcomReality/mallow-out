@@ -15,12 +15,13 @@ float getObjectBoundingRadius(int idx) {
   vec3 scale = uObjData2[idx].xyz;
   float objType = uObjData0[idx].x;
   
-  // Conservative estimate - largest dimension
-  float maxScale = max(scale.x, max(scale.y, scale.z));
+  // Correct estimate for rotated objects: distance from center to furthest point
+  // For most shapes length(scale) is the distance to corner; for torus, it's sum of radii.
+  float bound = (objType > 2.5 && objType < 3.5) ? (scale.x + scale.y) : length(scale);
   
   // Add blend radius for safety
   float blend = uObjData0[idx].z;
   
-  return maxScale + blend + 0.5;
+  return bound + blend + 0.5;
 }
 `;

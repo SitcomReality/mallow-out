@@ -77,9 +77,10 @@ float getObjectDist(vec3 p, int idx) {
   vec3 scale = uObjData2[idx].xyz;
   
   // Optimization #3: Early bounding sphere cull
+  float distToCenter = length(p - pos);
   float boundingRadius = getObjectBoundingRadius(idx);
-  if (length(p - pos) > boundingRadius) {
-    return boundingRadius; // Return conservative distance
+  if (distToCenter > boundingRadius) {
+    return distToCenter - boundingRadius; 
   }
   
   vec3 rot = uObjData4[idx].xyz;
