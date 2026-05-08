@@ -72,10 +72,30 @@ export function updateSpawningMarshmallows(currentTime) {
     mov.orientation.copy(targetQ);
     marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
     
+    // Mark spawn finished so movement logic can take over
     delete enemy.spawnStartTime;
     
-    // Set initial velocity for the movement script to pick up
-    const currentFwd = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
-    mov.velocity.copy(currentFwd).multiplyScalar(0.6);
+    // Smooth handoff: nudge final spawn position slightly toward the comfortable view center
+    // so the marshmallow doesn't immediately propel forward away from the camera.
+    const camPos = gameState.player.position;
+    const camForward = new THREE.Vector3(
+      Math.sin(gameState.player.yaw) * Math.cos(gameState.player.pitch),
+      Math.sin(gameState.player.pitch),
+      -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
+    ).normalize();
+    const viewCenter = camPos.clone().add(camForward.multiplyScalar(7.0));
+    
+    // Lerp position a small amount toward view center for a gentle transition
+    mov.position.lerp(viewCenter, 0.18);
+    marsh.position.x = mov.position.x;
+    marsh.position.y = mov.position.y;
+    marsh.position.z = mov.position.z;
+    
+    // Zero out transient velocity so the movement script can build a natural wander
+    mov.velocity.set(0, 0, 0);
+    
+    // Reset movement timers to avoid large bob-phase jumps and ensure smooth bobbing
+    mov.time = 0;
+    mov.bobPhase = Math.random() * Math.PI * 2;
   }
 }
