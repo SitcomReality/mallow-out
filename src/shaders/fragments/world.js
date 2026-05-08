@@ -82,9 +82,10 @@ float getObjectDist(vec3 p, int idx) {
   
   vec3 localP = p - pos;
   
-  // Apply rotation to local coordinate space (Inverse of THREE.js XYZ Euler order: Z, then Y, then X)
+  // Apply inverse rotation to transform world point to local space
+  // For THREE.js default 'XYZ' order, apply inverse rotations in reverse: -Z, then -Y, then -X
   localP.xy *= rot2(-rot.z);
-  localP.xz *= rot2(rot.y);
+  localP.xz *= rot2(-rot.y);
   localP.yz *= rot2(-rot.x);
   
   float d = 0.0;
@@ -178,13 +179,16 @@ vec4 map(vec3 p) {
       localP.xz *= rot2(rot.y);
       localP.xy *= rot2(-rot.z);
       
-      // uObjData5.w holds pupil look X, uObjData6.w holds pupil look Y (if needed, otherwise 0)
-      vec2 lookDir = vec2(uObjData5[i].w, 0.0); 
-      // We'll hijack the unused Y component in uObjData5 or just stay horizontal for now.
-      // Wait, uObjData6.w is charCode. Let's use uObjData2.w for lookY if needed.
-      lookDir.y = uObjData2[i].w; 
+      // uObjData5.w holds pupil look X, uObjData2.w holds pupil look Y
+      vec2 lookDir = vec2(uObjData5[i].w, uObjData2[i].w); 
       
-      col = getFaceColor(localP, uObjData2[i].xyz, col, expression, lookDir);
+      // Calculate local camera position for the billboarded face
+      vec3 localCamPos = uCamPos - uObjData1[i].xyz;
+      localCamPos.xy *= rot2(-rot.z);
+      localCamPos.xz *= rot2(-rot.y);
+      localCamPos.yz *= rot2(-rot.x);
+      
+      col = getFaceColor(localP, uObjData2[i].xyz, col, expression, lookDir, localCamPos);
     }
 
     if (gid != lastGid) {

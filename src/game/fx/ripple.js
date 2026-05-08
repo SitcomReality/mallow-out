@@ -39,12 +39,11 @@ export function createRippleFX(position, isCharged = false) {
 
   const bitangent = new THREE.Vector3().crossVectors(normal, tangent).normalize();
 
-  // Make basis so the torus' local Y-axis equals the surface normal (ring lies in the tangent plane).
-  // Use tangent as X and bitangent as Z to keep consistent handedness with shader conventions.
+  // Make basis with X = bitangent, Y = normal, Z = tangent so the torus' Y-axis aligns with the surface normal
   const matrix = new THREE.Matrix4();
-  matrix.makeBasis(tangent, normal, bitangent);
+  matrix.makeBasis(bitangent, normal, tangent);
   const q = new THREE.Quaternion().setFromRotationMatrix(matrix);
-  const euler = new THREE.Euler().setFromQuaternion(q, 'XYZ');
+  const euler = new THREE.Euler().setFromQuaternion(q);
 
   const fx = {
     id,
