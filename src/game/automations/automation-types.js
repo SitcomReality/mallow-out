@@ -2,6 +2,7 @@ export const AUTOMATION_TYPES = {
   AUTO_SHOOTER: 'auto_shooter',
   COMET: 'comet',
   LASER: 'laser',
+  TREAT_DISPENSER: 'treat_dispenser',
 };
 
 export const AUTOMATION_CONFIG = {
@@ -17,16 +18,23 @@ export const AUTOMATION_CONFIG = {
     id: AUTOMATION_TYPES.COMET,
     name: 'Comet Strike',
     icon: '☄️',
-    baseInterval: 15.0,
-    baseValue: 0.05,
+    baseInterval: 12.0, // seconds between comets
+    baseHeal: 8.0, // base heal amount
   },
   
   [AUTOMATION_TYPES.LASER]: {
     id: AUTOMATION_TYPES.LASER,
     name: 'Laser Beam',
     icon: '🔴',
-    baseInterval: 8.0,
-    baseValue: 0.08,
+    baseInterval: 8.0, // seconds between lasers
+    baseHeal: 5.0, // base heal amount
+  },
+  
+  [AUTOMATION_TYPES.TREAT_DISPENSER]: {
+    id: AUTOMATION_TYPES.TREAT_DISPENSER,
+    name: 'Treat Dispenser',
+    icon: '🍬',
+    checkInterval: 2.0, // check every 2 seconds if we can buy
   },
 };
 

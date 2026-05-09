@@ -24,6 +24,7 @@ export const gameState = {
     // Player
     shot_cooldown: 0,
     combo_duration: 0,
+    charge_speed: 0,
     // Marshmallow
     mallow_heal: 0,
     hit_protection: 0,
@@ -37,6 +38,14 @@ export const gameState = {
     auto_shooter_unlock: 0,
     auto_shooter_rate: 0,
     auto_shooter_value: 0,
+    comet_unlock: 0,
+    comet_rate: 0,
+    comet_power: 0,
+    laser_unlock: 0,
+    laser_rate: 0,
+    laser_power: 0,
+    treat_dispenser_unlock: 0,
+    treat_dispenser_discount: 0,
   },
 
   // Cosmetics system
@@ -54,7 +63,11 @@ export const gameState = {
     auto_shooter: 0,
     comet: 0,
     laser: 0,
+    treat_dispenser: 0,
   },
+  
+  // Treat dispenser can be paused
+  treatDispenserPaused: false,
   
   // Combo tracking
   combo: {
@@ -89,6 +102,7 @@ export const gameState = {
     isCharging: false,
     chargeTimer: 0,
     maxChargeTime: 3.0,
+    baseChargeTime: 3.0,
   },
 };
 
@@ -98,11 +112,17 @@ export function updateWeaponCooldowns(delta) {
     ws.skewerCooldown = Math.max(0, ws.skewerCooldown - delta);
   }
 
+  // Apply charge speed upgrade
+  const chargeSpeedBonus = getUpgradeEffect('charge_speed', gameState.upgrades.charge_speed || 0);
+  ws.maxChargeTime = Math.max(0.5, ws.baseChargeTime * (1 - chargeSpeedBonus));
+
   if (ws.isCharging && ws.skewerCooldown <= 0) {
     ws.chargeTimer = Math.min(ws.maxChargeTime, ws.chargeTimer + delta);
   } else {
     ws.chargeTimer = 0;
   }
 }
+
+import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
 
 export { settings, worldState };

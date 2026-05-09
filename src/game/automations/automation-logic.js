@@ -3,7 +3,10 @@ import { gameState } from '../state.js';
 import { getAutomationConfig, AUTOMATION_TYPES } from './automation-types.js';
 import { getUpgradeEffect } from '../upgrades/upgrade-calculator.js';
 import { createRippleFX } from '../fx.js';
-import { session } from '../manager.js';
+import { session, getTreatCost, buyMarshmallowTreat } from '../manager.js';
+import { applySpatter, applyRoundChunk } from '../damage/actions.js';
+import { healMarshmallow } from '../marshmallow.js';
+import { awardPollen } from '../economy.js';
 
 export function updateAutomations(delta) {
   // Auto Shooter
@@ -20,7 +23,48 @@ export function updateAutomations(delta) {
     }
   }
   
-  // Future automations will be added here similarly
+  // Comet Strike
+  if (gameState.upgrades.comet_unlock > 0 && gameState.currentMarshmallow) {
+    gameState.automationTimers.comet = (gameState.automationTimers.comet || 0) + delta;
+    
+    const config = getAutomationConfig(AUTOMATION_TYPES.COMET);
+    const rateBonus = getUpgradeEffect('comet_rate', gameState.upgrades.comet_rate || 0);
+    const interval = config.baseInterval / (1 + rateBonus);
+    
+    if (gameState.automationTimers.comet >= interval) {
+      gameState.automationTimers.comet = 0;
+      fireComet();
+    }
+  }
+  
+  // Laser Beam
+  if (gameState.upgrades.laser_unlock > 0 && gameState.currentMarshmallow) {
+    gameState.automationTimers.laser = (gameState.automationTimers.laser || 0) + delta;
+    
+    const config = getAutomationConfig(AUTOMATION_TYPES.LASER);
+    const rateBonus = getUpgradeEffect('laser_rate', gameState.upgrades.laser_rate || 0);
+    const interval = config.baseInterval / (1 + rateBonus);
+    
+    if (gameState.automationTimers.laser >= interval) {
+      gameState.automationTimers.laser = 0;
+      fireLaser();
+    }
+  }
+  
+  // Treat Dispenser
+  if (gameState.upgrades.treat_dispenser_unlock > 0) {
+    gameState.automationTimers.treat_dispenser = (gameState.automationTimers.treat_dispenser || 0) + delta;
+    
+    const config = getAutomationConfig(AUTOMATION_TYPES.TREAT_DISPENSER);
+    
+    if (gameState.automationTimers.treat_dispenser >= config.checkInterval) {
+      gameState.automationTimers.treat_dispenser = 0;
+      
+      if (!gameState.treatDispenserPaused) {
+        checkAndBuyTreat();
+      }
+    }
+  }
 }
 
 function fireAutoShooter() {
@@ -58,5 +102,163 @@ function fireAutoShooter() {
   
   if (session.floatingTextSystem) {
     session.floatingTextSystem.createDamageText(hitPoint, reward, false);
+  }
+}
+
+function fireComet() {
+  const marshmallow = gameState.currentMarshmallow;
+  if (!marshmallow) return;
+  
+  const config = getAutomationConfig(AUTOMATION_TYPES.COMET);
+  const powerBonus = getUpgradeEffect('comet_power', gameState.upgrades.comet_power || 0);
+  const healAmount = config.baseHeal * (1 + powerBonus);
+  
+  // Pick random point on marshmallow
+  const mallowPos = new THREE.Vector3(
+    marshmallow.marshmallow.position.x,
+    marshmallow.marshmallow.position.y,
+    marshmallow.marshmallow.position.z
+  );
+  
+  // Random offset on surface
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.random() * Math.PI;
+  const radius = marshmallow.marshmallow.scale.x;
+  const offset = new THREE.Vector3(
+    Math.sin(phi) * Math.cos(theta) * radius,
+    Math.cos(phi) * marshmallow.marshmallow.scale.y,
+    Math.sin(phi) * Math.sin(theta) * radius
+  );
+  
+  const hitPoint = mallowPos.clone().add(offset);
+  
+  // Apply round chunk damage (comet impact)
+  const chunk = applyRoundChunk(marshmallow, hitPoint);
+  chunk.scale = { x: 0.4, y: 0.4, z: 0.4 };
+  if (chunk.repairData) {
+    chunk.repairData.initialScale = 0.4;
+  }
+  
+  // Particles
+  if (session.particleSystem) {
+    const normal = offset.clone().normalize();
+    session.particleSystem.createMallowSplatter(hitPoint, normal);
+  }
+  
+  // Heal and award pollen
+  healMarshmallow(marshmallow, healAmount);
+  const pollenEarned = awardPollen(healAmount);
+  
+  if (session.floatingTextSystem) {
+    session.floatingTextSystem.createDamageText(hitPoint, pollenEarned, false);
+  }
+  
+  if (session.marshmallowHUD) {
+    session.marshmallowHUD.update(marshmallow);
+  }
+}
+
+function fireLaser() {
+  const marshmallow = gameState.currentMarshmallow;
+  if (!marshmallow) return;
+  
+  const config = getAutomationConfig(AUTOMATION_TYPES.LASER);
+  const powerBonus = getUpgradeEffect('laser_power', gameState.upgrades.laser_power || 0);
+  const healAmount = config.baseHeal * (1 + powerBonus);
+  
+  // Pick random point on marshmallow for laser entry
+  const mallowPos = new THREE.Vector3(
+    marshmallow.marshmallow.position.x,
+    marshmallow.marshmallow.position.y,
+    marshmallow.marshmallow.position.z
+  );
+  
+  const theta = Math.random() * Math.PI * 2;
+  const phi = Math.random() * Math.PI;
+  const radius = marshmallow.marshmallow.scale.x;
+  const offset = new THREE.Vector3(
+    Math.sin(phi) * Math.cos(theta) * radius,
+    Math.cos(phi) * marshmallow.marshmallow.scale.y,
+    Math.sin(phi) * Math.sin(theta) * radius
+  );
+  
+  const hitPoint = mallowPos.clone().add(offset);
+  const direction = offset.clone().normalize();
+  
+  // Create thin laser cut (using a thin box)
+  const up = new THREE.Vector3(0, 1, 0);
+  const axis = new THREE.Vector3().crossVectors(up, direction).normalize();
+  const angle = Math.acos(up.dot(direction));
+  
+  const worldQuat = new THREE.Quaternion();
+  if (axis.length() > 0.001) {
+    worldQuat.setFromAxisAngle(axis, angle);
+  }
+  
+  // Transform to local space
+  const mRot = new THREE.Euler(marshmallow.marshmallow.rotation.x, marshmallow.marshmallow.rotation.y, marshmallow.marshmallow.rotation.z);
+  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  
+  const localPos = hitPoint.clone().sub(mallowPos).applyQuaternion(mQuatInv);
+  const localQuat = mQuatInv.multiply(worldQuat);
+  const localRot = new THREE.Euler().setFromQuaternion(localQuat);
+  
+  const laser = {
+    id: 999000 + Math.floor(Math.random() * 1000),
+    type: 'box',
+    position: { x: localPos.x, y: localPos.y, z: localPos.z },
+    rotation: { x: localRot.x, y: localRot.y, z: localRot.z },
+    scale: { x: 0.05, y: 1.5, z: 0.05 }, // Thin wafer
+    color: '#ff00ff',
+    operation: 'subtract',
+    blendRadius: 0.01,
+    parentId: marshmallow.marshmallow.id,
+    repairData: {
+      type: 'laser',
+      startTime: performance.now() * 0.001,
+      initialScale: 1.5
+    }
+  };
+  
+  marshmallow.holes.push(laser);
+  
+  // Particles
+  if (session.particleSystem) {
+    const normal = direction.clone().multiplyScalar(-1);
+    session.particleSystem.createMallowSplatter(hitPoint, normal);
+  }
+  
+  // Heal and award pollen
+  healMarshmallow(marshmallow, healAmount);
+  const pollenEarned = awardPollen(healAmount);
+  
+  if (session.floatingTextSystem) {
+    session.floatingTextSystem.createDamageText(hitPoint, pollenEarned, false);
+  }
+  
+  if (session.marshmallowHUD) {
+    session.marshmallowHUD.update(marshmallow);
+  }
+}
+
+function checkAndBuyTreat() {
+  const discount = getUpgradeEffect('treat_dispenser_discount', gameState.upgrades.treat_dispenser_discount || 0);
+  const baseCost = getTreatCost();
+  const cost = Math.floor(baseCost * (1 - discount));
+  
+  if (gameState.currencies.marsh >= cost && !gameState.currentMarshmallow) {
+    // Manually deduct and award treat
+    gameState.currencies.marsh -= cost;
+    gameState.currencies.treats = (gameState.currencies.treats || 0) + 1;
+    
+    if (session.notifications) {
+      session.notifications.add({
+        id: 'auto_treat',
+        sticky: false,
+        title: 'Auto-Buy',
+        text: `Treat Dispenser purchased a treat!`,
+        color: '#ffd700'
+      });
+    }
   }
 }

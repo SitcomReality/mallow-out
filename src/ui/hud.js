@@ -34,6 +34,7 @@ export function createHUD() {
          <button id="navCosmetics" class="nav-btn wonky" data-fill="#ffd700" data-stroke="#000000" data-stroke-width="3">Cosmetics</button>
          <div id="treatControls" style="display: flex; gap: 4px;">
            <button id="equipTreat" class="nav-btn wonky" data-fill="#ffd700" data-stroke="#000000" data-stroke-width="3">Equip (0)</button>
+           <button id="pauseDispenser" class="nav-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" style="display: none;">Pause Auto</button>
          </div>
          <button id="navSettings" class="nav-btn wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">Settings</button>
       </div>
@@ -95,6 +96,15 @@ export function createHUD() {
     equipTreatBtn.addEventListener('click', (e) => {
       e.preventDefault();
       import('../game/manager.js').then(m => m.equipMarshmallowTreat());
+    });
+  }
+
+  const pauseDispenserBtn = hud.querySelector('#pauseDispenser');
+  if (pauseDispenserBtn) {
+    pauseDispenserBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      gameState.treatDispenserPaused = !gameState.treatDispenserPaused;
+      pauseDispenserBtn.textContent = gameState.treatDispenserPaused ? 'Resume Auto' : 'Pause Auto';
     });
   }
 
@@ -183,6 +193,16 @@ export function createHUD() {
           equipBtn.style.filter = 'hue-rotate(90deg)';
         } else {
           equipBtn.style.filter = 'none';
+        }
+      }
+      
+      const pauseBtn = document.getElementById('pauseDispenser');
+      if (pauseBtn) {
+        if (gameState.upgrades.treat_dispenser_unlock > 0) {
+          pauseBtn.style.display = 'block';
+          pauseBtn.textContent = gameState.treatDispenserPaused ? 'Resume Auto' : 'Pause Auto';
+        } else {
+          pauseBtn.style.display = 'none';
         }
       }
       
