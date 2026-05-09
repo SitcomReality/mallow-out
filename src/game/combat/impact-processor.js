@@ -22,6 +22,22 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
   const healBonus = getUpgradeEffect('mallow_heal', gameState.upgrades.mallow_heal || 0);
   const comboMult = getComboMultiplier();
   const healAmount = baseHeal * (1 + healBonus) * comboMult;
+  
+  // Milestone notifications
+  const totalPollen = gameState.currencies.pollen;
+  if (totalPollen >= 100 && totalPollen < 150 && !gameState.milestones?.pollen100) {
+    if (!gameState.milestones) gameState.milestones = {};
+    gameState.milestones.pollen100 = true;
+    if (session.notifications) {
+      session.notifications.add({
+        id: 'milestone_pollen_100',
+        sticky: true,
+        title: '🌟 100 POLLEN! 🌟',
+        text: 'You\'re a natural! Open a lootbox in Cosmetics to unlock new looks!',
+        color: '#ffd700'
+      });
+    }
+  }
 
   if (isCharged) {
     const hole = applyHolepunch(gameState.currentMarshmallow, resultPoint, direction);
@@ -70,10 +86,45 @@ export function handleFloorImpact(floorPoint, isCharged, usedAmmo, particleSyste
   if (!gameState.tutorial.hasShot) {
     gameState.tutorial.hasShot = true;
     gameState.tutorial.currentStep = 1;
+    
+    if (session.notifications) {
+      session.notifications.add({
+        id: 'first_shot',
+        sticky: false,
+        title: '💥 FIRST SHOT! 💥',
+        text: `+${marshReward} marsh! Keep tapping to build a COMBO!`,
+        color: '#8afdff'
+      });
+    }
+  }
+  
+  // Combo milestones
+  if (gameState.combo.count === 5 && !gameState.milestones?.combo5) {
+    if (!gameState.milestones) gameState.milestones = {};
+    gameState.milestones.combo5 = true;
+    if (session.notifications) {
+      session.notifications.add({
+        id: 'combo_5',
+        sticky: false,
+        title: '🔥 5-HIT COMBO! 🔥',
+        text: 'You\'re on FIRE! Higher combos = MORE REWARDS!',
+        color: '#ff4500'
+      });
+    }
   }
   
   if (usedAmmo === 'treat') {
     spawnNextMarshmallowAt(floorPoint);
+    
+    if (session.notifications) {
+      session.notifications.add({
+        id: 'treat_deployed',
+        sticky: false,
+        title: '🍬 TREAT DEPLOYED! 🍬',
+        text: 'Your marshmallow friend is emerging! Show it some love!',
+        color: '#ff69b4'
+      });
+    }
   }
 
   if (session.floatingTextSystem) {

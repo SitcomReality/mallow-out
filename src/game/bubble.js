@@ -164,6 +164,25 @@ export function updateBubbles(delta, currentTime) {
       
       if (t >= 1.0) {
         toRemove.push(bubble);
+        
+        // Bubble pop notification on first bubble
+        if (!gameState.milestones?.firstBubble) {
+          if (!gameState.milestones) gameState.milestones = {};
+          gameState.milestones.firstBubble = true;
+          if (import('./manager.js').then) {
+            import('./manager.js').then(mgr => {
+              if (mgr.session.notifications) {
+                mgr.session.notifications.add({
+                  id: 'first_bubble',
+                  sticky: true,
+                  title: '✨ BUBBLE DISCOVERED! ✨',
+                  text: 'Bubbles appear when your friend is away! Pop them for BONUS marsh!',
+                  color: '#8afdff'
+                });
+              }
+            });
+          }
+        }
       }
     }
   }

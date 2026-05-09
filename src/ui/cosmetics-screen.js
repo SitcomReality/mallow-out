@@ -89,32 +89,50 @@ export function createCosmeticsScreen() {
     document.getElementById('openLootbox')?.addEventListener('click', () => {
       if (!canAfford) return;
       
-      const result = openLootbox();
       const resultDiv = document.getElementById('lootboxResult');
       
-      if (result.refund) {
-        resultDiv.innerHTML = `
-          <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" style="padding: 16px;">
-            <p style="font-size: 10px; color: #000000;">All cosmetics unlocked! Refunded ${LOOTBOX_COST} pollen.</p>
-          </div>
-        `;
-      } else if (result.item) {
-        const rarity = COSMETIC_RARITIES[result.item.rarity.toUpperCase()];
-        resultDiv.innerHTML = `
-          <div class="wonky" data-fill="${rarity.color}" data-stroke="#000000" data-stroke-width="4" style="padding: 16px; animation: slideInRight 0.3s;">
-            <h3 style="font-size: 14px; color: #000000; margin: 0;">NEW COSMETIC!</h3>
-            <p style="font-size: 10px; color: #000000; margin: 8px 0 0;">${result.item.name}</p>
-            <p style="font-size: 8px; color: #000000;">${result.item.rarity.toUpperCase()}</p>
-          </div>
-        `;
-      }
-      
+      // Anticipation phase
+      resultDiv.innerHTML = `
+        <div class="wonky lootbox-opening" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="4" style="padding: 24px; text-align: center;">
+          <h3 style="font-size: 18px; color: #000000; margin: 0; animation: lootboxShake 0.1s infinite;">✨ OPENING... ✨</h3>
+          <div class="lootbox-spinner" style="margin: 16px auto; width: 60px; height: 60px; border: 4px solid #000; border-top-color: #ffd700; border-radius: 50%; animation: spin 0.6s linear infinite;"></div>
+        </div>
+      `;
       resultDiv.style.display = 'block';
       if (window.updateWonkyUI) window.updateWonkyUI();
       
+      // Delay for suspense
       setTimeout(() => {
-        show(); // Refresh display
-      }, 2000);
+        const result = openLootbox();
+        
+        if (result.refund) {
+          resultDiv.innerHTML = `
+            <div class="wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" style="padding: 16px;">
+              <p style="font-size: 10px; color: #000000;">All cosmetics unlocked! Refunded ${LOOTBOX_COST} pollen.</p>
+            </div>
+          `;
+        } else if (result.item) {
+          const rarity = COSMETIC_RARITIES[result.item.rarity.toUpperCase()];
+          const isPrismatic = result.item.rarity === 'epic' || result.item.rarity === 'rare';
+          
+          resultDiv.innerHTML = `
+            <div class="wonky lootbox-reveal ${isPrismatic ? 'prismatic-reveal' : ''}" data-fill="${rarity.color}" data-stroke="#000000" data-stroke-width="6" style="padding: 24px; animation: lootboxReveal 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);">
+              <div style="font-size: 48px; margin-bottom: 12px; animation: itemPop 0.6s ease-out;">${result.item.rarity === 'epic' ? '🌟' : result.item.rarity === 'rare' ? '💎' : '✨'}</div>
+              <h3 style="font-size: 20px; color: #000000; margin: 0 0 8px 0; text-transform: uppercase; animation: textShake 0.3s;">NEW ${result.item.rarity.toUpperCase()}!</h3>
+              <p style="font-size: 14px; color: #000000; margin: 8px 0; font-weight: 900;">${result.item.name}</p>
+              <div style="margin-top: 12px; padding: 8px; background: rgba(0,0,0,0.1); border: 2px solid #000; font-size: 10px; font-weight: 900;">
+                ${result.item.rarity === 'epic' ? '⚡ LEGENDARY DROP! ⚡' : result.item.rarity === 'rare' ? '🔥 RARE FIND! 🔥' : '✓ Unlocked!'}
+              </div>
+            </div>
+          `;
+        }
+        
+        if (window.updateWonkyUI) window.updateWonkyUI();
+        
+        setTimeout(() => {
+          show(); // Refresh display
+        }, 3000);
+      }, 1200);
     });
     
     screen.querySelectorAll('.cosmetic-item:not(.locked)').forEach(item => {

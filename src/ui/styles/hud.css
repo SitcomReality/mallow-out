@@ -121,6 +121,30 @@
   gap: 12px;
 }
 
+@keyframes currencyPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); filter: brightness(1.5) drop-shadow(0 0 10px currentColor); }
+  100% { transform: scale(1); }
+}
+
+.currency-pulse {
+  animation: currencyPulse 0.4s ease-out;
+}
+
+.currency-pulse .currency-value {
+  animation: rainbowText 0.4s ease-out;
+}
+
+@keyframes rainbowText {
+  0% { color: #ff0000; }
+  16% { color: #ff7f00; }
+  33% { color: #ffff00; }
+  50% { color: #00ff00; }
+  66% { color: #0000ff; }
+  83% { color: #8b00ff; }
+  100% { color: #000000; }
+}
+
 .nav-buttons {
   display: flex;
   gap: 8px;

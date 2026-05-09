@@ -15,15 +15,15 @@ export function createHUD() {
     
     <div class="hud-top">
       <div class="currency-display">
-        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
+        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" data-currency="marsh">
           <span class="currency-icon" id="icon-marsh"></span>
           <span class="currency-value" id="marshDisplay">0</span>
         </div>
-        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
+        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" data-currency="pollen">
           <span class="currency-icon" id="icon-pollen"></span>
           <span class="currency-value" id="pollenDisplay">0</span>
         </div>
-        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3">
+        <div class="currency-item wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" data-currency="caramel">
           <span class="currency-icon" id="icon-caramel"></span>
           <span class="currency-value" id="caramelDisplay">0</span>
         </div>
@@ -110,11 +110,11 @@ export function createHUD() {
 
   // Tutorial system using canonical SVG icons
   const tutorialMessages = [
-    `Welcome! Click anywhere on the glowing marsh floor to collect marsh currency (${getCurrencySVG('marsh',14)}).`,
-    `Great! Now use your marsh to buy a Marshmallow Treat from the Shop. This will summon your marshmallow friend!`,
-    `Perfect! Now click on your marshmallow friend to give it love and collect pollen (${getCurrencySVG('pollen',14)}).`,
-    `Excellent! Pollen automatically converts to caramel (${getCurrencySVG('caramel',14)}) which you can spend on permanent upgrades. Click the Upgrades button to see what's available!`,
-    `You've got the basics! Keep shooting to earn resources, buy upgrades to increase your earning rates, and unlock automations for idle progress. Have fun!`
+    `💥 <strong>WELCOME TO MALLOW OUT!</strong> 💥<br><br>Tap the glowing marsh floor to blast it and collect ${getCurrencySVG('marsh',16)} <strong>Marsh</strong> currency!<br><br>Every shot counts! Build combos for MASSIVE bonuses! 🔥`,
+    `🎉 <strong>INCREDIBLE!</strong> 🎉<br><br>You've earned ${getCurrencySVG('marsh',16)} Marsh! Now visit the <strong>Shop</strong> to buy a ${getCurrencySVG('treat',16)} <strong>Marshmallow Treat</strong>!<br><br>This summons your adorable marshmallow companion! 💖`,
+    `✨ <strong>YOUR FRIEND HAS ARRIVED!</strong> ✨<br><br>Tap your marshmallow to shower it with love! Each hit heals it AND rewards you with ${getCurrencySVG('pollen',16)} <strong>Pollen</strong>!<br><br>The more you love, the more you earn! 🌟`,
+    `🌈 <strong>POLLEN POWER!</strong> 🌈<br><br>Your pollen has been converted to ${getCurrencySVG('caramel',16)} <strong>Caramel</strong> - the PREMIUM currency!<br><br>Spend it on <strong>Permanent Upgrades</strong> to become UNSTOPPABLE! 💪`,
+    `🚀 <strong>YOU'RE READY!</strong> 🚀<br><br>✅ Shoot bubbles for BONUS marsh!<br>✅ Build combos for MULTIPLIERS!<br>✅ Unlock AUTOMATIONS!<br>✅ Open LOOTBOXES for cosmetics!<br><br>The marsh awaits your legend! 🏆`
   ];
 
   function showTutorialStep() {
@@ -165,9 +165,43 @@ export function createHUD() {
     },
 
     update() {
-      document.getElementById('marshDisplay').textContent = Math.floor(gameState.currencies.marsh);
-      document.getElementById('pollenDisplay').textContent = Math.floor(gameState.currencies.pollen);
-      document.getElementById('caramelDisplay').textContent = Math.floor(gameState.currencies.caramel);
+      const oldMarsh = parseInt(document.getElementById('marshDisplay').textContent) || 0;
+      const oldPollen = parseInt(document.getElementById('pollenDisplay').textContent) || 0;
+      const oldCaramel = parseInt(document.getElementById('caramelDisplay').textContent) || 0;
+      
+      const newMarsh = Math.floor(gameState.currencies.marsh);
+      const newPollen = Math.floor(gameState.currencies.pollen);
+      const newCaramel = Math.floor(gameState.currencies.caramel);
+      
+      document.getElementById('marshDisplay').textContent = newMarsh;
+      document.getElementById('pollenDisplay').textContent = newPollen;
+      document.getElementById('caramelDisplay').textContent = newCaramel;
+      
+      // Pulse animation when currency increases
+      if (newMarsh > oldMarsh) {
+        const el = document.querySelector('[data-currency="marsh"]');
+        if (el) {
+          el.classList.remove('currency-pulse');
+          void el.offsetWidth; // Force reflow
+          el.classList.add('currency-pulse');
+        }
+      }
+      if (newPollen > oldPollen) {
+        const el = document.querySelector('[data-currency="pollen"]');
+        if (el) {
+          el.classList.remove('currency-pulse');
+          void el.offsetWidth;
+          el.classList.add('currency-pulse');
+        }
+      }
+      if (newCaramel > oldCaramel) {
+        const el = document.querySelector('[data-currency="caramel"]');
+        if (el) {
+          el.classList.remove('currency-pulse');
+          void el.offsetWidth;
+          el.classList.add('currency-pulse');
+        }
+      }
       
       // Update tutorial
       if (!gameState.tutorial.completed) {

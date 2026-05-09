@@ -61,11 +61,52 @@
   transform: rotate(5deg);
 }
 
-/* Subtle pulsate used when an existing notification stacks (avoids re-running slide-in) */
+/* Enhanced pulsate for notifications with prismatic flash */
 @keyframes notifPulsate {
-  0% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); filter: brightness(1); }
-  40% { transform: scale(1.05); box-shadow: 0 6px 12px rgba(0,0,0,0.08); filter: brightness(1.08); }
-  100% { transform: scale(1); box-shadow: 0 0 0 rgba(0,0,0,0); filter: brightness(1); }
+  0% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 rgba(0,0,0,0); 
+    filter: brightness(1) hue-rotate(0deg); 
+  }
+  40% { 
+    transform: scale(1.15); 
+    box-shadow: 0 8px 24px rgba(255,215,0,0.6); 
+    filter: brightness(1.5) hue-rotate(90deg); 
+  }
+  100% { 
+    transform: scale(1); 
+    box-shadow: 0 0 0 rgba(0,0,0,0); 
+    filter: brightness(1) hue-rotate(0deg); 
+  }
+}
+
+@keyframes prismShine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.notification-content.prismatic {
+  background: linear-gradient(90deg, 
+    #ff0000 0%, 
+    #ff7f00 16%, 
+    #ffff00 33%, 
+    #00ff00 50%, 
+    #0000ff 66%, 
+    #8b00ff 83%, 
+    #ff0000 100%
+  ) !important;
+  background-size: 200% 100%;
+  animation: prismShine 2s linear infinite !important;
+}
+
+.notification-multiplier.mega {
+  font-size: 14px;
+  animation: megaPulse 0.6s ease-out infinite;
+}
+
+@keyframes megaPulse {
+  0%, 100% { transform: rotate(5deg) scale(1); }
+  50% { transform: rotate(-5deg) scale(1.2); }
 }
 
 .notification-content.pulsate {

@@ -52,6 +52,22 @@ export function awardCaramel(amount = BASE_CARAMEL_PER_COMBO) {
   const caramel = Math.floor(amount * (1 + upgradeBonus));
   
   gameState.currencies.caramel += caramel;
+  
+  // First caramel notification
+  if (gameState.currencies.caramel === caramel && !gameState.milestones?.firstCaramel) {
+    if (!gameState.milestones) gameState.milestones = {};
+    gameState.milestones.firstCaramel = true;
+    if (session.notifications) {
+      session.notifications.add({
+        id: 'first_caramel',
+        sticky: true,
+        title: '🍯 CARAMEL UNLOCKED! 🍯',
+        text: 'You earned premium currency! Spend it on powerful upgrades!',
+        color: '#ff8c00'
+      });
+    }
+  }
+  
   saveGame();
   return caramel;
 }
