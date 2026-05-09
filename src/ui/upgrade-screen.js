@@ -24,21 +24,27 @@ export function createUpgradeScreen() {
       const locked = upgrade.prerequisite && !(gameState.upgrades[upgrade.prerequisite] > 0);
       
       return `
-        <div class="upgrade-card wonky ${canAfford && !locked ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${locked ? 'locked' : ''}" 
-             data-fill="#ffffff" data-stroke="#000000" data-stroke-width="3" 
+        <div class="upgrade-row wonky ${canAfford && !locked ? '' : 'disabled'} ${maxed ? 'maxed' : ''} ${locked ? 'locked' : ''}" 
+             data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2" 
              data-id="${upgrade.id}" data-cost="${cost}">
-          <h3 class="upgrade-card-name">${upgrade.name}</h3>
-          <div class="upgrade-level wonky" data-fill="#ffffff" data-stroke="#000000" data-stroke-width="2">
-            ${maxed ? 'MAX' : locked ? '🔒' : 'Lv ' + currentLevel}
-          </div>
-          <p class="upgrade-card-desc">${upgrade.description}</p>
-          <div class="upgrade-effect">${upgrade.shortDesc}</div>
-          ${!maxed && !locked ? `
-            <div class="upgrade-cost">
-              ${getCurrencySVG('caramel', 14)}
-              <span>${cost}</span>
+          <div class="upgrade-info">
+            <div class="upgrade-header-line">
+              <h3 class="upgrade-name">${upgrade.name}</h3>
+              <div class="upgrade-status-label">
+                ${maxed ? 'MAXED' : locked ? 'LOCKED' : 'Lv ' + currentLevel}
+              </div>
             </div>
-          ` : ''}
+            <p class="upgrade-description">${upgrade.description}</p>
+            <div class="upgrade-benefit">${upgrade.shortDesc}</div>
+          </div>
+          <div class="upgrade-action">
+            ${!maxed && !locked ? `
+              <div class="upgrade-cost-pill">
+                ${getCurrencySVG('caramel', 12)}
+                <span>${cost}</span>
+              </div>
+            ` : ''}
+          </div>
         </div>
       `;
     }).join('');
@@ -54,6 +60,10 @@ export function createUpgradeScreen() {
   }
   
   function show() {
+    // Preserve scroll position
+    const container = screen.querySelector('.upgrade-categories-container');
+    const scrollPos = container ? container.scrollTop : 0;
+
     const categoriesHTML = Object.values(UPGRADE_CATEGORIES)
       .map(cat => renderCategory(cat))
       .join('');
@@ -77,16 +87,20 @@ export function createUpgradeScreen() {
     // Immediately update wonky UI to prevent loading delay
     if (window.updateWonkyUI) window.updateWonkyUI();
     
-    const cards = screen.querySelectorAll('.upgrade-card');
-    cards.forEach(card => {
-      card.addEventListener('click', () => {
-        if (card.classList.contains('locked') || card.classList.contains('maxed')) return;
+    // Restore scroll position
+    const newContainer = screen.querySelector('.upgrade-categories-container');
+    if (newContainer) newContainer.scrollTop = scrollPos;
+
+    const rows = screen.querySelectorAll('.upgrade-row');
+    rows.forEach(row => {
+      row.addEventListener('click', () => {
+        if (row.classList.contains('locked') || row.classList.contains('maxed')) return;
         
-        const upgradeId = card.dataset.id;
+        const upgradeId = row.dataset.id;
         const currentLevel = gameState.upgrades[upgradeId] || 0;
         const cost = getUpgradeCost(upgradeId, currentLevel);
         
-        if (card.classList.contains('disabled')) return;
+        if (row.classList.contains('disabled')) return;
         if (gameState.currencies.caramel < cost) return;
         
         gameState.currencies.caramel -= cost;

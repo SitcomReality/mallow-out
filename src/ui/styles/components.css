@@ -107,36 +107,96 @@
   filter: grayscale(1);
 }
 
-.upgrade-card {
-  padding: 14px;
+.upgrade-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
   cursor: pointer;
   transition: transform 0.1s;
-  text-align: center;
+  gap: 16px;
   position: relative;
 }
 
-.upgrade-card-name {
-  font-size: 10px;
-  color: #000000;
-  margin: 0 0 6px 0;
-  font-weight: 400;
+.upgrade-row:hover:not(.disabled):not(.maxed) {
+  transform: translateX(4px);
 }
-
-.upgrade-card-desc {
-  font-size: 7px;
-  color: #333333;
-  margin: 0 0 6px 0;
-  line-height: 1.3;
-}
-
-.upgrade-card:hover:not(.disabled) {
-  transform: translateY(-2px);
-}
-.upgrade-card:hover:not(.disabled) > .wonky-svg .wonky-fill {
+.upgrade-row:hover:not(.disabled):not(.maxed) > .wonky-svg .wonky-fill {
   fill: #ffff00 !important;
 }
-.upgrade-card:hover:not(.disabled) > .wonky-svg .wonky-stroke {
-  stroke: #000000 !important;
+
+.upgrade-row.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}
+
+.upgrade-row.maxed {
+  cursor: default;
+  opacity: 1;
+  filter: none;
+}
+.upgrade-row.maxed > .wonky-svg .wonky-fill {
+  fill: #32cd3222 !important;
+}
+
+.upgrade-info {
+  flex: 1;
+  text-align: left;
+}
+
+.upgrade-header-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.upgrade-name {
+  font-size: 10px;
+  margin: 0;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.upgrade-status-label {
+  font-size: 7px;
+  background: rgba(0,0,0,0.1);
+  padding: 2px 6px;
+  border: 1px solid #000;
+  font-weight: 900;
+}
+
+.upgrade-description {
+  font-size: 8px;
+  margin: 0 0 4px 0;
+  color: #333;
+  line-height: 1.4;
+}
+
+.upgrade-benefit {
+  font-size: 7px;
+  color: #666;
+  font-weight: 900;
+}
+
+.upgrade-action {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 60px;
+}
+
+.upgrade-cost-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.5);
+  border: 2px solid #000;
+  font-weight: 900;
 }
 
 .continue-btn:hover:not(:disabled) > .wonky-svg .wonky-fill {
@@ -144,59 +204,6 @@
 }
 .big-btn:hover > .wonky-svg .wonky-fill {
   fill: #ffff00 !important;
-}
-
-.upgrade-card.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-.upgrade-card.purchased {
-  cursor: default;
-  filter: none;
-  opacity: 1;
-}
-.upgrade-card.purchased > .wonky-svg .wonky-fill {
-  fill: #32cd32 !important;
-}
-.upgrade-card.purchased > .wonky-svg .wonky-stroke {
-  stroke: #000000 !important;
-}
-
-.upgrade-purchased-badge {
-  margin-top: 12px;
-  color: #000000;
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 10px;
-}
-
-.upgrade-level {
-  font-size: 7px;
-  font-weight: 400;
-  color: #000000;
-  display: inline-block;
-  padding: 3px 8px;
-  margin: 4px 0;
-}
-
-.upgrade-effect {
-  font-size: 7px;
-  color: #333333;
-  font-weight: 400;
-  margin: 4px 0;
-}
-
-.upgrade-cost {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 12px;
-  font-size: 12px;
-  font-weight: 400;
-  color: #000000;
 }
 
 .currency-item {

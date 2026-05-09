@@ -64,15 +64,16 @@
 }
 
 .category-upgrades {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px;
 }
 
-.upgrade-card.locked {
+.upgrade-row.locked {
   opacity: 0.5;
   cursor: not-allowed;
-  filter: grayscale(0.7);
+  filter: grayscale(1.0);
 }
 
 /* Cosmetics specific styles */
