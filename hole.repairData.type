@@ -1,0 +1,10 @@
+// Shrink the box smoothly to 0
+    const scale = 0.8 * (1.0 - t);
+    hole.scale.x = scale;
+    hole.scale.y = scale;
+    hole.scale.z = scale;
+    
+    // Reduce blend to 0
+    hole.blendRadius = hole.repairData.initialBlend * (1.0 - t);
+    
+  } else if (hole.repairData.type === 'laser') {
