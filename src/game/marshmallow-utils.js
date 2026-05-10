@@ -3,16 +3,10 @@ import * as THREE from 'three';
 /**
  * Transforms a world-space point and quaternion into the local space of a marshmallow.
  */
-export function getQuat(obj) {
-  if (obj.rotation.w !== undefined) {
-    return new THREE.Quaternion(obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.w);
-  }
-  return new THREE.Quaternion().setFromEuler(new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z));
-}
-
 export function getLocalTransform(worldPos, worldQuat, marshmallow) {
   const mPos = new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z);
-  const mQuat = getQuat(marshmallow);
+  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
+  const mQuat = new THREE.Quaternion().setFromEuler(mRot);
   const mQuatInv = mQuat.clone().invert();
 
   const localPos = worldPos.clone().sub(mPos).applyQuaternion(mQuatInv);
@@ -30,7 +24,8 @@ export function getLocalTransform(worldPos, worldQuat, marshmallow) {
  */
 export function calculateSurfaceNormal(marshmallow, hitPoint) {
   const center = new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z);
-  const q = getQuat(marshmallow);
+  const euler = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
+  const q = new THREE.Quaternion().setFromEuler(euler);
   const axisWorld = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
 
   const toHit = hitPoint.clone().sub(center);
