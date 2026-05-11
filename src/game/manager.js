@@ -3,6 +3,7 @@ import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { awardCaramel } from './economy.js';
 import { saveGame } from './persistence.js';
+import { clearLasers } from './automations/automation-logic.js';
 
 export const session = {
   isPlaying: false,
@@ -148,5 +149,6 @@ export function quitToMenu() {
     caramel_bonus: 0,
   };
   
+  clearLasers();
   if (session.particleSystem) session.particleSystem.clear();
 }

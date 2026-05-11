@@ -87,10 +87,6 @@ export function updateRepairs(currentTime, delta) {
         hole.noiseAmount = hole.repairData.initialNoiseAmount * (1.0 - t) + 0.4 * t;
         hole.noiseScale = hole.repairData.initialNoiseScale * (1.0 - t) + 3.0 * t;
         
-      } else if (hole.repairData.type === 'laser') {
-        // Fast repair - shrinks quickly
-        const scale = hole.repairData.initialScale * (1.0 - t);
-        hole.scale.x = hole.scale.y = hole.scale.z = scale;
       }
     }
     

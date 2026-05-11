@@ -8,7 +8,84 @@ import { applySpatter, applyRoundChunk, applyHolepunch } from '../damage/actions
 import { healMarshmallow } from '../marshmallow.js';
 import { awardPollen } from '../economy.js';
 
+export const activeLasers = [];
+
+export function clearLasers() {
+  for (const laser of activeLasers) {
+    if (session.tracerSystem) {
+      session.tracerSystem.scene.remove(laser.lineGlow);
+      session.tracerSystem.scene.remove(laser.lineCore);
+      laser.lineGlow.geometry.dispose();
+      laser.lineGlow.material.dispose();
+      laser.lineCore.geometry.dispose();
+      laser.lineCore.material.dispose();
+    }
+  }
+  activeLasers.length = 0;
+}
+
 export function updateAutomations(delta) {
+  for (let i = activeLasers.length - 1; i >= 0; i--) {
+    const laser = activeLasers[i];
+    laser.timer += delta;
+    const t = Math.min(laser.timer / laser.duration, 1.0);
+    
+    const currentTarget = new THREE.Vector3().lerpVectors(laser.p1, laser.p2, t);
+    
+    const positions = new Float32Array([
+      laser.origin.x, laser.origin.y, laser.origin.z,
+      currentTarget.x, currentTarget.y, currentTarget.z
+    ]);
+    laser.lineGlow.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    laser.lineCore.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    const currentTargetLocal = new THREE.Vector3().lerpVectors(laser.p1Local, laser.p2Local, t);
+    const centerLocal = new THREE.Vector3().addVectors(laser.p1Local, currentTargetLocal).multiplyScalar(0.5);
+    const width = laser.p1Local.distanceTo(currentTargetLocal);
+    
+    laser.hole.position = { x: centerLocal.x, y: centerLocal.y, z: centerLocal.z };
+    laser.hole.scale.x = width / 2 + 0.001;
+    
+    if (session.particleSystem && Math.random() < 0.6) {
+      const normal = laser.origin.clone().sub(currentTarget).normalize();
+      session.particleSystem.createMallowSplatter(currentTarget, normal);
+    }
+    
+    const targetHeal = laser.healAmount * t;
+    const healDelta = targetHeal - laser.healedSoFar;
+    laser.healedSoFar = targetHeal;
+    
+    if (laser.marshmallow) {
+      healMarshmallow(laser.marshmallow, healDelta);
+      if (session.marshmallowHUD) {
+        session.marshmallowHUD.update(laser.marshmallow);
+      }
+    }
+    
+    if (t >= 1.0) {
+      const pollenEarned = awardPollen(laser.healAmount);
+      if (session.floatingTextSystem) {
+        session.floatingTextSystem.createDamageText(laser.p2, pollenEarned, false);
+      }
+      
+      if (laser.marshmallow && laser.marshmallow.holes) {
+        const idx = laser.marshmallow.holes.indexOf(laser.hole);
+        if (idx > -1) laser.marshmallow.holes.splice(idx, 1);
+      }
+      
+      if (session.tracerSystem) {
+        session.tracerSystem.scene.remove(laser.lineGlow);
+        session.tracerSystem.scene.remove(laser.lineCore);
+        laser.lineGlow.geometry.dispose();
+        laser.lineGlow.material.dispose();
+        laser.lineCore.geometry.dispose();
+        laser.lineCore.material.dispose();
+      }
+      
+      activeLasers.splice(i, 1);
+    }
+  }
+
   // Auto Shooter
   if (gameState.upgrades.auto_shooter_unlock > 0) {
     gameState.automationTimers.auto_shooter = (gameState.automationTimers.auto_shooter || 0) + delta;
@@ -166,49 +243,100 @@ function fireLaser() {
   const powerBonus = getUpgradeEffect('laser_power', gameState.upgrades.laser_power || 0);
   const healAmount = config.baseHeal * (1 + powerBonus);
   
-  // Pick random point on marshmallow for laser entry
-  const mallowPos = new THREE.Vector3(
+  const mPos = new THREE.Vector3(
     marshmallow.marshmallow.position.x,
     marshmallow.marshmallow.position.y,
     marshmallow.marshmallow.position.z
   );
   
-  const theta = Math.random() * Math.PI * 2;
-  const phi = Math.random() * Math.PI;
-  const radius = marshmallow.marshmallow.scale.x;
-  const offset = new THREE.Vector3(
-    Math.sin(phi) * Math.cos(theta) * radius,
-    Math.cos(phi) * marshmallow.marshmallow.scale.y,
-    Math.sin(phi) * Math.sin(theta) * radius
-  );
+  const camPos = gameState.player.position;
+  const camForward = new THREE.Vector3(
+    Math.sin(gameState.player.yaw) * Math.cos(gameState.player.pitch),
+    Math.sin(gameState.player.pitch),
+    -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
+  ).normalize();
+  const camRight = new THREE.Vector3().crossVectors(camForward, new THREE.Vector3(0, 1, 0)).normalize();
+  const camUp = new THREE.Vector3().crossVectors(camRight, camForward).normalize();
   
-  const hitPoint = mallowPos.clone().add(offset);
-  // Laser direction points through the marshmallow from the hit point
-  const direction = offset.clone().normalize().negate();
+  const R = marshmallow.marshmallow.scale.x + 0.6; 
+  const randY = (Math.random() - 0.5) * marshmallow.marshmallow.scale.y;
+  const randZ = (Math.random() - 0.5) * marshmallow.marshmallow.scale.x * 0.8;
   
-  const hole = applyHolepunch(marshmallow, hitPoint, direction);
-  if (hole && hole.repairData) {
-    hole.repairData.type = 'laser';
-    hole.repairData.initialScale = hole.scale.y; // For the laser repair logic
+  const p1 = mPos.clone().add(camRight.clone().multiplyScalar(-R)).add(camUp.clone().multiplyScalar(randY)).add(camForward.clone().multiplyScalar(randZ));
+  const p2 = mPos.clone().add(camRight.clone().multiplyScalar(R)).add(camUp.clone().multiplyScalar(randY)).add(camForward.clone().multiplyScalar(randZ));
+  
+  const origin = p1.clone().add(camRight.clone().multiplyScalar(-20)).add(camUp.clone().multiplyScalar(2));
+  
+  let mQuatInv;
+  if (marshmallow.marshmallow.rotation.w !== undefined) {
+    mQuatInv = new THREE.Quaternion(marshmallow.marshmallow.rotation.x, marshmallow.marshmallow.rotation.y, marshmallow.marshmallow.rotation.z, marshmallow.marshmallow.rotation.w).invert();
+  } else {
+    mQuatInv = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.marshmallow.rotation.x, marshmallow.marshmallow.rotation.y, marshmallow.marshmallow.rotation.z)).invert();
   }
   
-  // Particles
-  if (session.particleSystem) {
-    const normal = direction.clone().multiplyScalar(-1);
-    session.particleSystem.createMallowSplatter(hitPoint, normal);
+  const p1Local = p1.clone().sub(mPos).applyQuaternion(mQuatInv);
+  const p2Local = p2.clone().sub(mPos).applyQuaternion(mQuatInv);
+  const originLocal = origin.clone().sub(mPos).applyQuaternion(mQuatInv);
+  
+  const boxX = new THREE.Vector3().subVectors(p2Local, p1Local).normalize();
+  const centerLocal = new THREE.Vector3().addVectors(p1Local, p2Local).multiplyScalar(0.5);
+  const rayDir = new THREE.Vector3().subVectors(centerLocal, originLocal).normalize();
+  
+  let boxY = new THREE.Vector3().crossVectors(boxX, rayDir);
+  if (boxY.lengthSq() < 1e-6) {
+    boxY = new THREE.Vector3(0, 1, 0);
+  }
+  boxY.normalize();
+  
+  const boxZ = new THREE.Vector3().crossVectors(boxX, boxY).normalize();
+  
+  const rotMatrix = new THREE.Matrix4().makeBasis(boxX, boxY, boxZ);
+  const boxQuat = new THREE.Quaternion().setFromRotationMatrix(rotMatrix);
+  
+  const hole = {
+    id: 90000 + Math.floor(Math.random() * 10000),
+    type: 'box',
+    position: { x: p1Local.x, y: p1Local.y, z: p1Local.z },
+    rotation: { x: boxQuat.x, y: boxQuat.y, z: boxQuat.z, w: boxQuat.w },
+    scale: { x: 0.01, y: 0.02, z: 10.0 }, 
+    color: '#ff0000',
+    operation: 'subtract',
+    blendRadius: 0.0,
+    noiseAmount: 0.0,
+    noiseScale: 1.0,
+    parentId: marshmallow.id,
+  };
+  
+  marshmallow.holes.push(hole);
+  
+  const geometry = new THREE.BufferGeometry().setFromPoints([origin, p1]);
+  const materialGlow = new THREE.LineBasicMaterial({ color: 0xff0000, transparent: true, opacity: 0.8, linewidth: 6 });
+  const materialCore = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1.0, linewidth: 2 });
+  
+  materialGlow.depthTest = false; materialGlow.depthWrite = false;
+  materialCore.depthTest = false; materialCore.depthWrite = false;
+  
+  const lineGlow = new THREE.Line(geometry, materialGlow);
+  const lineCore = new THREE.Line(geometry, materialCore);
+  lineGlow.renderOrder = 9998;
+  lineCore.renderOrder = 9999;
+  
+  if (session.tracerSystem) {
+    session.tracerSystem.scene.add(lineGlow);
+    session.tracerSystem.scene.add(lineCore);
   }
   
-  // Heal and award pollen
-  healMarshmallow(marshmallow, healAmount);
-  const pollenEarned = awardPollen(healAmount);
-  
-  if (session.floatingTextSystem) {
-    session.floatingTextSystem.createDamageText(hitPoint, pollenEarned, false);
-  }
-  
-  if (session.marshmallowHUD) {
-    session.marshmallowHUD.update(marshmallow);
-  }
+  activeLasers.push({
+    timer: 0,
+    duration: 0.8,
+    p1, p2, origin,
+    p1Local, p2Local,
+    hole,
+    marshmallow,
+    lineGlow, lineCore,
+    healAmount,
+    healedSoFar: 0
+  });
 }
 
 function checkAndBuyTreat() {
