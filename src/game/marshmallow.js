@@ -122,13 +122,6 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
     name: mName,
     lastHitTime: performance.now() * 0.001,
     isDying: false,
-    hitReaction: {
-      active: false,
-      timer: 0,
-      knockbackVelocity: new THREE.Vector3(),
-      flashTimer: 0,
-      bulgeTimer: 0,
-    },
     movement: {
       position: null,      // World position (THREE.Vector3)
       velocity: null,      // World velocity (THREE.Vector3)

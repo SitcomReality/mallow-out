@@ -16,36 +16,6 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
 
   registerHit('marshmallow');
   
-  // Apply hit reaction with knockback
-  const marshmallow = gameState.currentMarshmallow;
-  const knockbackStrength = isCharged ? 0.8 : 0.15;
-  const knockbackDir = direction.clone().multiplyScalar(-knockbackStrength);
-  
-  if (!marshmallow.hitReaction) {
-    marshmallow.hitReaction = {
-      active: false,
-      timer: 0,
-      knockbackVelocity: new THREE.Vector3(),
-      flashTimer: 0,
-      bulgeTimer: 0,
-    };
-  }
-  
-  marshmallow.hitReaction.active = true;
-  marshmallow.hitReaction.timer = 0.3;
-  marshmallow.hitReaction.knockbackVelocity.copy(knockbackDir);
-  marshmallow.hitReaction.flashTimer = 0.2;
-  marshmallow.hitReaction.bulgeTimer = 0.15;
-  
-  // Store base scale for bulge effect
-  if (!marshmallow.meltStartScale) {
-    marshmallow.meltStartScale = {
-      x: marshmallow.marshmallow.scale.x,
-      y: marshmallow.marshmallow.scale.y,
-      z: marshmallow.marshmallow.scale.z || marshmallow.marshmallow.scale.x
-    };
-  }
-  
   // Base values for heal/pollen
   const baseHeal = isCharged ? 25.0 : 5.0;
   const pollenMult = isCharged ? 5.0 : 1.0;

@@ -86,15 +86,8 @@ export function updateUniforms(uniforms, time) {
     const parent = gameState.objects.find(o => o.id === obj.parentId);
     if (parent) {
       const pPos = new THREE.Vector3(parent.position.x, parent.position.y, parent.position.z);
-      
-      // Handle both Euler and Quaternion parent rotations
-      let pQuat;
-      if (parent.rotation && typeof parent.rotation.w === 'number') {
-        pQuat = new THREE.Quaternion(parent.rotation.x, parent.rotation.y, parent.rotation.z, parent.rotation.w);
-      } else {
-        const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
-        pQuat = new THREE.Quaternion().setFromEuler(pRot);
-      }
+      const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
+      const pQuat = new THREE.Quaternion().setFromEuler(pRot);
       
       const lPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
       const wPos = lPos.applyQuaternion(pQuat).add(pPos);

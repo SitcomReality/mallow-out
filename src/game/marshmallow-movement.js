@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const SPHERE_RADIUS = 10.0;
 const INNER_MARGIN = 2.0;
 const MIN_CAMERA_DISTANCE = 3.5;
-const DRIFT_SPEED = 0.2;
+const DRIFT_SPEED = 0.55;
 
 export function updateMarshmallowMovement(marshmallow, delta) {
   if (!marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
@@ -45,20 +45,20 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   // 3. Calculate steering direction
   let targetDir = wanderTarget.clone().sub(mov.position).normalize();
 
-  // CENTERING: Much stronger pull to keep marshmallow in view
+  // CENTERING: Strong pull if wandering too far from the screen center
   const toCenter = viewCenter.clone().sub(mov.position);
   const centerDist = toCenter.length();
-  if (centerDist > 1.5) {
-    const pullFactor = Math.min(1.0, (centerDist - 1.5) * 1.2);
+  if (centerDist > 2.0) {
+    const pullFactor = Math.min(1.0, (centerDist - 2.0) * 0.6);
     targetDir.lerp(toCenter.normalize(), pullFactor).normalize();
   }
 
-  // REPEL FROM CAMERA: Keep a comfortable viewing distance
+  // REPEL FROM CAMERA: Keep a minimum distance
   const toCam = mov.position.clone().sub(camPos);
   const distToCam = toCam.length();
-  if (distToCam < MIN_CAMERA_DISTANCE + 1.5) {
-    const pushStrength = 1.0 - (distToCam - MIN_CAMERA_DISTANCE) / 1.5;
-    targetDir.lerp(toCam.normalize(), Math.min(1.0, pushStrength * 1.2)).normalize();
+  if (distToCam < MIN_CAMERA_DISTANCE + 2.0) {
+    const pushStrength = 1.0 - (distToCam - MIN_CAMERA_DISTANCE) / 2.0;
+    targetDir.lerp(toCam.normalize(), Math.min(1.0, pushStrength * 0.9)).normalize();
   }
 
   // REPEL FROM SPHERE EDGE
@@ -101,12 +101,6 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const bob = Math.sin(mov.time * 1.8 + mov.bobPhase) * 0.12;
   mov.velocity.y += bob;
 
-  // Apply hit knockback if active
-  if (marshmallow.hitReaction && marshmallow.hitReaction.active) {
-    mov.velocity.add(marshmallow.hitReaction.knockbackVelocity);
-    marshmallow.hitReaction.knockbackVelocity.multiplyScalar(0.85); // Decay
-  }
-
   mov.position.addScaledVector(mov.velocity, delta);
 
   // Hard safety boundaries
@@ -117,16 +111,4 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   marsh.position.x = mov.position.x;
   marsh.position.y = mov.position.y;
   marsh.position.z = mov.position.z;
-  
-  // Apply visual bulge effect from hit reaction
-  if (marshmallow.hitReaction && marshmallow.hitReaction.bulgeTimer > 0) {
-    const bulgeT = marshmallow.hitReaction.bulgeTimer / 0.15;
-    const bulgeFactor = 1.0 + Math.sin(bulgeT * Math.PI) * 0.15;
-    marsh.scale.x = marshmallow.meltStartScale ? marshmallow.meltStartScale.x * bulgeFactor : marsh.scale.x * bulgeFactor;
-    marsh.scale.y = marshmallow.meltStartScale ? marshmallow.meltStartScale.y * bulgeFactor : marsh.scale.y * bulgeFactor;
-  } else if (marshmallow.meltStartScale) {
-    // Reset to base scale
-    marsh.scale.x = marshmallow.meltStartScale.x;
-    marsh.scale.y = marshmallow.meltStartScale.y;
-  }
 }

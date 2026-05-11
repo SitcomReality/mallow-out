@@ -10,18 +10,6 @@ export function updateMarshmallows(delta) {
   const marshmallow = gameState.currentMarshmallow;
   if (!marshmallow) return;
 
-  // Update hit reaction effects
-  if (marshmallow.hitReaction.active) {
-    marshmallow.hitReaction.timer -= delta;
-    marshmallow.hitReaction.flashTimer -= delta;
-    marshmallow.hitReaction.bulgeTimer -= delta;
-    
-    if (marshmallow.hitReaction.timer <= 0) {
-      marshmallow.hitReaction.active = false;
-      marshmallow.hitReaction.knockbackVelocity.set(0, 0, 0);
-    }
-  }
-
   if (marshmallow.movement) {
     updateMarshmallowMovement(marshmallow, delta);
   }
