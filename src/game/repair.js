@@ -87,23 +87,6 @@ export function updateRepairs(currentTime, delta) {
         hole.noiseAmount = hole.repairData.initialNoiseAmount * (1.0 - t) + 0.4 * t;
         hole.noiseScale = hole.repairData.initialNoiseScale * (1.0 - t) + 3.0 * t;
         
-      } else if (hole.repairData.type === DAMAGE_TYPES.KERF_CHUNK) {
-        // Smooth movement away along attack direction with easing
-        const easeT = 1.0 - Math.pow(1.0 - t, 3.0);
-        const speed = 2.0 * delta;
-        hole.position.x += hole.repairData.normal.x * speed;
-        hole.position.y += hole.repairData.normal.y * speed;
-        hole.position.z += hole.repairData.normal.z * speed;
-        
-        // Smooth blend reduction
-        hole.blendRadius = hole.repairData.initialBlend * (1.0 - easeT);
-        
-        // Shrink the kerf chunk smoothly to 0
-        const shrinkFactor = 1.0 - t;
-        hole.scale.x = 0.8 * shrinkFactor;
-        hole.scale.y = 0.8 * shrinkFactor;
-        hole.scale.z = 0.8 * shrinkFactor;
-        
       } else if (hole.repairData.type === 'laser') {
         // Fast repair - shrinks quickly
         const scale = hole.repairData.initialScale * (1.0 - t);

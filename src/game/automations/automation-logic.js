@@ -4,7 +4,7 @@ import { getAutomationConfig, AUTOMATION_TYPES } from './automation-types.js';
 import { getUpgradeEffect } from '../upgrades/upgrade-calculator.js';
 import { createRippleFX } from '../fx.js';
 import { session, getTreatCost, buyMarshmallowTreat } from '../manager.js';
-import { applySpatter, applyRoundChunk } from '../damage/actions.js';
+import { applySpatter, applyRoundChunk, applyHolepunch } from '../damage/actions.js';
 import { healMarshmallow } from '../marshmallow.js';
 import { awardPollen } from '../economy.js';
 
@@ -183,44 +183,14 @@ function fireLaser() {
   );
   
   const hitPoint = mallowPos.clone().add(offset);
-  const direction = offset.clone().normalize();
+  // Laser direction points through the marshmallow from the hit point
+  const direction = offset.clone().normalize().negate();
   
-  // Create thin laser cut (using a thin box)
-  const up = new THREE.Vector3(0, 1, 0);
-  const axis = new THREE.Vector3().crossVectors(up, direction).normalize();
-  const angle = Math.acos(up.dot(direction));
-  
-  const worldQuat = new THREE.Quaternion();
-  if (axis.length() > 0.001) {
-    worldQuat.setFromAxisAngle(axis, angle);
+  const hole = applyHolepunch(marshmallow, hitPoint, direction);
+  if (hole && hole.repairData) {
+    hole.repairData.type = 'laser';
+    hole.repairData.initialScale = hole.scale.y; // For the laser repair logic
   }
-  
-  // Transform to local space
-  const mRot = new THREE.Euler(marshmallow.marshmallow.rotation.x, marshmallow.marshmallow.rotation.y, marshmallow.marshmallow.rotation.z);
-  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
-  
-  const localPos = hitPoint.clone().sub(mallowPos).applyQuaternion(mQuatInv);
-  const localQuat = mQuatInv.multiply(worldQuat);
-  const localRot = new THREE.Euler().setFromQuaternion(localQuat);
-  
-  const laser = {
-    id: 999000 + Math.floor(Math.random() * 1000),
-    type: 'box',
-    position: { x: localPos.x, y: localPos.y, z: localPos.z },
-    rotation: { x: localRot.x, y: localRot.y, z: localRot.z },
-    scale: { x: 0.05, y: 1.5, z: 0.05 }, // Thin wafer
-    color: '#ff00ff',
-    operation: 'subtract',
-    blendRadius: 0.01,
-    parentId: marshmallow.marshmallow.id,
-    repairData: {
-      type: 'laser',
-      startTime: performance.now() * 0.001,
-      initialScale: 1.5
-    }
-  };
-  
-  marshmallow.holes.push(laser);
   
   // Particles
   if (session.particleSystem) {

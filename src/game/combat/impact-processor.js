@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
-import { applyHolepunch, applyRoundChunk, applyKerfChunk } from '../damage/actions.js';
+import { applyHolepunch, applyRoundChunk } from '../damage/actions.js';
 import { healMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
 import { awardMarsh, awardPollen, awardMarshMultiplier } from '../economy.js';
@@ -70,16 +70,9 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
   }
 
   if (isCharged) {
-    if (Math.random() > 0.5) {
-      const hole = applyHolepunch(gameState.currentMarshmallow, resultPoint, direction);
-      if (hole && hole.repairData) {
-        hole.repairData.delay = gameState.weaponStates.maxChargeTime || 3.0;
-      }
-    } else {
-      const kerf = applyKerfChunk(gameState.currentMarshmallow, resultPoint, direction);
-      if (kerf && kerf.repairData) {
-        kerf.repairData.delay = gameState.weaponStates.maxChargeTime || 3.0;
-      }
+    const hole = applyHolepunch(gameState.currentMarshmallow, resultPoint, direction);
+    if (hole && hole.repairData) {
+      hole.repairData.delay = gameState.weaponStates.maxChargeTime || 3.0;
     }
   } else {
     const chunk = applyRoundChunk(gameState.currentMarshmallow, resultPoint);
