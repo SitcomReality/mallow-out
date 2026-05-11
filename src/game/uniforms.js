@@ -70,42 +70,36 @@ export function updateUniforms(uniforms, time) {
   
   objects.forEach((obj, i) => {
     let gid = 0;
-    let finalPos = { ...obj.position };
-    let finalRot = { ...obj.rotation };
-    
     if (obj.parentId) {
       if (groupMap.has(obj.parentId)) {
         gid = groupMap.get(obj.parentId);
       }
     } else if (groupMap.has(obj.id)) {
-      // This is a parent object - it should also belong to its own group
       gid = groupMap.get(obj.id);
     }
     
+    // Determine local position and rotation
+    let worldPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
+    let worldQuat;
+    if (obj.rotation && typeof obj.rotation.w === 'number') {
+      worldQuat = new THREE.Quaternion(obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.w);
+    } else {
+      worldQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z));
+    }
+
     // Transform local to world space if parent is found
     const parent = gameState.objects.find(o => o.id === obj.parentId);
     if (parent) {
       const pPos = new THREE.Vector3(parent.position.x, parent.position.y, parent.position.z);
-      
-      // Handle both Euler and Quaternion parent rotations
       let pQuat;
       if (parent.rotation && typeof parent.rotation.w === 'number') {
         pQuat = new THREE.Quaternion(parent.rotation.x, parent.rotation.y, parent.rotation.z, parent.rotation.w);
       } else {
-        const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
-        pQuat = new THREE.Quaternion().setFromEuler(pRot);
+        pQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z));
       }
       
-      const lPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
-      const wPos = lPos.applyQuaternion(pQuat).add(pPos);
-      
-      const lRot = new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z);
-      const lQuat = new THREE.Quaternion().setFromEuler(lRot);
-      const wQuat = pQuat.clone().multiply(lQuat);
-      const wRot = new THREE.Euler().setFromQuaternion(wQuat);
-      
-      finalPos = { x: wPos.x, y: wPos.y, z: wPos.z };
-      finalRot = { x: wRot.x, y: wRot.y, z: wRot.z };
+      worldPos.applyQuaternion(pQuat).add(pPos);
+      worldQuat.premultiply(pQuat);
     }
 
     uniforms.uObjData0.value[i].set(
@@ -114,22 +108,8 @@ export function updateUniforms(uniforms, time) {
       obj.blendRadius || 0,
       gid
     );
-    uniforms.uObjData1.value[i].set(finalPos.x, finalPos.y, finalPos.z, 0);
-    // Handle both Euler and Quaternion rotation inputs
-    let finalQuat;
-    if (obj.rotation && typeof obj.rotation.w === 'number') {
-      finalQuat = new THREE.Quaternion(obj.rotation.x, obj.rotation.y, obj.rotation.z, obj.rotation.w);
-    } else {
-      finalQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(obj.rotation.x, obj.rotation.y, obj.rotation.z));
-    }
-
-    if (parent) {
-      const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
-      const pQuat = new THREE.Quaternion().setFromEuler(pRot);
-      finalQuat.premultiply(pQuat);
-    }
-
-    uniforms.uObjData4.value[i].set(finalQuat.x, finalQuat.y, finalQuat.z, finalQuat.w);
+    uniforms.uObjData1.value[i].set(worldPos.x, worldPos.y, worldPos.z, 0);
+    uniforms.uObjData4.value[i].set(worldQuat.x, worldQuat.y, worldQuat.z, worldQuat.w);
     
     let color = new THREE.Color(obj.color);
     if (obj.id === gameState.currentMarshmallow?.marshmallow?.id) {
