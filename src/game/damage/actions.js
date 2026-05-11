@@ -15,8 +15,12 @@ export function applyHolepunch(marshmallowEntity, hitPoint, rayDirection) {
   const h = marshmallow.scale.y;
 
   const mPos = new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z);
-  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
-  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  let mQuatInv;
+  if (marshmallow.rotation.w !== undefined) {
+    mQuatInv = new THREE.Quaternion(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z, marshmallow.rotation.w).invert();
+  } else {
+    mQuatInv = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z)).invert();
+  }
   
   const localOrigin = hitPoint.clone().sub(mPos).applyQuaternion(mQuatInv);
   const localDir = rayDirection.clone().applyQuaternion(mQuatInv).normalize();
@@ -97,8 +101,12 @@ export function applyRoundChunk(marshmallowEntity, hitPoint) {
   const marshmallow = marshmallowEntity.marshmallow;
   const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
   
-  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
-  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  let mQuatInv;
+  if (marshmallow.rotation.w !== undefined) {
+    mQuatInv = new THREE.Quaternion(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z, marshmallow.rotation.w).invert();
+  } else {
+    mQuatInv = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z)).invert();
+  }
   
   const localPos = hitPoint.clone().sub(new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z)).applyQuaternion(mQuatInv);
   const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
@@ -141,8 +149,12 @@ export function applySpatter(marshmallowEntity, hitPoint, distance) {
   const marshmallow = marshmallowEntity.marshmallow;
   const worldNormal = calculateSurfaceNormal(marshmallow, hitPoint);
   
-  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
-  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  let mQuatInv;
+  if (marshmallow.rotation.w !== undefined) {
+    mQuatInv = new THREE.Quaternion(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z, marshmallow.rotation.w).invert();
+  } else {
+    mQuatInv = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z)).invert();
+  }
   
   const maxRange = 15;
   const minRange = 3;
@@ -199,13 +211,17 @@ export function applyKerfChunk(marshmallowEntity, hitPoint, rayDirection) {
   const cornerQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(angle45, angle45, angle45));
   const worldQuat = orientQuat.multiply(cornerQuat);
   
-  const penetrationOffset = 0.55; 
+  const penetrationOffset = 0.2; // Deeper cut so it connects instantly
   const cubePosWorld = hitPoint.clone().add(worldNormal.clone().multiplyScalar(penetrationOffset));
   
   const local = getLocalTransform(cubePosWorld, worldQuat, marshmallow);
   
-  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
-  const mQuatInv = new THREE.Quaternion().setFromEuler(mRot).invert();
+  let mQuatInv;
+  if (marshmallow.rotation.w !== undefined) {
+    mQuatInv = new THREE.Quaternion(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z, marshmallow.rotation.w).invert();
+  } else {
+    mQuatInv = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z)).invert();
+  }
   const localNormal = worldNormal.clone().applyQuaternion(mQuatInv);
 
   const kerf = {

@@ -5,17 +5,20 @@ import * as THREE from 'three';
  */
 export function getLocalTransform(worldPos, worldQuat, marshmallow) {
   const mPos = new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z);
-  const mRot = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
-  const mQuat = new THREE.Quaternion().setFromEuler(mRot);
+  let mQuat;
+  if (marshmallow.rotation.w !== undefined) {
+    mQuat = new THREE.Quaternion(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z, marshmallow.rotation.w);
+  } else {
+    mQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z));
+  }
   const mQuatInv = mQuat.clone().invert();
 
   const localPos = worldPos.clone().sub(mPos).applyQuaternion(mQuatInv);
   const localQuat = mQuatInv.multiply(worldQuat);
-  const localRot = new THREE.Euler().setFromQuaternion(localQuat);
 
   return { 
     position: { x: localPos.x, y: localPos.y, z: localPos.z },
-    rotation: { x: localRot.x, y: localRot.y, z: localRot.z }
+    rotation: { x: localQuat.x, y: localQuat.y, z: localQuat.z, w: localQuat.w }
   };
 }
 
@@ -24,8 +27,12 @@ export function getLocalTransform(worldPos, worldQuat, marshmallow) {
  */
 export function calculateSurfaceNormal(marshmallow, hitPoint) {
   const center = new THREE.Vector3(marshmallow.position.x, marshmallow.position.y, marshmallow.position.z);
-  const euler = new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z);
-  const q = new THREE.Quaternion().setFromEuler(euler);
+  let q;
+  if (marshmallow.rotation.w !== undefined) {
+    q = new THREE.Quaternion(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z, marshmallow.rotation.w);
+  } else {
+    q = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.rotation.x, marshmallow.rotation.y, marshmallow.rotation.z));
+  }
   const axisWorld = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
 
   const toHit = hitPoint.clone().sub(center);

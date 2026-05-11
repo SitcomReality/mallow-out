@@ -4,7 +4,7 @@ import * as THREE from 'three';
 const SPHERE_RADIUS = 10.0;
 const INNER_MARGIN = 2.0;
 const MIN_CAMERA_DISTANCE = 3.5;
-const DRIFT_SPEED = 0.55;
+const DRIFT_SPEED = 0.2;
 
 export function updateMarshmallowMovement(marshmallow, delta) {
   if (!marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
@@ -33,47 +33,41 @@ export function updateMarshmallowMovement(marshmallow, delta) {
     -Math.cos(gameState.player.yaw) * Math.cos(gameState.player.pitch)
   ).normalize();
 
-  // Target a comfortable viewing area ~7 units ahead of camera
-  const viewCenter = camPos.clone().add(camForward.multiplyScalar(7.0));
+  // Target a comfortable viewing area ~6.5 units ahead of camera
+  const viewCenter = camPos.clone().add(camForward.multiplyScalar(6.5));
   
   // 2. Generate wandering target with organic noise
-  const noiseX = Math.sin(mov.time * 0.4 + mov.bobPhase) * 1.8;
-  const noiseY = Math.cos(mov.time * 0.3 + mov.bobPhase * 1.5) * 1.2;
-  const noiseZ = Math.sin(mov.time * 0.5 + mov.bobPhase * 0.8) * 1.8;
+  const noiseX = Math.sin(mov.time * 0.5 + mov.bobPhase) * 2.5;
+  const noiseY = Math.cos(mov.time * 0.4 + mov.bobPhase * 1.5) * 1.5;
+  const noiseZ = Math.sin(mov.time * 0.6 + mov.bobPhase * 0.8) * 1.5;
   const wanderTarget = viewCenter.clone().add(new THREE.Vector3(noiseX, noiseY, noiseZ));
 
-  // 3. Calculate steering direction
-  let targetDir = wanderTarget.clone().sub(mov.position).normalize();
+  // 3. Smoothly move position towards wanderTarget (spring-like logic)
+  const toWander = wanderTarget.clone().sub(mov.position);
+  mov.velocity.copy(toWander).multiplyScalar(1.2); 
 
-  // CENTERING: Strong pull if wandering too far from the screen center
-  const toCenter = viewCenter.clone().sub(mov.position);
-  const centerDist = toCenter.length();
-  if (centerDist > 2.0) {
-    const pullFactor = Math.min(1.0, (centerDist - 2.0) * 0.6);
-    targetDir.lerp(toCenter.normalize(), pullFactor).normalize();
+  // Apply hit knockback if active
+  if (marshmallow.hitReaction && marshmallow.hitReaction.active) {
+    mov.velocity.add(marshmallow.hitReaction.knockbackVelocity);
+    marshmallow.hitReaction.knockbackVelocity.multiplyScalar(0.85); // Decay
   }
 
-  // REPEL FROM CAMERA: Keep a minimum distance
-  const toCam = mov.position.clone().sub(camPos);
-  const distToCam = toCam.length();
-  if (distToCam < MIN_CAMERA_DISTANCE + 2.0) {
-    const pushStrength = 1.0 - (distToCam - MIN_CAMERA_DISTANCE) / 2.0;
-    targetDir.lerp(toCam.normalize(), Math.min(1.0, pushStrength * 0.9)).normalize();
+  mov.position.addScaledVector(mov.velocity, delta);
+
+  // Hard safety boundaries
+  if (mov.position.length() > SPHERE_RADIUS - 0.5) {
+    mov.position.normalize().multiplyScalar(SPHERE_RADIUS - 0.5);
   }
 
-  // REPEL FROM SPHERE EDGE
-  const sphereDist = mov.position.length();
-  if (sphereDist > SPHERE_RADIUS - INNER_MARGIN) {
-    const inward = mov.position.clone().normalize().multiplyScalar(-1);
-    targetDir.lerp(inward, 0.9).normalize();
-  }
+  marsh.position.x = mov.position.x;
+  marsh.position.y = mov.position.y;
+  marsh.position.z = mov.position.z;
 
-  // 4. Update Orientation (Steering)
-  const currentForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+  // 4. Update Orientation (Face the camera)
+  let targetDir = camPos.clone().sub(mov.position).normalize();
   
-  // Responsiveness of the head-turn
-  const steerSpeed = 1.4;
-  currentForward.lerp(targetDir, Math.min(1.0, steerSpeed * delta)).normalize();
+  const currentForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
+  currentForward.lerp(targetDir, Math.min(1.0, 3.0 * delta)).normalize();
 
   // Build stable upright basis
   const worldUp = new THREE.Vector3(0, 1, 0);
@@ -88,27 +82,18 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const targetMatrix = new THREE.Matrix4().makeBasis(up, currentForward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
 
-  // Smooth rotation blending
-  mov.orientation.slerp(targetQ, Math.min(1.0, 1.8 * delta));
+  mov.orientation.slerp(targetQ, Math.min(1.0, 5.0 * delta));
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
-
-  // 5. Update Position
-  // Movement is always in the direction of the face's current orientation
-  const actualForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
-  mov.velocity.copy(actualForward).multiplyScalar(DRIFT_SPEED);
   
-  // Gentle vertical bobbing
-  const bob = Math.sin(mov.time * 1.8 + mov.bobPhase) * 0.12;
-  mov.velocity.y += bob;
-
-  mov.position.addScaledVector(mov.velocity, delta);
-
-  // Hard safety boundaries
-  if (mov.position.length() > SPHERE_RADIUS - 0.5) {
-    mov.position.normalize().multiplyScalar(SPHERE_RADIUS - 0.5);
+  // Apply visual bulge effect from hit reaction
+  if (marshmallow.hitReaction && marshmallow.hitReaction.bulgeTimer > 0) {
+    const bulgeT = marshmallow.hitReaction.bulgeTimer / 0.25;
+    const bulgeFactor = 1.0 + Math.sin(bulgeT * Math.PI) * 0.25;
+    marsh.scale.x = marshmallow.meltStartScale ? marshmallow.meltStartScale.x * bulgeFactor : marsh.scale.x * bulgeFactor;
+    marsh.scale.y = marshmallow.meltStartScale ? marshmallow.meltStartScale.y * bulgeFactor : marsh.scale.y * bulgeFactor;
+  } else if (marshmallow.meltStartScale) {
+    // Reset to base scale
+    marsh.scale.x = marshmallow.meltStartScale.x;
+    marsh.scale.y = marshmallow.meltStartScale.y;
   }
-
-  marsh.position.x = mov.position.x;
-  marsh.position.y = mov.position.y;
-  marsh.position.z = mov.position.z;
 }

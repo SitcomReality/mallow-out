@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
-import { applyHolepunch, applyRoundChunk } from '../damage/actions.js';
+import { applyHolepunch, applyRoundChunk, applyKerfChunk } from '../damage/actions.js';
 import { healMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
 import { awardMarsh, awardPollen, awardMarshMultiplier } from '../economy.js';
@@ -15,6 +15,36 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
   if (!gameState.currentMarshmallow) return;
 
   registerHit('marshmallow');
+  
+  // Apply hit reaction with knockback
+  const marshmallow = gameState.currentMarshmallow;
+  const knockbackStrength = isCharged ? 18.0 : 4.0;
+  const knockbackDir = direction.clone().multiplyScalar(-knockbackStrength);
+  
+  if (!marshmallow.hitReaction) {
+    marshmallow.hitReaction = {
+      active: false,
+      timer: 0,
+      knockbackVelocity: new THREE.Vector3(),
+      flashTimer: 0,
+      bulgeTimer: 0,
+    };
+  }
+  
+  marshmallow.hitReaction.active = true;
+  marshmallow.hitReaction.timer = 0.3;
+  marshmallow.hitReaction.knockbackVelocity.copy(knockbackDir);
+  marshmallow.hitReaction.flashTimer = 0.15;
+  marshmallow.hitReaction.bulgeTimer = 0.25;
+  
+  // Store base scale for bulge effect
+  if (!marshmallow.meltStartScale) {
+    marshmallow.meltStartScale = {
+      x: marshmallow.marshmallow.scale.x,
+      y: marshmallow.marshmallow.scale.y,
+      z: marshmallow.marshmallow.scale.z || marshmallow.marshmallow.scale.x
+    };
+  }
   
   // Base values for heal/pollen
   const baseHeal = isCharged ? 25.0 : 5.0;
@@ -40,9 +70,16 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
   }
 
   if (isCharged) {
-    const hole = applyHolepunch(gameState.currentMarshmallow, resultPoint, direction);
-    if (hole && hole.repairData) {
-      hole.repairData.delay = gameState.weaponStates.maxChargeTime || 3.0;
+    if (Math.random() > 0.5) {
+      const hole = applyHolepunch(gameState.currentMarshmallow, resultPoint, direction);
+      if (hole && hole.repairData) {
+        hole.repairData.delay = gameState.weaponStates.maxChargeTime || 3.0;
+      }
+    } else {
+      const kerf = applyKerfChunk(gameState.currentMarshmallow, resultPoint, direction);
+      if (kerf && kerf.repairData) {
+        kerf.repairData.delay = gameState.weaponStates.maxChargeTime || 3.0;
+      }
     }
   } else {
     const chunk = applyRoundChunk(gameState.currentMarshmallow, resultPoint);

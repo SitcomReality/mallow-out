@@ -86,8 +86,15 @@ export function updateUniforms(uniforms, time) {
     const parent = gameState.objects.find(o => o.id === obj.parentId);
     if (parent) {
       const pPos = new THREE.Vector3(parent.position.x, parent.position.y, parent.position.z);
-      const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
-      const pQuat = new THREE.Quaternion().setFromEuler(pRot);
+      
+      // Handle both Euler and Quaternion parent rotations
+      let pQuat;
+      if (parent.rotation && typeof parent.rotation.w === 'number') {
+        pQuat = new THREE.Quaternion(parent.rotation.x, parent.rotation.y, parent.rotation.z, parent.rotation.w);
+      } else {
+        const pRot = new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z);
+        pQuat = new THREE.Quaternion().setFromEuler(pRot);
+      }
       
       const lPos = new THREE.Vector3(obj.position.x, obj.position.y, obj.position.z);
       const wPos = lPos.applyQuaternion(pQuat).add(pPos);
@@ -123,7 +130,15 @@ export function updateUniforms(uniforms, time) {
     }
 
     uniforms.uObjData4.value[i].set(finalQuat.x, finalQuat.y, finalQuat.z, finalQuat.w);
-    const color = new THREE.Color(obj.color);
+    
+    let color = new THREE.Color(obj.color);
+    if (obj.id === gameState.currentMarshmallow?.marshmallow?.id) {
+      const m = gameState.currentMarshmallow;
+      if (m.hitReaction && m.hitReaction.flashTimer > 0) {
+        color = new THREE.Color(0xffffff); // Damage flash
+      }
+    }
+    
     uniforms.uObjData3.value[i].set(color.r, color.g, color.b, 0);
     
     // Pass noise parameters and text char codes
