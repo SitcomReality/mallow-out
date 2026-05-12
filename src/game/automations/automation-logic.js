@@ -39,13 +39,6 @@ export function updateAutomations(delta) {
     laser.lineGlow.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     laser.lineCore.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
     
-    const currentTargetLocal = new THREE.Vector3().lerpVectors(laser.p1Local, laser.p2Local, t);
-    const centerLocal = new THREE.Vector3().addVectors(laser.p1Local, currentTargetLocal).multiplyScalar(0.5);
-    const width = laser.p1Local.distanceTo(currentTargetLocal);
-    
-    laser.hole.position = { x: centerLocal.x, y: centerLocal.y, z: centerLocal.z };
-    laser.hole.scale.x = width / 2 + 0.001;
-    
     if (session.particleSystem && Math.random() < 0.6) {
       const normal = laser.origin.clone().sub(currentTarget).normalize();
       session.particleSystem.createMallowSplatter(currentTarget, normal);
@@ -274,21 +267,12 @@ function fireLaser() {
     mQuatInv = new THREE.Quaternion().setFromEuler(new THREE.Euler(marshmallow.marshmallow.rotation.x, marshmallow.marshmallow.rotation.y, marshmallow.marshmallow.rotation.z)).invert();
   }
   
-  const p1Local = p1.clone().sub(mPos).applyQuaternion(mQuatInv);
-  const p2Local = p2.clone().sub(mPos).applyQuaternion(mQuatInv);
-  const originLocal = origin.clone().sub(mPos).applyQuaternion(mQuatInv);
+  // Use fixed local direction for consistent laser orientation
+  const boxX = new THREE.Vector3(1, 0, 0);
+  const centerLocal = new THREE.Vector3(0, randY, randZ);
   
-  const boxX = new THREE.Vector3().subVectors(p2Local, p1Local).normalize();
-  const centerLocal = new THREE.Vector3().addVectors(p1Local, p2Local).multiplyScalar(0.5);
-  const rayDir = new THREE.Vector3().subVectors(centerLocal, originLocal).normalize();
-  
-  let boxY = new THREE.Vector3().crossVectors(boxX, rayDir);
-  if (boxY.lengthSq() < 1e-6) {
-    boxY = new THREE.Vector3(0, 1, 0);
-  }
-  boxY.normalize();
-  
-  const boxZ = new THREE.Vector3().crossVectors(boxX, boxY).normalize();
+  const boxY = new THREE.Vector3(0, 1, 0);
+  const boxZ = new THREE.Vector3(0, 0, 1);
   
   const rotMatrix = new THREE.Matrix4().makeBasis(boxX, boxY, boxZ);
   const boxQuat = new THREE.Quaternion().setFromRotationMatrix(rotMatrix);
@@ -296,9 +280,9 @@ function fireLaser() {
   const hole = {
     id: 90000 + Math.floor(Math.random() * 10000),
     type: 'box',
-    position: { x: p1Local.x, y: p1Local.y, z: p1Local.z },
+    position: { x: centerLocal.x, y: centerLocal.y, z: centerLocal.z },
     rotation: { x: boxQuat.x, y: boxQuat.y, z: boxQuat.z, w: boxQuat.w },
-    scale: { x: 0.01, y: 0.02, z: 10.0 }, 
+    scale: { x: R * 2.5, y: 0.02, z: 0.01 },
     color: '#ff0000',
     operation: 'subtract',
     blendRadius: 0.0,
@@ -330,7 +314,6 @@ function fireLaser() {
     timer: 0,
     duration: 0.8,
     p1, p2, origin,
-    p1Local, p2Local,
     hole,
     marshmallow,
     lineGlow, lineCore,

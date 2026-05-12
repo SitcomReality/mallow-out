@@ -14,7 +14,7 @@ export function getLocalTransform(worldPos, worldQuat, marshmallow) {
   const mQuatInv = mQuat.clone().invert();
 
   const localPos = worldPos.clone().sub(mPos).applyQuaternion(mQuatInv);
-  const localQuat = mQuatInv.multiply(worldQuat);
+  const localQuat = mQuatInv.clone().multiply(worldQuat);
 
   return { 
     position: { x: localPos.x, y: localPos.y, z: localPos.z },
