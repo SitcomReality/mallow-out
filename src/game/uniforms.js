@@ -98,6 +98,9 @@ export function updateUniforms(uniforms, time) {
         pQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(parent.rotation.x, parent.rotation.y, parent.rotation.z));
       }
       
+      // Apply parent scale to local position, then rotate and translate
+      const pScale = new THREE.Vector3(parent.scale.x, parent.scale.y, parent.scale.z || parent.scale.x);
+      worldPos.multiply(pScale);
       worldPos.applyQuaternion(pQuat).add(pPos);
       worldQuat.premultiply(pQuat);
     }

@@ -63,11 +63,24 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   marsh.position.y = mov.position.y;
   marsh.position.z = mov.position.z;
 
-  // 4. Update Orientation (Face the camera)
+  // 4. Update Orientation (Face the camera with some wandering rotation)
   let targetDir = camPos.clone().sub(mov.position).normalize();
   
+  // Add gentle rotation variation over time to show off different angles
+  const rotationPhase = mov.time * 0.3;
+  const yawOffset = Math.sin(rotationPhase) * 0.4; // ±23 degrees
+  const pitchOffset = Math.cos(rotationPhase * 0.7) * 0.2; // ±11 degrees
+  
+  // Create rotation offsets
+  const yawQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yawOffset);
+  const pitchAxis = new THREE.Vector3().crossVectors(new THREE.Vector3(0, 1, 0), targetDir).normalize();
+  const pitchQuat = new THREE.Quaternion().setFromAxisAngle(pitchAxis, pitchOffset);
+  
+  // Apply offsets to target direction
+  targetDir.applyQuaternion(yawQuat).applyQuaternion(pitchQuat).normalize();
+  
   const currentForward = new THREE.Vector3(0, 1, 0).applyQuaternion(mov.orientation);
-  currentForward.lerp(targetDir, Math.min(1.0, 3.0 * delta)).normalize();
+  currentForward.lerp(targetDir, Math.min(1.0, 2.5 * delta)).normalize();
 
   // Build stable upright basis
   const worldUp = new THREE.Vector3(0, 1, 0);
@@ -82,7 +95,7 @@ export function updateMarshmallowMovement(marshmallow, delta) {
   const targetMatrix = new THREE.Matrix4().makeBasis(up, currentForward, right);
   const targetQ = new THREE.Quaternion().setFromRotationMatrix(targetMatrix);
 
-  mov.orientation.slerp(targetQ, Math.min(1.0, 5.0 * delta));
+  mov.orientation.slerp(targetQ, Math.min(1.0, 4.0 * delta));
   marsh.rotation = { x: mov.orientation.x, y: mov.orientation.y, z: mov.orientation.z, w: mov.orientation.w };
   
   // Apply visual bulge effect from hit reaction
