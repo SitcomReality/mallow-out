@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-import { settings, worldState } from '../state.js';
+import { settings } from '../state.js';
 
 export const gameState = {
   player: {
@@ -125,4 +125,4 @@ export function updateWeaponCooldowns(delta) {
 
 import { getUpgradeEffect } from './upgrades/upgrade-calculator.js';
 
-export { settings, worldState };
+export { settings };

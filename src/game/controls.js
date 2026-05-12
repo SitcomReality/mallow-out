@@ -7,5 +7,5 @@ export function initControls(container) {
 }
 
 export function updateControls(delta) {
-  // Controls functionality has been removed for incremental game conversion.
+  // No-op: camera is static for this game
 }

@@ -1,4 +1,4 @@
-import { settings } from './state.js';
+import { settings } from '../state.js';
 
 let frameCount = 0;
 let totalDelta = 0;

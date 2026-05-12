@@ -1,7 +1,3 @@
-import * as THREE from 'three';
-
-export const worldState = {};
-
 export const settings = {
   renderScale: 1.0,
   targetFPS: 60,

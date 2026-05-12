@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { createEngine } from '../engine.js';
 import { createMainMaterial } from '../render/material.js';
 import { updateUniforms } from './uniforms.js';
-import { settings, worldState } from '../state.js';
+import { settings } from '../state.js';
 import { gameState } from './state.js';
 import { PostProcessor } from '../render/post-process.js';
 import { ParticleRenderer } from '../effects/particle-renderer.js';

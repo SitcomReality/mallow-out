@@ -22,7 +22,6 @@ export function runGameLoop(time) {
   
   if (!session.isPaused) {
     updateDynamicGraphics(delta);
-    updateControls(delta);
     updateWeaponCooldowns(delta);
     updateMarshmallows(delta);
     updateAutomations(delta);
