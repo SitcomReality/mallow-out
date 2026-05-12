@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from './state.js';
-import { settings, worldState } from '../state.js';
+import { settings } from '../state.js';
 import { ENV_COLORS, ENV_SETTINGS, WORLD_BOUNDS } from './environment-constants.js';
 import { PLAYER_HEIGHT } from './controls-constants.js';
 
