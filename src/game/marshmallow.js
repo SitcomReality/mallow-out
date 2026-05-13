@@ -6,7 +6,6 @@ import { getMarshmallowHealth } from './marshmallow-scaling.js';
 import { selectMarshmallowType } from './marshmallow-spawn.js';
 import { BASE_BOB_AMPLITUDE } from './marshmallow-type-constants.js';
 import { gameState } from './state.js';
-import { getCosmeticById } from './cosmetics/cosmetics-types.js';
 
 let nextId = 1;
 
