@@ -22,3 +22,11 @@ export function awardCaramel(amount = BASE_CARAMEL_PER_HIT, multiplier = 1.0) {
 export function awardPollen(amount = BASE_CARAMEL_PER_HIT, multiplier = 1.0) {
   return awardCaramel(amount, multiplier);
 }
+
+/**
+ * Backwards-compatible alias: older code expects awardMarshMultiplier.
+ * Provide a thin wrapper to preserve compatibility while consolidating currencies.
+ */
+export function awardMarshMultiplier(amount = BASE_CARAMEL_PER_HIT, multiplier = 1.0) {
+  return awardCaramel(amount, multiplier);
+}
