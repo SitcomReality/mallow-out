@@ -1,4 +1,5 @@
 import { gameState } from '../state.js';
+import { devState } from '../dev-state.js';
 import { activeFX } from '../fx.js';
 import { getEnemyDistanceAt, getBubbleDistanceAt } from '../shooting.js';
 
@@ -9,7 +10,11 @@ export function rebuildObjectList() {
   gameState.objects = [];
   if (gameState.currentMarshmallow) {
     gameState.objects.push(gameState.currentMarshmallow.marshmallow);
-    if (gameState.currentMarshmallow.goo) gameState.objects.push(gameState.currentMarshmallow.goo);
+    if (gameState.currentMarshmallow.goo) {
+      // Update goo operation based on dev state
+      gameState.currentMarshmallow.goo.operation = devState.showGoo ? 'union' : 'intersect';
+      gameState.objects.push(gameState.currentMarshmallow.goo);
+    }
     gameState.objects.push(...gameState.currentMarshmallow.holes);
   }
   for (const melting of gameState.meltingMarshmallows) {

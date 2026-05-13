@@ -1,4 +1,5 @@
 import { gameState } from './state.js';
+import { devState } from './dev-state.js';
 import * as THREE from 'three';
 
 const SPHERE_RADIUS = 10.0;
@@ -8,6 +9,7 @@ const DRIFT_SPEED = 0.2;
 
 export function updateMarshmallowMovement(marshmallow, delta) {
   if (!marshmallow.movement || marshmallow.isDying || marshmallow.spawnStartTime !== undefined) return;
+  if (devState.freezeMovement) return;
   
   const mov = marshmallow.movement;
   const marsh = marshmallow.marshmallow;

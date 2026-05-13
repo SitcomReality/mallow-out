@@ -1,4 +1,5 @@
 import { gameState } from './state.js';
+import { devState } from './dev-state.js';
 import { 
   REPAIR_DURATION, 
   REPAIR_DELAY,
@@ -10,6 +11,8 @@ import {
 import { DAMAGE_TYPES } from './damage/types.js';
 
 export function updateRepairs(currentTime, delta) {
+  if (devState.disableHealing) return;
+  
   // Only repair the active marshmallow; melting marshmallows stop repairing
   const activeMarshmallows = [];
   if (gameState.currentMarshmallow) activeMarshmallows.push(gameState.currentMarshmallow);

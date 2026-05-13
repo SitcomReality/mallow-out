@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
+import { devState } from '../dev-state.js';
 import { applyHolepunch, applyRoundChunk } from '../damage/actions.js';
 import { damageMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
@@ -17,32 +18,35 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
   
   // Apply hit reaction with knockback
   const marshmallow = gameState.currentMarshmallow;
-  const knockbackStrength = isCharged ? 18.0 : 4.0;
-  const knockbackDir = direction.clone().multiplyScalar(-knockbackStrength);
   
-  if (!marshmallow.hitReaction) {
-    marshmallow.hitReaction = {
-      active: false,
-      timer: 0,
-      knockbackVelocity: new THREE.Vector3(),
-      flashTimer: 0,
-      bulgeTimer: 0,
-    };
-  }
-  
-  marshmallow.hitReaction.active = true;
-  marshmallow.hitReaction.timer = 0.3;
-  marshmallow.hitReaction.knockbackVelocity.copy(knockbackDir);
-  marshmallow.hitReaction.flashTimer = 0.15;
-  marshmallow.hitReaction.bulgeTimer = 0.25;
-  
-  // Store base scale for bulge effect
-  if (!marshmallow.meltStartScale) {
-    marshmallow.meltStartScale = {
-      x: marshmallow.marshmallow.scale.x,
-      y: marshmallow.marshmallow.scale.y,
-      z: marshmallow.marshmallow.scale.z || marshmallow.marshmallow.scale.x
-    };
+  if (!devState.disableHitEffects) {
+    const knockbackStrength = isCharged ? 18.0 : 4.0;
+    const knockbackDir = direction.clone().multiplyScalar(-knockbackStrength);
+    
+    if (!marshmallow.hitReaction) {
+      marshmallow.hitReaction = {
+        active: false,
+        timer: 0,
+        knockbackVelocity: new THREE.Vector3(),
+        flashTimer: 0,
+        bulgeTimer: 0,
+      };
+    }
+    
+    marshmallow.hitReaction.active = true;
+    marshmallow.hitReaction.timer = 0.3;
+    marshmallow.hitReaction.knockbackVelocity.copy(knockbackDir);
+    marshmallow.hitReaction.flashTimer = 0.15;
+    marshmallow.hitReaction.bulgeTimer = 0.25;
+    
+    // Store base scale for bulge effect
+    if (!marshmallow.meltStartScale) {
+      marshmallow.meltStartScale = {
+        x: marshmallow.marshmallow.scale.x,
+        y: marshmallow.marshmallow.scale.y,
+        z: marshmallow.marshmallow.scale.z || marshmallow.marshmallow.scale.x
+      };
+    }
   }
   
   // Deal damage

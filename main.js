@@ -19,7 +19,9 @@ import { createMobileControls } from './src/ui/mobile-controls.js';
 import { createNotificationSystem } from './src/ui/notifications.js';
 import { hasSaveGame, loadGame, clearSaveGame } from './src/game/persistence.js';
 import { applyWonkyUI } from './src/ui/wonky.js';
+import { createDevMenu } from './src/ui/dev-menu.js';
 applyWonkyUI();
+createDevMenu();
 
 const mainBtn = document.getElementById('mainBtn');
 const resetBtn = document.getElementById('resetGame');

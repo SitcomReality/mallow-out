@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { devState } from './dev-state.js';
 import { MARSHMALLOW_CYLINDER_RADIUS, MARSHMALLOW_CYLINDER_HEIGHT, MARSHMALLOW_HEIGHT, MARSHMALLOW_SPAWN_RADIUS } from './marshmallow-constants.js';
 import { SPAWN_START_Y, SPAWN_END_Y } from './spawn-constants.js';
 import { EXPRESSION_DEFAULT, EXPRESSION_ANGRY, EXPRESSION_SURPRISED } from './face-constants.js';
@@ -81,7 +82,7 @@ export function createMarshmallow(totalDestroyed, spawnPoint) {
       z: MARSHMALLOW_CYLINDER_RADIUS * sizeMultiplier * 1.5 
     },
     color: '#ff1493', // Deep Pink Goo
-    operation: 'intersect',
+    operation: devState.showGoo ? 'union' : 'intersect',
     blendRadius: 0.1,
     parentId: marshmallowId,
   };
