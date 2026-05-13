@@ -108,7 +108,6 @@ function startGame() {
     gameState.weaponStates.isCharging = false;
     
     const rect = container.getBoundingClientRect();
-    // Using current mouse position for final shot location
     const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     
@@ -119,7 +118,10 @@ function startGame() {
     session.upgradeScreen.show();
   });
 
-  // Removed automatic spawn on game start; player must purchase a treat to summon the marshmallow.
+  // Spawn initial marshmallow
+  import('./src/game/manager.js').then(m => {
+    setTimeout(() => m.spawnNextMarshmallow(), 1000);
+  });
   if (session.renderFn) {
     session.renderFn(performance.now(), session.particleSystem, session.floatingTextSystem);
   }

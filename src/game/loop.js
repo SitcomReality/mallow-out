@@ -24,7 +24,6 @@ export function runGameLoop(time) {
     updateDynamicGraphics(delta);
     updateWeaponCooldowns(delta);
     updateMarshmallows(delta);
-    updateAutomations(delta);
     updateComboSystem(delta);
     updateBubbles(delta, time * 0.001);
     

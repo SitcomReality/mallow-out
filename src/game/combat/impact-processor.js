@@ -1,15 +1,14 @@
 import * as THREE from 'three';
 import { gameState } from '../state.js';
 import { applyHolepunch, applyRoundChunk } from '../damage/actions.js';
-import { healMarshmallow } from '../marshmallow.js';
+import { damageMarshmallow } from '../marshmallow.js';
 import { registerHit, getComboMultiplier } from '../combo-system.js';
-import { awardMarsh, awardPollen, awardMarshMultiplier } from '../economy.js';
-import { spawnNextMarshmallowAt, session } from '../manager.js';
-import { getUpgradeEffect } from '../upgrades/weapon-modifiers.js';
+import { awardCaramel } from '../economy.js';
+import { session, onMarshmallowDefeated } from '../manager.js';
 import { createRippleFX } from '../fx.js';
 
 /**
- * Applies logic for a successful hit on the marshmallow pet.
+ * Applies logic for a successful hit on the marshmallow.
  */
 export function handleMarshmallowImpact(resultPoint, direction, isCharged, particleSystem, marshmallowHUD) {
   if (!gameState.currentMarshmallow) return;
@@ -46,29 +45,16 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
     };
   }
   
-  // Base values for heal/pollen
-  const baseHeal = isCharged ? 25.0 : 5.0;
-  const pollenMult = isCharged ? 5.0 : 1.0;
-  const healBonus = getUpgradeEffect('mallow_heal', gameState.upgrades.mallow_heal || 0);
+  // Deal damage
+  const baseDamage = isCharged ? 25.0 : 5.0;
   const comboMult = getComboMultiplier();
-  const healAmount = baseHeal * (1 + healBonus) * comboMult;
+  const damage = baseDamage * comboMult;
   
-  // Milestone notifications
-  const totalPollen = gameState.currencies.pollen;
-  if (totalPollen >= 100 && totalPollen < 150 && !gameState.milestones?.pollen100) {
-    if (!gameState.milestones) gameState.milestones = {};
-    gameState.milestones.pollen100 = true;
-    if (session.notifications) {
-      session.notifications.add({
-        id: 'milestone_pollen_100',
-        sticky: true,
-        title: '🌟 100 POLLEN! 🌟',
-        text: 'You\'re a natural! Open a lootbox in Cosmetics to unlock new looks!',
-        color: '#ffd700'
-      });
-    }
-  }
-
+  const defeated = damageMarshmallow(marshmallow, damage, particleSystem);
+  
+  // Award caramel for hitting
+  const caramelEarned = awardCaramel(Math.floor(damage / 5), comboMult);
+  
   if (isCharged) {
     const hole = applyHolepunch(gameState.currentMarshmallow, resultPoint, direction);
     if (hole && hole.repairData) {
@@ -89,19 +75,18 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
     particleSystem.createMallowSplatter(resultPoint, hitNormal);
   }
   
-  healMarshmallow(gameState.currentMarshmallow, healAmount);
-  const pollenEarned = awardPollen(healAmount, pollenMult);
-  
   if (session.floatingTextSystem) {
-    session.floatingTextSystem.createDamageText(resultPoint, pollenEarned, isCharged);
+    session.floatingTextSystem.createDamageText(resultPoint, caramelEarned, isCharged);
   }
   
   if (!gameState.tutorial.hasShotMarshmallow) {
     gameState.tutorial.hasShotMarshmallow = true;
-    gameState.tutorial.currentStep = 3;
+    gameState.tutorial.currentStep = 2;
   }
   
-  if (marshmallowHUD) {
+  if (defeated) {
+    onMarshmallowDefeated();
+  } else if (marshmallowHUD) {
     marshmallowHUD.update(gameState.currentMarshmallow);
   }
 }
@@ -109,9 +94,13 @@ export function handleMarshmallowImpact(resultPoint, direction, isCharged, parti
 /**
  * Applies logic for a hit on the marsh floor.
  */
-export function handleFloorImpact(floorPoint, isCharged, usedAmmo, particleSystem) {
-  registerHit('marsh');
-  const marshReward = awardMarshMultiplier(getComboMultiplier());
+export function handleFloorImpact(floorPoint, isCharged, particleSystem) {
+  registerHit('floor');
+  
+  // Award small caramel for floor shots
+  const comboMult = getComboMultiplier();
+  const caramelReward = Math.floor(1 * comboMult);
+  awardCaramel(caramelReward);
   
   if (!gameState.tutorial.hasShot) {
     gameState.tutorial.hasShot = true;
@@ -122,8 +111,8 @@ export function handleFloorImpact(floorPoint, isCharged, usedAmmo, particleSyste
         id: 'first_shot',
         sticky: false,
         title: '💥 FIRST SHOT! 💥',
-        text: `+${marshReward} marsh! Keep tapping to build a COMBO!`,
-        color: '#8afdff'
+        text: `+${caramelReward} caramel! Build combos for more!`,
+        color: '#ff8c00'
       });
     }
   }
@@ -142,23 +131,9 @@ export function handleFloorImpact(floorPoint, isCharged, usedAmmo, particleSyste
       });
     }
   }
-  
-  if (usedAmmo === 'treat') {
-    spawnNextMarshmallowAt(floorPoint);
-    
-    if (session.notifications) {
-      session.notifications.add({
-        id: 'treat_deployed',
-        sticky: false,
-        title: '🍬 TREAT DEPLOYED! 🍬',
-        text: 'Your marshmallow friend is emerging! Show it some love!',
-        color: '#ff69b4'
-      });
-    }
-  }
 
   if (session.floatingTextSystem) {
-    session.floatingTextSystem.createDamageText(floorPoint, marshReward, false);
+    session.floatingTextSystem.createDamageText(floorPoint, caramelReward, false);
   }
   
   createRippleFX(floorPoint, isCharged);

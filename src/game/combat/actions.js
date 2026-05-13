@@ -42,9 +42,6 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
     mallowResult = castRay(origin, direction, (p) => getEnemyDistanceAt(gameState.currentMarshmallow, p));
   }
 
-  const usedAmmo = ws.activeAmmo || 'standard';
-  ws.activeAmmo = 'standard';
-
   // 1. Process Bubbles (Transparent, don't stop the bullet)
   processBubbleHits(origin, direction, isCharged, particleSystem);
 
@@ -60,7 +57,7 @@ export function shoot(screenX, screenY, particleSystem, marshmallowHUD, camera) 
   }
 
   if (finalFloorHit) {
-    handleFloorImpact(floorResult.point, isCharged, usedAmmo, particleSystem);
+    handleFloorImpact(floorResult.point, isCharged, particleSystem);
   }
 
   // 4. Visual Tracer Calculation

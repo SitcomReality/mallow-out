@@ -15,10 +15,7 @@ export const gameState = {
   objects: [],
   totalMarshmallowsDestroyed: 0,
   currencies: {
-    pollen: 0,
     caramel: 0,
-    marsh: 0,
-    treats: 0, // Stackable inventory items
   },
   upgrades: {
     // Player
@@ -26,48 +23,8 @@ export const gameState = {
     combo_duration: 0,
     charge_speed: 0,
     // Marshmallow
-    mallow_heal: 0,
-    hit_protection: 0,
-    health_regen: 0,
     mallow_max_health: 0,
-    // Economy
-    pollen_multiplier: 0,
-    caramel_bonus: 0,
-    marsh_reward: 0,
-    // Automation
-    auto_shooter_unlock: 0,
-    auto_shooter_rate: 0,
-    auto_shooter_value: 0,
-    comet_unlock: 0,
-    comet_rate: 0,
-    comet_power: 0,
-    laser_unlock: 0,
-    laser_rate: 0,
-    laser_power: 0,
-    treat_dispenser_unlock: 0,
-    treat_dispenser_discount: 0,
   },
-
-  // Cosmetics system
-  cosmetics: {
-    unlocked: ['skin_pink'], // Start with default skin unlocked
-    equipped: {
-      skin: 'skin_pink',
-      pattern: null,
-      accessory: null
-    }
-  },
-
-  // Automation timers
-  automationTimers: {
-    auto_shooter: 0,
-    comet: 0,
-    laser: 0,
-    treat_dispenser: 0,
-  },
-  
-  // Treat dispenser can be paused
-  treatDispenserPaused: false,
   
   // Combo tracking
   combo: {
@@ -76,8 +33,7 @@ export const gameState = {
     type: null,
   },
 
-  // Dynamic cost for marshmallow treats (starts at 10 and increases by 20% each purchase)
-  marshmallowTreatCost: 10,
+
   
   // Tutorial state
   tutorial: {
@@ -98,7 +54,6 @@ export const gameState = {
   weaponStates: {
     skewerCooldown: 0,
     maxCooldown: 1.0,
-    activeAmmo: 'standard', // 'standard' or 'treat'
     isCharging: false,
     chargeTimer: 0,
     maxChargeTime: 3.0,

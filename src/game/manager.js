@@ -2,8 +2,6 @@ import { gameState } from './state.js';
 import { createMarshmallow } from './marshmallow.js';
 import { rebuildObjectList } from './combat.js';
 import { awardCaramel } from './economy.js';
-import { saveGame } from './persistence.js';
-import { clearLasers } from './automations/automation-logic.js';
 
 export const session = {
   isPlaying: false,
@@ -18,75 +16,11 @@ export const session = {
   hasShownSpawnNotification: false,
 };
 
-/**
- * Treat cost increases by 10% each purchase with simple compounding.
- * Cost = baseCost * (1.1 ^ purchases), starting at 10 marsh.
- */
-
-export function getTreatCost() {
-  return Math.floor(gameState.marshmallowTreatCost);
-}
-
-export function canSpawnMarshmallow() {
-  const cost = getTreatCost();
-  return !gameState.currentMarshmallow &&
-         gameState.meltingMarshmallows.length <= 1 &&
-         gameState.currencies.marsh >= cost;
-}
-
-export function buyMarshmallowTreat() {
-  const cost = getTreatCost();
-  if (gameState.currencies.marsh < cost) {
-    if (session.notifications) {
-      session.notifications.add({
-        id: 'need_marsh_buy',
-        sticky: false,
-        title: 'Cannot Afford',
-        text: `You need ${cost} marsh currency for a treat!`,
-        color: '#8afdff'
-      });
-    }
-    return;
-  }
-
-  gameState.currencies.marsh -= cost;
-  gameState.currencies.treats = (gameState.currencies.treats || 0) + 1;
-  
-  // Increase cost by 10% (compounded)
-  gameState.marshmallowTreatCost = Math.floor(gameState.marshmallowTreatCost * 1.1);
-  
-  // Tutorial progress
-  if (!gameState.tutorial.hasBoughtTreat) {
-    gameState.tutorial.hasBoughtTreat = true;
-    gameState.tutorial.currentStep = 2;
-  }
-  
-  saveGame();
-}
-
-export function equipMarshmallowTreat() {
-  if ((gameState.currencies.treats || 0) <= 0) return;
-  if (gameState.weaponStates.activeAmmo === 'treat') return;
-
-  gameState.weaponStates.activeAmmo = 'treat';
-  gameState.currencies.treats--;
-  
-  if (session.notifications) {
-    session.notifications.add({
-      id: 'treat_equipped',
-      sticky: false,
-      title: 'Treat Loaded!',
-      text: 'Next shot will deploy the marshmallow treat!',
-      color: '#ff69b4'
-    });
-  }
-}
-
-export function spawnNextMarshmallowAt(point) {
+export function spawnNextMarshmallow() {
   if (gameState.currentMarshmallow) return;
   if (gameState.meltingMarshmallows.length > 1) return;
   
-  const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed, point);
+  const marshmallow = createMarshmallow(gameState.totalMarshmallowsDestroyed);
   
   marshmallow.spawnStartTime = performance.now() * 0.001;
   gameState.currentMarshmallow = marshmallow;
@@ -101,7 +35,7 @@ export function spawnNextMarshmallowAt(point) {
       id: `spawn_${marshmallow.name}`,
       sticky: true,
       title: `${marshmallow.name} Emerged!`,
-      text: `Your marshmallow friend has come out to play!`,
+      text: `Shoot to damage! Build combos for bonus caramel!`,
       color: '#ff69b4'
     });
   }
@@ -109,14 +43,20 @@ export function spawnNextMarshmallowAt(point) {
   rebuildObjectList();
 }
 
-// Deprecated alias for compatibility if needed, but we prefer the specific ones above
-export function spawnNextMarshmallow() {
-  equipMarshmallowTreat();
-}
-
 export function onMarshmallowDefeated() {
   gameState.totalMarshmallowsDestroyed++;
-  awardCaramel();
+  const bonus = 10;
+  awardCaramel(bonus);
+  
+  if (session.notifications) {
+    session.notifications.add({
+      id: 'mallow_defeated',
+      sticky: false,
+      title: `${gameState.currentMarshmallow?.name || 'Marshmallow'} Defeated!`,
+      text: `+${bonus} caramel bonus!`,
+      color: '#ff8c00'
+    });
+  }
 }
 
 export function togglePause() {
@@ -144,11 +84,5 @@ export function quitToMenu() {
   gameState.meltingMarshmallows = [];
   gameState.objects = [];
   
-  gameState.upgrades = {
-    pollen_multiplier: 0,
-    caramel_bonus: 0,
-  };
-  
-  clearLasers();
   if (session.particleSystem) session.particleSystem.clear();
 }

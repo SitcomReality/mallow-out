@@ -72,8 +72,7 @@ export function createUpgradeScreen() {
       <div class="upgrade-content wonky" data-fill="rgba(255,255,255,0.95)" data-stroke="#000000" data-stroke-width="8">
         <h2 class="upgrade-title">Permanent Upgrades</h2>
         <p class="upgrade-subtitle">
-          ${getCurrencySVG('caramel', 16)} 
-          ${gameState.currencies.caramel} Caramel
+          ${getCurrencySVG('caramel', 16)} ${gameState.currencies.caramel} Caramel
         </p>
         <div class="upgrade-categories-container">
           ${categoriesHTML}
