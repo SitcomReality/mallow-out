@@ -13,7 +13,6 @@ export const session = {
   particleSystem: null,
   mobileControls: null,
   renderFn: null,
-  hasShownSpawnNotification: false,
 };
 
 export function spawnNextMarshmallow() {
@@ -45,7 +44,7 @@ export function spawnNextMarshmallow() {
 
 export function onMarshmallowDefeated() {
   gameState.totalMarshmallowsDestroyed++;
-  const bonus = 10;
+  const bonus = 20;
   awardCaramel(bonus);
   
   if (session.notifications) {
@@ -53,10 +52,15 @@ export function onMarshmallowDefeated() {
       id: 'mallow_defeated',
       sticky: false,
       title: `${gameState.currentMarshmallow?.name || 'Marshmallow'} Defeated!`,
-      text: `+${bonus} caramel bonus!`,
+      text: `+${bonus} caramel bonus! Score: ${gameState.totalMarshmallowsDestroyed}`,
       color: '#ff8c00'
     });
   }
+  
+  // Auto-spawn next marshmallow after a brief delay
+  setTimeout(() => {
+    spawnNextMarshmallow();
+  }, 1500);
 }
 
 export function togglePause() {

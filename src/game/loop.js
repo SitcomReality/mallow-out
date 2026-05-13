@@ -8,7 +8,6 @@ import { rebuildObjectList } from './combat.js';
 import { updateFX } from './fx.js';
 import { updateDynamicGraphics } from './render-logic.js';
 import { updateMarshmallows } from './marshmallow-logic.js';
-import { updateAutomations } from './automations/automation-logic.js';
 import { updateComboSystem } from './combo-system.js';
 import { updateBubbles } from './bubble.js';
 

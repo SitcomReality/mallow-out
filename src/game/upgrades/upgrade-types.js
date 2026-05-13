@@ -1,9 +1,6 @@
 // Upgrade type definitions with categories and properties
 export const UPGRADE_CATEGORIES = {
   PLAYER: 'player',
-  MARSHMALLOW: 'marshmallow',
-  ECONOMY: 'economy',
-  AUTOMATION: 'automation',
 };
 
 export const UPGRADE_TYPES = {
@@ -30,15 +27,6 @@ export const UPGRADE_TYPES = {
     name: 'Fast Charge',
     description: 'Reduce time to fully charge shot',
     shortDesc: '-15% charge time'
-  },
-
-  // Marshmallow Upgrades
-  MALLOW_MAX_HEALTH: {
-    id: 'mallow_max_health',
-    category: UPGRADE_CATEGORIES.MARSHMALLOW,
-    name: 'Hardy Mallow',
-    description: 'Increase marshmallow maximum health',
-    shortDesc: '+25% max HP'
   },
 };
 

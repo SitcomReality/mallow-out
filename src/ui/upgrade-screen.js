@@ -6,9 +6,6 @@ import { getCurrencySVG } from './currency-symbols.js';
 
 const CATEGORY_NAMES = {
   [UPGRADE_CATEGORIES.PLAYER]: 'Player',
-  [UPGRADE_CATEGORIES.MARSHMALLOW]: 'Marshmallow',
-  [UPGRADE_CATEGORIES.ECONOMY]: 'Economy',
-  [UPGRADE_CATEGORIES.AUTOMATION]: 'Automation',
 };
 
 export function createUpgradeScreen() {

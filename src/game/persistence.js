@@ -5,7 +5,7 @@ const SAVE_KEY = 'mallow_out_savegame';
 export function saveGame() {
   const saveData = {
     totalMarshmallowsDestroyed: gameState.totalMarshmallowsDestroyed,
-    currencies: { ...gameState.currencies },
+    currencies: { caramel: gameState.currencies.caramel },
     upgrades: { ...gameState.upgrades },
     playerMarshmallowName: gameState.playerMarshmallowName || null,
     tutorial: { ...gameState.tutorial },
@@ -27,7 +27,7 @@ export function loadGame() {
     const data = JSON.parse(saved);
     
     gameState.totalMarshmallowsDestroyed = data.totalMarshmallowsDestroyed || 0;
-    gameState.currencies = data.currencies || { caramel: 0 };
+    gameState.currencies = { caramel: (data.currencies && data.currencies.caramel) || 0 };
     gameState.upgrades = data.upgrades || {};
     gameState.playerMarshmallowName = data.playerMarshmallowName || null;
     gameState.tutorial = data.tutorial || {

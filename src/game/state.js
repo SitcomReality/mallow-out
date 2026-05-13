@@ -22,8 +22,6 @@ export const gameState = {
     shot_cooldown: 0,
     combo_duration: 0,
     charge_speed: 0,
-    // Marshmallow
-    mallow_max_health: 0,
   },
   
   // Combo tracking
