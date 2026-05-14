@@ -4,6 +4,10 @@ import { settings } from '../state.js';
 import { ENV_COLORS, ENV_SETTINGS, WORLD_BOUNDS } from './environment-constants.js';
 import { PLAYER_HEIGHT } from './controls-constants.js';
 
+// Cache for static uniform values
+let lastTime = -1;
+let lastNumObjects = -1;
+
 export function updateUniforms(uniforms, time) {
   const player = gameState.player;
   
@@ -12,22 +16,43 @@ export function updateUniforms(uniforms, time) {
   player.pitch = -0.35;
   player.yaw = 0;
   
-  uniforms.uCamPos.value.copy(player.position);
+  // Only update camera uniforms if position changed (it doesn't in this game)
+  if (lastTime === -1) {
+    uniforms.uCamPos.value.copy(player.position);
   
-  const forward = new THREE.Vector3(
-    Math.sin(player.yaw) * Math.cos(player.pitch),
-    Math.sin(player.pitch),
-    -Math.cos(player.yaw) * Math.cos(player.pitch)
-  ).normalize();
+    const forward = new THREE.Vector3(
+      Math.sin(player.yaw) * Math.cos(player.pitch),
+      Math.sin(player.pitch),
+      -Math.cos(player.yaw) * Math.cos(player.pitch)
+    ).normalize();
+    
+    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
+    const up = new THREE.Vector3().crossVectors(right, forward).normalize();
+    
+    uniforms.uCamFwd.value.copy(forward);
+    uniforms.uCamRight.value.copy(right);
+    uniforms.uCamUp.value.copy(up);
+    
+    // Cache static environment values
+    const sunDir = new THREE.Vector3(-1.0, 1.5, 1.0).normalize();
+    uniforms.uSunColor.value.setHex(ENV_COLORS.sun);
+    uniforms.uAmbientColor.value.setHex(ENV_COLORS.ambient);
+    uniforms.uSkyColor.value.setHex(ENV_COLORS.sky);
+    uniforms.uSkyColor2.value.setHex(ENV_COLORS.sky2);
+    uniforms.uFogColor.value.setHex(ENV_COLORS.fog);
+    uniforms.uSunDir.value.copy(sunDir);
+    uniforms.uFogDensity.value = ENV_SETTINGS.fogDensity;
+    uniforms.uFloorColor.value.setHex(ENV_COLORS.floor);
+    uniforms.uFloorEnabled.value = 1;
+    uniforms.uFloorTextured.value = ENV_SETTINGS.floorTextured;
+    uniforms.uSkyTextured.value = ENV_SETTINGS.skyTextured;
+    uniforms.uWorldBoundsEnabled.value = WORLD_BOUNDS.enabled ? 1.0 : 0.0;
+    uniforms.uWorldBoundsRadius.value = WORLD_BOUNDS.radius;
+    uniforms.uWorldBoundsCenterY.value = WORLD_BOUNDS.centerY;
+    uniforms.uWorldBoundsOutline.value = WORLD_BOUNDS.showOutline ? 1.0 : 0.0;
+  }
   
-  const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-  const up = new THREE.Vector3().crossVectors(right, forward).normalize();
-  
-  uniforms.uCamFwd.value.copy(forward);
-  uniforms.uCamRight.value.copy(right);
-  uniforms.uCamUp.value.copy(up);
-  
-  // Time and settings
+  // Time and dynamic settings (always update)
   uniforms.uTime.value = time * 0.001;
   uniforms.uMaxSteps.value = settings.maxSteps;
   uniforms.uDrawDist.value = settings.drawDistance;
@@ -35,6 +60,8 @@ export function updateUniforms(uniforms, time) {
   uniforms.uCelShading.value = settings.celShading ? 1 : 0;
   uniforms.uShadowsEnabled.value = settings.shadowsEnabled ? 1 : 0;
   uniforms.uAOEnabled.value = settings.aoEnabled ? 1 : 0;
+  
+  lastTime = time;
   
   const opMap = { union: 0, subtract: 1, intersect: 2 };
   const typeMap = { sphere: 0, box: 1, cylinder: 2, torus: 3, text: 4, group: 5 };
@@ -66,7 +93,13 @@ export function updateUniforms(uniforms, time) {
 
   // Scene objects (limit to 32 max to prevent array out of bounds)
   const objects = gameState.objects.slice(0, 32);
-  uniforms.uNumObjects.value = objects.length;
+  const numObjects = objects.length;
+  
+  // Only update object data if count changed (optimization)
+  if (numObjects !== lastNumObjects) {
+    uniforms.uNumObjects.value = numObjects;
+    lastNumObjects = numObjects;
+  }
   
   objects.forEach((obj, i) => {
     let gid = 0;
@@ -140,30 +173,7 @@ export function updateUniforms(uniforms, time) {
     uniforms.uObjData2.value[i].w = lookY;
   });
   
-  // Environment calculations
-  const sunDir = new THREE.Vector3(-1.0, 1.5, 1.0).normalize();
-  
-  uniforms.uSunColor.value.setHex(ENV_COLORS.sun);
-  uniforms.uAmbientColor.value.setHex(ENV_COLORS.ambient);
-  uniforms.uSkyColor.value.setHex(ENV_COLORS.sky);
-  uniforms.uSkyColor2.value.setHex(ENV_COLORS.sky2);
-  uniforms.uFogColor.value.setHex(ENV_COLORS.fog);
-  
-  uniforms.uSunDir.value.copy(sunDir);
-  uniforms.uFogDensity.value = ENV_SETTINGS.fogDensity;
-
-  uniforms.uFloorColor.value.setHex(ENV_COLORS.floor);
-  uniforms.uFloorEnabled.value = 1;
-  uniforms.uFloorTextured.value = ENV_SETTINGS.floorTextured;
-  uniforms.uSkyTextured.value = ENV_SETTINGS.skyTextured;
-  
-  // World bounding sphere
-  uniforms.uWorldBoundsEnabled.value = WORLD_BOUNDS.enabled ? 1.0 : 0.0;
-  uniforms.uWorldBoundsRadius.value = WORLD_BOUNDS.radius;
-  uniforms.uWorldBoundsCenterY.value = WORLD_BOUNDS.centerY;
-  uniforms.uWorldBoundsOutline.value = WORLD_BOUNDS.showOutline ? 1.0 : 0.0;
-  
-  // Selection/outline - controlled by settings.outlinesEnabled
+  // Selection/outline - controlled by settings.outlinesEnabled (static values cached above)
   uniforms.uSelectionInfo.value.set(0, 0);
   uniforms.uShowOutline.value = settings.outlinesEnabled ? 1 : 0;
   uniforms.uOutlineColor.value.set(0, 0, 0); // Ensure black outlines by default

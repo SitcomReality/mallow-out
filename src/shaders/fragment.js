@@ -104,6 +104,13 @@ void main() {
         break;
       }
       
+      // Early exit: if we're very close to a surface, take the hit
+      if (res.x < EPSILON * 2.0) {
+        hitCol = res.yzw;
+        hit = true;
+        break;
+      }
+      
       // Adaptive step size
       t += res.x * 0.9;
       if (t > tMax) {

@@ -101,14 +101,19 @@ float getObjectDist(vec3 p, int idx) {
     d = sdText(localP, scale, uObjData6[idx].w);
   }
   
-  // Only apply noise if actually needed
+  // Distance-based LOD: skip noise for distant objects
   if (nAmount > 0.001) {
-    // Optimization: Skip expensive noise if we are comfortably outside the bounding volume
-    float distToCenter = length(p - pos);
-    if (distToCenter < getObjectBoundingRadius(idx) + 0.1) {
-      vec3 nOffset = uObjData6[idx].xyz;
-      float pert = (fbm3D(localP * nScale - nOffset) - 0.5) * 2.0 * nAmount;
-      d += pert;
+    float distToCamera = length(p - uCamPos);
+    // Only apply noise to objects within 20 units of camera
+    if (distToCamera < 20.0) {
+      float distToCenter = length(p - pos);
+      if (distToCenter < getObjectBoundingRadius(idx) + 0.1) {
+        vec3 nOffset = uObjData6[idx].xyz;
+        // Reduce noise quality for distant objects (>10 units)
+        float lodFactor = smoothstep(20.0, 10.0, distToCamera);
+        float pert = (fbm3D(localP * nScale - nOffset) - 0.5) * 2.0 * nAmount * lodFactor;
+        d += pert;
+      }
     }
   }
   

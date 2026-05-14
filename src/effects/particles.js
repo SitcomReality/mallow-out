@@ -79,6 +79,9 @@ export class ParticleSystem {
   }
 
   update(delta) {
+    // Reuse temp vectors to reduce allocations
+    const tempVec = new THREE.Vector3();
+    
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const p = this.particles[i];
       p.life -= delta;
@@ -88,7 +91,11 @@ export class ParticleSystem {
       }
       p.velocity.y += p.gravity * delta;
       p.velocity.multiplyScalar(p.drag);
-      p.position.addScaledVector(p.velocity, delta);
+      
+      // Update position in-place
+      tempVec.copy(p.velocity).multiplyScalar(delta);
+      p.position.add(tempVec);
+      
       const t = 1.0 - (p.life / p.maxLife);
       p.size = p.sizeStart * (1 - t) + p.sizeEnd * t;
     }
